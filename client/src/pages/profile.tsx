@@ -730,7 +730,7 @@ export default function ProfilePage() {
                                 >
                                    {/* Clan Banner Image */}
                                    <div className="h-32 relative">
-                                      <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                      <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                       <div className={`absolute inset-0 ${selectedClan === clan.id ? "bg-black/20" : "bg-black/60 group-hover:bg-black/40"} transition-colors duration-300`} />
                                       
                                       {/* Clan Logo - Positioned absolutely but rendered visually on top */}
@@ -802,6 +802,12 @@ export default function ProfilePage() {
                                    </li>
                                 </ul>
                              </div>
+                             
+                             {/* Discord Join Button for Guests */}
+                             <Button className="w-full bg-[#5865F2] hover:bg-[#5865F2]/90 text-white font-bold font-display tracking-wide shadow-lg h-12 gap-2 hover:scale-[1.02] transition-transform">
+                                <img src={discordLogo} className="w-5 h-5 brightness-0 invert" />
+                                Вступить в Discord
+                             </Button>
                           </div>
 
                           <div className="md:col-span-8 space-y-4">

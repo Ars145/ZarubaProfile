@@ -96,3 +96,37 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #FF6600; 
 }
+
+/* Animations */
+@keyframes scanline {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
+
+.bg-scanline {
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(0, 0, 0, 0.5) 51%,
+    transparent 51%
+  );
+  background-size: 100% 4px;
+  animation: scanline 10s linear infinite;
+  pointer-events: none;
+}
+
+.glass-card {
+  @apply bg-zinc-900/40 backdrop-blur-md border border-white/5;
+}
+
+.hover-glow {
+  @apply transition-all duration-300;
+}
+.hover-glow:hover {
+  box-shadow: 0 0 20px theme('colors.primary.DEFAULT' / 20%);
+  border-color: theme('colors.primary.DEFAULT' / 40%);
+}

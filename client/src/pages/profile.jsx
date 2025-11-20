@@ -18,13 +18,7 @@ import { useState, useRef, useEffect } from "react";
 
 // Squad Stats Components
 import { useSquadStats } from "@/hooks/useSquadStats";
-import {
-  RankProgressCard,
-  MainStatsCard,
-  WeaponsStatsCard,
-  RolesStatsCard,
-  PlaytimeCard
-} from "@/components/squad-stats-display";
+import { SquadStatsCompact } from "@/components/squad-stats-compact";
 
 // Generated Assets
 import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
@@ -814,34 +808,10 @@ export default function ProfilePage() {
             </Card>
           </motion.div>
 
-          {/* Squad Stats Section */}
+          {/* Squad Stats Section - Компактная версия */}
           {squadStats && (
-            <motion.div
-              variants={container}
-              initial="hidden"
-              animate="show"
-              className="space-y-6"
-            >
-              {/* Rank Progress */}
-              <RankProgressCard rank={squadStats.rank} />
-              
-              {/* Playtime Stats */}
-              <PlaytimeCard stats={squadStats} />
-              
-              {/* Main Combat Stats */}
-              <MainStatsCard stats={squadStats} />
-              
-              {/* Weapons Stats */}
-              <WeaponsStatsCard 
-                weapons={squadStats.detailedWeapons} 
-                topWeapon={squadStats.topWeapon}
-              />
-              
-              {/* Roles Stats */}
-              <RolesStatsCard 
-                roles={squadStats.detailedRoles}
-                topRole={squadStats.topRole}
-              />
+            <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.8 }}>
+              <SquadStatsCompact stats={squadStats} />
             </motion.div>
           )}
         </div>

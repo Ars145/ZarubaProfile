@@ -16,6 +16,16 @@ import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
 import { useState, useRef, useEffect } from "react";
 
+// Squad Stats Components
+import { useSquadStats } from "@/hooks/useSquadStats";
+import {
+  RankProgressCard,
+  MainStatsCard,
+  WeaponsStatsCard,
+  RolesStatsCard,
+  PlaytimeCard
+} from "@/components/squad-stats-display";
+
 // Generated Assets
 import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
 import deltaBanner from "@assets/generated_images/blue_tactical_gaming_clan_banner_with_delta_force_theme.png";
@@ -179,6 +189,9 @@ export default function ProfilePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [username, setUsername] = useState("TacticalViper");
   const [avatarUrl, setAvatarUrl] = useState("https://api.dicebear.com/7.x/avataaars/svg?seed=TacticalViper");
+  
+  // Squad Stats Integration
+  const squadStats = useSquadStats('STEAM_0:1:12345678');
   
   // Owner specific state
   const [ownerTab, setOwnerTab] = useState("squad");
@@ -800,6 +813,37 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* Squad Stats Section */}
+          {squadStats && (
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="space-y-6"
+            >
+              {/* Rank Progress */}
+              <RankProgressCard rank={squadStats.rank} />
+              
+              {/* Playtime Stats */}
+              <PlaytimeCard stats={squadStats} />
+              
+              {/* Main Combat Stats */}
+              <MainStatsCard stats={squadStats} />
+              
+              {/* Weapons Stats */}
+              <WeaponsStatsCard 
+                weapons={squadStats.detailedWeapons} 
+                topWeapon={squadStats.topWeapon}
+              />
+              
+              {/* Roles Stats */}
+              <RolesStatsCard 
+                roles={squadStats.detailedRoles}
+                topRole={squadStats.topRole}
+              />
+            </motion.div>
+          )}
         </div>
 
         {/* Right Column - Clan Management */}

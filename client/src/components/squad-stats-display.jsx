@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Target, Gun, Shield, Trophy, Star, Zap, 
+  Target, Swords, Shield, Trophy, Star, Zap, 
   Crosshair, Activity, Award 
 } from "lucide-react";
 
@@ -149,7 +149,7 @@ export function WeaponsStatsCard({ weapons, topWeapon }) {
       <Card className="bg-zinc-900/50 border-zinc-800">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Gun className="w-5 h-5 text-primary" />
+            <Swords className="w-5 h-5 text-primary" />
             Статистика Оружия
           </CardTitle>
         </CardHeader>

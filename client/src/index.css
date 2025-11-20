@@ -127,6 +127,6 @@
   @apply transition-all duration-300;
 }
 .hover-glow:hover {
-  box-shadow: 0 0 20px theme('colors.primary.DEFAULT' / 20%);
-  border-color: theme('colors.primary.DEFAULT' / 40%);
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
+  border-color: hsl(var(--primary) / 0.4);
 }

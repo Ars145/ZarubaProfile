@@ -33,28 +33,28 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-display: "Oxanium", sans-serif;
-  --font-body: "Rajdhani", sans-serif;
+  --font-body: "Inter", sans-serif;
 }
 
 :root {
   /* Dark Gaming Theme Base */
-  --background: 0 0% 3%; /* #080808 - Deep Black */
+  --background: 0 0% 4%; /* #0a0a0a - Deep Black */
   --foreground: 0 0% 98%; /* White */
 
-  --card: 0 0% 7%; /* Slightly lighter black for cards */
+  --card: 0 0% 7%; 
   --card-foreground: 0 0% 98%;
 
   --popover: 0 0% 7%;
   --popover-foreground: 0 0% 98%;
 
   /* ZARUBA Orange */
-  --primary: 25 100% 50%; /* #FF6600 - Vibrant Orange */
+  --primary: 25 100% 50%; /* #FF6600 */
   --primary-foreground: 0 0% 98%;
 
-  --secondary: 0 0% 15%; /* Dark Gray for secondary actions */
+  --secondary: 0 0% 12%; 
   --secondary-foreground: 0 0% 98%;
 
-  --muted: 0 0% 15%;
+  --muted: 0 0% 12%;
   --muted-foreground: 0 0% 60%;
 
   --accent: 25 100% 50%;
@@ -63,17 +63,11 @@
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
+  --border: 0 0% 12%;
+  --input: 0 0% 12%;
   --ring: 25 100% 50%;
 
-  --radius: 0.5rem;
-
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -86,4 +80,19 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display uppercase tracking-wide;
   }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a; 
+}
+::-webkit-scrollbar-thumb {
+  background: #333; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF6600; 
 }

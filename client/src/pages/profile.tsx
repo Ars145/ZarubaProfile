@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut } from "lucide-react";
+import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import discordLogo from "@assets/image_1763634265865.png";
+import { useState } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const container = {
   hidden: { opacity: 0 },
@@ -27,6 +29,44 @@ const item = {
 };
 
 export default function ProfilePage() {
+  const [selectedClan, setSelectedClan] = useState("alpha");
+
+  const clans = [
+    { 
+      id: "alpha", 
+      name: "Отряд Альфа", 
+      tag: "ALPHA", 
+      members: 5, 
+      req: "100ч+, KD > 1.0",
+      description: "Элитный отряд для опытных игроков. Только командная игра.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      borderColor: "border-primary/30"
+    },
+    { 
+      id: "df", 
+      name: "Delta Force", 
+      tag: "DF", 
+      members: 12, 
+      req: "50ч+, Микрофон",
+      description: "Тактический отряд специального назначения.",
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/30"
+    },
+    { 
+      id: "ze", 
+      name: "Zaruba Elite", 
+      tag: "ZE", 
+      members: 24, 
+      req: "500ч+, KD > 2.0",
+      description: "Только для ветеранов сервера.",
+      color: "text-yellow-500",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/30"
+    }
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       
@@ -190,18 +230,12 @@ export default function ProfilePage() {
                       value="apply" 
                       className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none px-0 py-3 font-display tracking-wide text-muted-foreground hover:text-white transition-colors"
                     >
-                      ЗАЯВКА
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="search" 
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none px-0 py-3 font-display tracking-wide text-muted-foreground hover:text-white transition-colors"
-                    >
-                      ПОИСК КЛАНОВ
+                      ПОДАТЬ ЗАЯВКУ
                     </TabsTrigger>
                   </TabsList>
 
                   <div className="p-6 md:p-8 bg-zinc-900/20 min-h-[400px]">
-                    {/* CLAN TAB (RENAMED FROM MY SQUAD) */}
+                    {/* CLAN TAB */}
                     <TabsContent value="clan" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                         <div className="flex flex-col md:flex-row gap-8">
                             {/* Clan Stats Card */}
@@ -316,63 +350,111 @@ export default function ProfilePage() {
 
                     {/* Apply Form */}
                     <TabsContent value="apply" className="mt-0 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                       <div className="max-w-2xl mx-auto space-y-6 pt-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-3">
-                              <Label className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Выберите Клан</Label>
-                              <select className="w-full h-11 rounded-xl border border-input bg-zinc-950/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all hover:border-primary/30">
-                                <option>Отряд Альфа [ALPHA]</option>
-                                <option>Delta Force [DF]</option>
-                                <option>Zaruba Elite [ZE]</option>
-                              </select>
-                            </div>
-                            <div className="space-y-3">
-                              <Label className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Желаемая роль</Label>
-                              <select className="w-full h-11 rounded-xl border border-input bg-zinc-950/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 transition-all hover:border-primary/30">
-                                <option>Штурмовик</option>
-                                <option>Снайпер</option>
-                                <option>Медик</option>
-                                <option>Поддержка</option>
-                              </select>
-                            </div>
+                       <div className="space-y-8 pt-4">
+                          
+                          {/* Visual Clan Selector */}
+                          <div className="space-y-4">
+                             <div className="flex items-center justify-between">
+                                <Label className="text-xs uppercase text-muted-foreground font-bold tracking-wider flex items-center gap-2">
+                                   <Search className="w-4 h-4" />
+                                   Выберите Клан для вступления
+                                </Label>
+                                <span className="text-xs text-muted-foreground">{clans.length} доступно</span>
+                             </div>
+
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {clans.map((clan) => (
+                                   <div 
+                                     key={clan.id}
+                                     onClick={() => setSelectedClan(clan.id)}
+                                     className={`relative p-4 rounded-xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] ${selectedClan === clan.id ? `${clan.bgColor} ${clan.borderColor} ring-1 ring-offset-0 ring-white/20` : "bg-zinc-950/50 border-white/10 hover:border-white/20 hover:bg-zinc-900"}`}
+                                   >
+                                      {selectedClan === clan.id && (
+                                        <div className="absolute top-3 right-3">
+                                          <CheckCircle2 className={`w-5 h-5 ${clan.color}`} />
+                                        </div>
+                                      )}
+                                      
+                                      <div className="space-y-3">
+                                         <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-black text-sm border border-white/10 bg-black/40 ${clan.color}`}>
+                                              {clan.tag}
+                                            </div>
+                                            <div>
+                                              <h4 className="font-bold text-white leading-tight">{clan.name}</h4>
+                                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{clan.members} бойцов</span>
+                                            </div>
+                                         </div>
+                                         
+                                         <Separator className="bg-white/5" />
+                                         
+                                         <div className="space-y-1.5">
+                                           <p className="text-xs text-muted-foreground line-clamp-2 h-8 leading-relaxed">
+                                             {clan.description}
+                                           </p>
+                                           <div className="flex items-center gap-2 pt-1">
+                                              <Badge variant="outline" className={`text-[10px] h-5 border-white/10 ${clan.color} bg-black/40`}>
+                                                {clan.req}
+                                              </Badge>
+                                           </div>
+                                         </div>
+                                      </div>
+                                   </div>
+                                ))}
+                             </div>
                           </div>
 
-                          <div className="space-y-3">
-                            <Label className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Комментарий к заявке</Label>
-                            <textarea 
-                              className="flex min-h-[140px] w-full rounded-xl border border-input bg-zinc-950/50 px-4 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 resize-none hover:border-primary/30 transition-all"
-                              placeholder="Расскажите о своем опыте, любимых классах и почему вы хотите вступить именно к нам..."
-                            />
-                          </div>
+                          {/* Requirements & Form based on selection */}
+                          <motion.div 
+                            key={selectedClan}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="grid grid-cols-1 md:grid-cols-12 gap-8"
+                          >
+                             {/* Requirements Panel */}
+                             <div className="md:col-span-4 space-y-4">
+                                <div className={`rounded-xl p-5 border ${clans.find(c => c.id === selectedClan)?.bgColor} ${clans.find(c => c.id === selectedClan)?.borderColor}`}>
+                                   <h4 className={`font-display font-bold text-lg mb-3 flex items-center gap-2 ${clans.find(c => c.id === selectedClan)?.color}`}>
+                                      <AlertCircle className="w-5 h-5" />
+                                      Требования
+                                   </h4>
+                                   <ul className="space-y-3">
+                                      <li className="flex items-start gap-3 text-sm text-white/80">
+                                         <div className="w-1.5 h-1.5 rounded-full bg-current mt-2 shrink-0 opacity-50" />
+                                         <span>Наличие микрофона и Discord обязательно</span>
+                                      </li>
+                                      <li className="flex items-start gap-3 text-sm text-white/80">
+                                         <div className="w-1.5 h-1.5 rounded-full bg-current mt-2 shrink-0 opacity-50" />
+                                         <span>Возраст 18+ (возможны исключения)</span>
+                                      </li>
+                                      <li className="flex items-start gap-3 text-sm text-white/80">
+                                         <div className="w-1.5 h-1.5 rounded-full bg-current mt-2 shrink-0 opacity-50" />
+                                         <span>Адекватность и умение играть в команде</span>
+                                      </li>
+                                      <li className="flex items-start gap-3 text-sm font-bold text-white pt-2 border-t border-white/10 mt-2">
+                                         <CheckCircle2 className="w-4 h-4 mr-1 text-green-500" />
+                                         Вы подходите под требования
+                                      </li>
+                                   </ul>
+                                </div>
+                             </div>
 
-                          <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 flex items-start gap-4">
-                            <AlertCircle className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                            <div className="space-y-1">
-                              <p className="text-sm font-bold text-primary uppercase tracking-wide">Требования к кандидатам</p>
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                Для вступления в клан необходимо иметь минимум 100 часов игры на сервере, положительный K/D (&gt;1.0) и работающий микрофон. Лидер клана рассмотрит вашу заявку в течение 24 часов.
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex justify-end pt-4">
-                            <Button size="lg" className="w-full md:w-auto bg-primary text-black font-bold font-display tracking-wide hover:bg-primary/90 shadow-[0_0_30px_rgba(255,102,0,0.3)] transition-all hover:scale-105">
-                              ОТПРАВИТЬ ЗАЯВКУ
-                            </Button>
-                          </div>
-                       </div>
-                    </TabsContent>
-
-                    {/* Search Placeholder */}
-                    <TabsContent value="search" className="mt-0">
-                       <div className="text-center py-20 flex flex-col items-center justify-center opacity-50">
-                          <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mb-6">
-                             <Shield className="w-10 h-10 text-zinc-500" />
-                          </div>
-                          <h3 className="text-xl font-display font-bold text-white mb-2">Поиск кланов</h3>
-                          <p className="text-muted-foreground max-w-sm mx-auto">
-                             Воспользуйтесь фильтрами чтобы найти подходящий клан по уровню игры и требованиям.
-                          </p>
+                             {/* Comment Form */}
+                             <div className="md:col-span-8 space-y-4">
+                                <div className="space-y-2">
+                                  <Label className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Сопроводительное письмо</Label>
+                                  <textarea 
+                                    className="flex min-h-[180px] w-full rounded-xl border border-input bg-zinc-950/50 px-4 py-4 text-sm ring-offset-background placeholder:text-muted-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 resize-none hover:border-primary/30 transition-all"
+                                    placeholder={`Привет! Я хочу вступить в ${clans.find(c => c.id === selectedClan)?.name} потому что...`}
+                                  />
+                                </div>
+                                <div className="flex justify-end">
+                                  <Button size="lg" className="w-full md:w-auto bg-white text-black font-bold font-display tracking-wide hover:bg-zinc-200 shadow-lg transition-all hover:scale-105">
+                                    ОТПРАВИТЬ ЗАЯВКУ В {clans.find(c => c.id === selectedClan)?.tag}
+                                  </Button>
+                                </div>
+                             </div>
+                          </motion.div>
                        </div>
                     </TabsContent>
                   </div>

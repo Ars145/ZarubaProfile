@@ -1,4 +1,4 @@
-import { BackgroundParticles } from "@/components/background-particles";
+import BackgroundParticles from "@/components/background-particles";
 
 export function Layout({ children }) {
   return (
@@ -26,10 +26,3 @@ export function Layout({ children }) {
     </div>
   );
 }
-
-// Placeholder for the separate file import if not using the index export
-import Particles from "./background-particles"; 
-// Overwrite the export to use the local component if the import fails in the same file context (mockup mode quirk)
-const BackgroundParticlesComponent = Particles;
-
-export { BackgroundParticlesComponent as BackgroundParticles };

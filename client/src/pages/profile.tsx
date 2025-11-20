@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon } from "lucide-react";
+import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,7 @@ export default function ProfilePage() {
   // Clan Assets State (Owner Settings)
   const [clanBanner, setClanBanner] = useState(alphaBanner);
   const [clanLogo, setClanLogo] = useState(wolfLogo);
+  const [discordLink, setDiscordLink] = useState("https://discord.gg/clan-alpha");
 
   // Mock data for squad members with roles
   const [squadMembers, setSquadMembers] = useState([
@@ -728,19 +729,19 @@ export default function ProfilePage() {
                                   className={`relative rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] group overflow-hidden ${selectedClan === clan.id ? `${clan.borderColor} ring-1 ring-offset-0 ring-white/20 shadow-2xl scale-[1.02]` : "border-white/10 hover:border-white/20"}`}
                                 >
                                    {/* Clan Banner Image */}
-                                   <div className="h-32 relative overflow-hidden">
+                                   <div className="h-32 relative">
                                       <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                       <div className={`absolute inset-0 ${selectedClan === clan.id ? "bg-black/20" : "bg-black/60 group-hover:bg-black/40"} transition-colors duration-300`} />
                                       
-                                      {/* Clan Logo */}
-                                      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                                      {/* Clan Logo - Positioned absolutely but rendered visually on top */}
+                                      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20">
                                         <div className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clan.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}>
                                            <img src={clan.logo} className="w-full h-full object-cover" />
                                         </div>
                                       </div>
                                    </div>
                                    
-                                   <div className="pt-10 pb-6 px-5 bg-zinc-950/80 backdrop-blur-sm relative">
+                                   <div className="pt-12 pb-6 px-5 bg-zinc-950/80 backdrop-blur-sm relative z-10">
                                       {selectedClan === clan.id && (
                                         <div className="absolute top-4 right-4 animate-in zoom-in duration-300">
                                             <CheckCircle2 className={`w-5 h-5 ${clan.color}`} />
@@ -875,6 +876,32 @@ export default function ProfilePage() {
                                      <p className="text-[10px] text-muted-foreground">Квадратное изображение, мин. 512x512px</p>
                                   </div>
                                </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      {/* Discord Settings */}
+                      <div className="space-y-6 bg-black/20 p-6 rounded-2xl border border-white/5">
+                         <div className="flex items-center gap-3 mb-4">
+                            <LinkIcon className="w-5 h-5 text-primary" />
+                            <h4 className="font-bold text-white text-lg">Discord Интеграция</h4>
+                         </div>
+                         
+                         <div className="grid gap-4">
+                            <div className="grid gap-2">
+                               <Label>Ссылка на Discord (Embed/Invite)</Label>
+                               <div className="relative">
+                                  <div className="absolute left-3 top-2.5 text-[#5865F2]">
+                                     <img src={discordLogo} className="w-5 h-5 brightness-0 invert" />
+                                  </div>
+                                  <Input 
+                                     value={discordLink}
+                                     onChange={(e) => setDiscordLink(e.target.value)}
+                                     className="bg-black/20 border-white/10 pl-10 font-mono text-sm text-blue-400" 
+                                     placeholder="https://discord.gg/..."
+                                  />
+                               </div>
+                               <p className="text-[10px] text-muted-foreground">Эта ссылка будет использоваться для кнопки вступления в Discord.</p>
                             </div>
                          </div>
                       </div>

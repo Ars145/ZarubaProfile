@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 // Generated Assets
 import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
@@ -23,19 +23,81 @@ import wolfLogo from "@assets/generated_images/tactical_wolf_logo_for_clan.png";
 import eagleLogo from "@assets/generated_images/tactical_eagle_logo_for_clan.png";
 import skullLogo from "@assets/generated_images/tactical_skull_logo_for_clan.png";
 
+// --- Animation Components ---
+
+const TiltCard = ({ children, className }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
+  const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
+
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["15deg", "-15deg"]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-15deg", "15deg"]);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+      }}
+      className={className}
+    >
+      <div style={{ transform: "translateZ(50px)" }} className="h-full">
+        {children}
+      </div>
+    </motion.div>
+  );
+};
+
+const AnimatedCounter = ({ value }) => {
+    // Simple counter placeholder - full animated counter would need useEffect/raf
+    return <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>{value}</motion.span>;
+};
+
 const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
+      staggerChildren: 0.1,
+      delayChildren: 0.2
     }
   }
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+          type: "spring",
+          stiffness: 100,
+          damping: 15
+      }
+  }
 };
 
 const parseGameDuration = (durationStr) => {
@@ -411,11 +473,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Header / Identity Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative mb-12 rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
-      >
+      <TiltCard className="relative mb-12 rounded-3xl overflow-hidden border border-white/10 shadow-2xl group perspective-1000">
         {/* Dynamic Banner Background */}
         <div className="absolute inset-0 h-64 md:h-72 z-0">
            <img src={profileBg} className="w-full h-full object-cover opacity-60 mix-blend-overlay" />
@@ -424,28 +482,39 @@ export default function ProfilePage() {
         </div>
         
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-8 pt-24 px-6 md:px-10 pb-8">
-          <div className="relative group">
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background/50 backdrop-blur-sm shadow-[0_0_40px_rgba(255,102,0,0.2)] group-hover:shadow-[0_0_60px_rgba(255,102,0,0.4)] transition-all duration-500 bg-zinc-900">
+          <motion.div 
+            className="relative group cursor-pointer"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background/50 backdrop-blur-sm shadow-[0_0_40px_rgba(255,102,0,0.2)] group-hover:shadow-[0_0_60px_rgba(255,102,0,0.6)] transition-all duration-500 bg-zinc-900 relative z-10">
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             </div>
-            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-background p-1.5 rounded-full">
+            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-background p-1.5 rounded-full z-20">
               <Badge className="bg-primary text-black hover:bg-primary/90 border-4 border-background px-4 py-1.5 text-lg font-black font-display shadow-lg whitespace-nowrap flex items-center gap-2">
                 <Crown className="w-4 h-4 fill-black" />
                 LVL 52
               </Badge>
             </div>
-          </div>
+          </motion.div>
 
           <div className="flex-1 space-y-4 mb-2">
             <div className="flex flex-wrap items-center gap-4">
-              <h1 className="text-5xl md:text-7xl font-black text-white font-display tracking-tighter uppercase drop-shadow-2xl shadow-black">
+              <motion.h1 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-5xl md:text-7xl font-black text-white font-display tracking-tighter uppercase drop-shadow-2xl shadow-black"
+              >
                 {username}
-              </h1>
+              </motion.h1>
               
               {isVip && (
-                <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md animate-in fade-in zoom-in duration-300">
-                  VIP Account
-                </Badge>
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                    <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md animate-pulse shadow-[0_0_15px_rgba(255,102,0,0.4)]">
+                    VIP Account
+                    </Badge>
+                </motion.div>
               )}
               
               {userRole !== "guest" && (
@@ -457,12 +526,12 @@ export default function ProfilePage() {
             </div>
             
             <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-muted-foreground">
-              <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5">
+              <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5 hover:bg-white/5 transition-colors cursor-pointer">
                  <Progress value={68} className="w-24 h-2 bg-white/10" />
                  <span className="text-xs font-mono text-white">XP: 68%</span>
               </div>
 
-              <span className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
+              <span className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5 hover:border-primary/30 transition-colors cursor-pointer">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" className="w-4 h-4 opacity-70" />
                 <span className="font-mono text-white/70">STEAM_0:1:12345678</span>
               </span>
@@ -479,7 +548,7 @@ export default function ProfilePage() {
           <div className="flex gap-3 w-full md:w-auto mt-6 md:mt-0">
              <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                <DialogTrigger asChild>
-                 <Button variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow">
+                 <Button variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow transition-all duration-300">
                    <Settings className="w-5 h-5 mr-2" />
                    Настройки
                  </Button>
@@ -524,12 +593,12 @@ export default function ProfilePage() {
                </DialogContent>
              </Dialog>
              
-             <Button variant="ghost" size="icon" className="h-12 w-12 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm">
+             <Button variant="ghost" size="icon" className="h-12 w-12 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300">
                 <LogOut className="w-5 h-5" />
              </Button>
           </div>
         </div>
-      </motion.div>
+      </TiltCard>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
@@ -549,22 +618,24 @@ export default function ProfilePage() {
               { label: "K/D Ratio", value: "1.42", icon: Target, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
               { label: "В Игре", value: "342ч", icon: Clock, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" },
             ].map((stat, i) => (
-              <Card key={i} className={`bg-zinc-900/40 border-white/5 backdrop-blur-md hover:bg-zinc-900/60 transition-all group overflow-hidden relative hover:-translate-y-1 duration-300 border ${stat.border}`}>
-                <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-${stat.color.split('-')[1]}-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                <CardContent className="p-5 flex flex-col items-center text-center relative z-10">
-                  <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} mb-3 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg`}>
-                    <stat.icon className="w-6 h-6" />
-                  </div>
-                  <span className="text-3xl font-black font-display text-white tracking-wide drop-shadow-md">{stat.value}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1 opacity-70 group-hover:opacity-100 transition-opacity">{stat.label}</span>
-                </CardContent>
-              </Card>
+              <motion.div variants={item} key={i}>
+                  <Card className={`bg-zinc-900/40 border-white/5 backdrop-blur-md hover:bg-zinc-900/60 transition-all group overflow-hidden relative hover:-translate-y-1 duration-300 border ${stat.border} h-full`}>
+                    <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-${stat.color.split('-')[1]}-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <CardContent className="p-5 flex flex-col items-center text-center relative z-10">
+                      <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} mb-3 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 shadow-lg`}>
+                        <stat.icon className="w-6 h-6" />
+                      </div>
+                      <span className="text-3xl font-black font-display text-white tracking-wide drop-shadow-md"><AnimatedCounter value={stat.value}/></span>
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1 opacity-70 group-hover:opacity-100 transition-opacity">{stat.label}</span>
+                    </CardContent>
+                  </Card>
+              </motion.div>
             ))}
           </motion.div>
           
           {/* Achievements Section (New Idea) */}
-          <motion.div variants={item} initial="hidden" animate="show">
-             <Card className="bg-zinc-900/40 border-white/5 backdrop-blur-md">
+          <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.4 }}>
+             <Card className="bg-zinc-900/40 border-white/5 backdrop-blur-md overflow-hidden group hover:border-white/10 transition-colors">
                 <CardHeader>
                    <CardTitle className="text-lg font-display flex items-center gap-2">
                       <Medal className="w-5 h-5 text-yellow-500" />
@@ -573,24 +644,28 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                    {achievements.map((ach, i) => (
-                      <div key={i} className="flex items-center gap-4 p-2 rounded-lg hover:bg-white/5 transition-colors">
-                         <div className={`p-2 rounded-lg bg-zinc-900 border border-white/10 ${ach.color}`}>
+                      <motion.div 
+                        key={i} 
+                        className="flex items-center gap-4 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-default"
+                        whileHover={{ x: 5 }}
+                      >
+                         <div className={`p-2 rounded-lg bg-zinc-900 border border-white/10 ${ach.color} shadow-inner`}>
                             <ach.icon className="w-5 h-5" />
                          </div>
                          <div>
                             <h4 className="font-bold text-sm text-white">{ach.name}</h4>
                             <p className="text-xs text-muted-foreground">{ach.desc}</p>
                          </div>
-                      </div>
+                      </motion.div>
                    ))}
-                   <Button variant="link" className="w-full text-muted-foreground text-xs uppercase tracking-widest h-auto p-0 mt-2">Показать все</Button>
+                   <Button variant="link" className="w-full text-muted-foreground text-xs uppercase tracking-widest h-auto p-0 mt-2 hover:text-white">Показать все</Button>
                 </CardContent>
              </Card>
           </motion.div>
 
           {/* Discord Integration Card */}
-          <motion.div variants={item} initial="hidden" animate="show">
-            <Card className="bg-[#5865F2] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-shadow duration-500">
+          <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.6 }}>
+            <Card className="bg-[#5865F2] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-shadow duration-500 cursor-pointer transform hover:scale-[1.02] duration-300">
               <div className="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3109/636e0a6918e57475a843f59f_layer_1.svg')] opacity-10 bg-repeat" />
               <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors duration-500 animate-pulse" />
               
@@ -625,7 +700,7 @@ export default function ProfilePage() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <Button className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11">
+                <Button className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11 group-hover:scale-[1.02] transition-transform">
                   ОБНОВИТЬ ПРИВЯЗКУ
                 </Button>
               </CardContent>
@@ -635,13 +710,19 @@ export default function ProfilePage() {
 
         {/* Right Column - Clan Management */}
         <div className="lg:col-span-8">
-          <motion.div variants={item} initial="hidden" animate="show" className="h-full">
-            <Card className="glass-card overflow-hidden shadow-2xl border-white/5 h-full flex flex-col">
+          <motion.div 
+            variants={item} 
+            initial="hidden" 
+            animate="show" 
+            transition={{ delay: 0.2 }}
+            className="h-full"
+          >
+            <Card className="glass-card overflow-hidden shadow-2xl border-white/5 h-full flex flex-col bg-black/20 backdrop-blur-xl">
               <div className="h-1 bg-gradient-to-r from-primary via-orange-400 to-primary w-full shadow-[0_0_10px_rgba(255,102,0,0.5)]" />
               <CardHeader className="pb-0 border-b border-white/5 bg-zinc-950/30 shrink-0">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-4">
                   <div>
-                    <CardTitle className="text-3xl flex items-center gap-3 text-white drop-shadow-md">
+                    <CardTitle className="text-3xl flex items-center gap-3 text-white drop-shadow-md font-display">
                       <Shield className="w-8 h-8 text-primary filter drop-shadow-[0_0_5px_rgba(255,102,0,0.5)]" />
                       {userRole === "guest" ? "ВСТУПЛЕНИЕ В КЛАН" : "МОЙ ОТРЯД"}
                     </CardTitle>
@@ -718,21 +799,28 @@ export default function ProfilePage() {
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              {clans.map((clan) => (
-                                <div 
+                                <motion.div 
                                   key={clan.id}
                                   onClick={() => setSelectedClan(clan.id)}
-                                  className={`relative rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] group overflow-hidden ${selectedClan === clan.id ? `${clan.borderColor} ring-1 ring-offset-0 ring-white/20 shadow-2xl scale-[1.02]` : "border-white/10 hover:border-white/20"}`}
+                                  whileHover={{ scale: 1.03, y: -5 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className={`relative rounded-2xl border cursor-pointer transition-all duration-300 group overflow-hidden ${selectedClan === clan.id ? `${clan.borderColor} ring-1 ring-offset-0 ring-white/20 shadow-2xl scale-[1.02]` : "border-white/10 hover:border-white/20"}`}
                                 >
                                    {/* Clan Banner Image */}
                                    <div className="h-32 relative">
-                                      <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                      <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                       <div className={`absolute inset-0 ${selectedClan === clan.id ? "bg-black/20" : "bg-black/60 group-hover:bg-black/40"} transition-colors duration-300`} />
                                       
                                       {/* Clan Logo - Positioned absolutely but rendered visually on top */}
                                       <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-20">
-                                        <div className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clan.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}>
+                                        <motion.div 
+                                            initial={{ y: 20, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            transition={{ delay: 0.2 }}
+                                            className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clan.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}
+                                        >
                                            <img src={clan.logo} className="w-full h-full object-cover" />
-                                        </div>
+                                        </motion.div>
                                       </div>
                                    </div>
                                    
@@ -767,7 +855,7 @@ export default function ProfilePage() {
                                         </div>
                                       </div>
                                    </div>
-                                </div>
+                                </motion.div>
                              ))}
                           </div>
                        </div>
@@ -1107,7 +1195,10 @@ export default function ProfilePage() {
 
                           <div className="space-y-3">
                               {/* Commander */}
-                              <div className="flex items-center justify-between p-4 bg-zinc-900/80 border border-primary/30 rounded-xl group hover:bg-zinc-800 hover:border-primary/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.2)] relative overflow-hidden">
+                              <motion.div 
+                                whileHover={{ scale: 1.01 }}
+                                className="flex items-center justify-between p-4 bg-zinc-900/80 border border-primary/30 rounded-xl group hover:bg-zinc-800 hover:border-primary/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.2)] relative overflow-hidden cursor-pointer"
+                              >
                                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(255,102,0,0.5)]" />
                                   <div className="flex items-center gap-5 pl-2">
                                       <div className="relative">
@@ -1138,70 +1229,76 @@ export default function ProfilePage() {
                                         <Button size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-white hover:bg-white/5"><Settings className="w-5 h-5" /></Button>
                                     </div>
                                   )}
-                              </div>
+                              </motion.div>
 
                               {/* Members */}
-                              {getSortedMembers().map((member, i) => (
-                                  <Dialog key={member.id} open={selectedMemberStats?.id === member.id} onOpenChange={(open) => !open && setSelectedMemberStats(null)}>
-                                    <DialogTrigger asChild>
-                                      <div onClick={() => setSelectedMemberStats(member)} className={`flex items-center justify-between p-3 bg-zinc-900/40 border border-white/5 rounded-xl group hover:bg-zinc-900/80 hover:border-white/10 transition-all cursor-pointer`}>
-                                          <div className="flex items-center gap-4">
-                                              <Avatar className="h-10 w-10 border border-white/10 group-hover:border-white/30 transition-colors">
-                                                  <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold">{member.avatar}</AvatarFallback>
-                                              </Avatar>
-                                              <div>
-                                                  <div className="flex items-center gap-2">
-                                                      <h4 className="font-bold text-white text-base">{member.name}</h4>
-                                                  </div>
-                                                  <div className="flex items-center gap-2 text-xs mt-1">
-                                                      <Badge variant="outline" className={`rounded-sm px-1.5 py-0 h-5 uppercase font-bold tracking-wider border ${member.roleColor}`}>{member.role}</Badge>
-                                                      <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                                                      <span className={`${member.statusColor} font-medium`}>{member.status}</span>
-                                                  </div>
-                                                  {sortBy !== "default" && (
-                                                     <div className="text-[10px] text-muted-foreground mt-1 font-mono">
-                                                        {sortBy === "kd" && `K/D: ${member.stats.kd}`}
-                                                        {sortBy === "hours" && `${member.stats.hours}`}
-                                                        {sortBy === "winrate" && `Win: ${member.stats.winrate}%`}
-                                                        {sortBy === "kills" && `Kills: ${member.stats.kills}`}
-                                                     </div>
-                                                  )}
-                                              </div>
-                                          </div>
-                                          
-                                          {/* Owner Actions Dropdown - Stop propagation to avoid opening stats modal when clicking settings */}
-                                          {userRole === "owner" && (
-                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                                              <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                  <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/5">
-                                                    <Settings className="w-4 h-4" />
-                                                  </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="bg-zinc-900 border-white/10">
-                                                  <DropdownMenuSub>
-                                                    <DropdownMenuSubTrigger className="text-white hover:bg-white/10 cursor-pointer">
-                                                      <User className="w-4 h-4 mr-2" /> Изменить роль
-                                                    </DropdownMenuSubTrigger>
-                                                    <DropdownMenuSubContent className="bg-zinc-900 border-white/10">
-                                                      <DropdownMenuRadioGroup value={member.role} onValueChange={(val) => handleRoleChange(member.id, val)}>
-                                                        <DropdownMenuRadioItem value="Офицер" className="cursor-pointer text-orange-400 focus:text-orange-400">Офицер</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="Боец" className="cursor-pointer text-white focus:text-white">Боец</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="Рекрут" className="cursor-pointer text-emerald-500 focus:text-emerald-500">Рекрут</DropdownMenuRadioItem>
-                                                      </DropdownMenuRadioGroup>
-                                                    </DropdownMenuSubContent>
-                                                  </DropdownMenuSub>
-                                                  <DropdownMenuItem className="text-red-500 hover:bg-red-500/10 cursor-pointer focus:text-red-500 focus:bg-red-500/10">
-                                                    <Trash2 className="w-4 h-4 mr-2" /> Исключить
-                                                  </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                              </DropdownMenu>
+                              <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
+                                {getSortedMembers().map((member, i) => (
+                                    <Dialog key={member.id} open={selectedMemberStats?.id === member.id} onOpenChange={(open) => !open && setSelectedMemberStats(null)}>
+                                      <DialogTrigger asChild>
+                                        <motion.div 
+                                            variants={item}
+                                            onClick={() => setSelectedMemberStats(member)} 
+                                            className={`flex items-center justify-between p-3 bg-zinc-900/40 border border-white/5 rounded-xl group hover:bg-zinc-900/80 hover:border-white/10 transition-all cursor-pointer hover:shadow-lg hover:shadow-black/50`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <Avatar className="h-10 w-10 border border-white/10 group-hover:border-white/30 transition-colors">
+                                                    <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold">{member.avatar}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-bold text-white text-base">{member.name}</h4>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-xs mt-1">
+                                                        <Badge variant="outline" className={`rounded-sm px-1.5 py-0 h-5 uppercase font-bold tracking-wider border ${member.roleColor}`}>{member.role}</Badge>
+                                                        <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                                                        <span className={`${member.statusColor} font-medium`}>{member.status}</span>
+                                                    </div>
+                                                    {sortBy !== "default" && (
+                                                       <div className="text-[10px] text-muted-foreground mt-1 font-mono">
+                                                          {sortBy === "kd" && `K/D: ${member.stats.kd}`}
+                                                          {sortBy === "hours" && `${member.stats.hours}`}
+                                                          {sortBy === "winrate" && `Win: ${member.stats.winrate}%`}
+                                                          {sortBy === "kills" && `Kills: ${member.stats.kills}`}
+                                                       </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                          )}
-                                      </div>
-                                    </DialogTrigger>
-                                  </Dialog>
-                              ))}
+                                            
+                                            {/* Owner Actions Dropdown - Stop propagation to avoid opening stats modal when clicking settings */}
+                                            {userRole === "owner" && (
+                                              <div className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                                <DropdownMenu>
+                                                  <DropdownMenuTrigger asChild>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-white hover:bg-white/5">
+                                                      <Settings className="w-4 h-4" />
+                                                    </Button>
+                                                  </DropdownMenuTrigger>
+                                                  <DropdownMenuContent align="end" className="bg-zinc-900 border-white/10">
+                                                    <DropdownMenuSub>
+                                                      <DropdownMenuSubTrigger className="text-white hover:bg-white/10 cursor-pointer">
+                                                        <User className="w-4 h-4 mr-2" /> Изменить роль
+                                                      </DropdownMenuSubTrigger>
+                                                      <DropdownMenuSubContent className="bg-zinc-900 border-white/10">
+                                                        <DropdownMenuRadioGroup value={member.role} onValueChange={(val) => handleRoleChange(member.id, val)}>
+                                                          <DropdownMenuRadioItem value="Офицер" className="cursor-pointer text-orange-400 focus:text-orange-400">Офицер</DropdownMenuRadioItem>
+                                                          <DropdownMenuRadioItem value="Боец" className="cursor-pointer text-white focus:text-white">Боец</DropdownMenuRadioItem>
+                                                          <DropdownMenuRadioItem value="Рекрут" className="cursor-pointer text-emerald-500 focus:text-emerald-500">Рекрут</DropdownMenuRadioItem>
+                                                        </DropdownMenuRadioGroup>
+                                                      </DropdownMenuSubContent>
+                                                    </DropdownMenuSub>
+                                                    <DropdownMenuItem className="text-red-500 hover:bg-red-500/10 cursor-pointer focus:text-red-500 focus:bg-red-500/10">
+                                                      <Trash2 className="w-4 h-4 mr-2" /> Исключить
+                                                    </DropdownMenuItem>
+                                                  </DropdownMenuContent>
+                                                </DropdownMenu>
+                                              </div>
+                                            )}
+                                        </motion.div>
+                                      </DialogTrigger>
+                                    </Dialog>
+                                ))}
+                              </motion.div>
                               
                               {userRole === "owner" && (
                                 <Button variant="outline" className="w-full border-dashed border-white/10 hover:border-white/30 hover:bg-white/5 text-muted-foreground h-12">

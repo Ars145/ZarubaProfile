@@ -176,19 +176,15 @@ export default function ProfilePage() {
                       Центр управления вашим отрядом и личным составом.
                     </CardDescription>
                   </div>
-                  <Button className="bg-zinc-800 text-white hover:bg-zinc-700 border border-white/5 font-display tracking-wide">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Создать Клан
-                  </Button>
                 </div>
                 
-                <Tabs defaultValue="squad" className="w-full">
+                <Tabs defaultValue="clan" className="w-full">
                   <TabsList className="w-full justify-start bg-transparent p-0 h-auto gap-6">
                     <TabsTrigger 
-                      value="squad" 
+                      value="clan" 
                       className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none px-0 py-3 font-display tracking-wide text-muted-foreground hover:text-white transition-colors"
                     >
-                      МОЙ ОТРЯД
+                      КЛАН
                     </TabsTrigger>
                     <TabsTrigger 
                       value="apply" 
@@ -205,8 +201,8 @@ export default function ProfilePage() {
                   </TabsList>
 
                   <div className="p-6 md:p-8 bg-zinc-900/20 min-h-[400px]">
-                    {/* MY SQUAD TAB */}
-                    <TabsContent value="squad" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    {/* CLAN TAB (RENAMED FROM MY SQUAD) */}
+                    <TabsContent value="clan" className="mt-0 space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                         <div className="flex flex-col md:flex-row gap-8">
                             {/* Clan Stats Card */}
                             <div className="w-full md:w-80 shrink-0 space-y-4">
@@ -383,67 +379,6 @@ export default function ProfilePage() {
                 </Tabs>
               </CardHeader>
             </Card>
-          </motion.div>
-
-          {/* Recent Activity */}
-          <motion.div variants={item} initial="hidden" animate="show" className="space-y-5">
-             <div className="flex items-center justify-between">
-               <h3 className="text-xl font-display font-bold text-white flex items-center gap-3">
-                 <Swords className="w-6 h-6 text-primary" />
-                 ИСТОРИЯ МАТЧЕЙ
-               </h3>
-               <Button variant="link" className="text-primary hover:text-primary/80 p-0 h-auto font-bold text-xs uppercase tracking-widest">
-                 Показать все
-               </Button>
-             </div>
-             
-             <div className="space-y-3">
-               {[
-                  { name: "ZARUBA #1 SUPERMOD", map: "Kohat Toi Invasion v1", time: "42 мин назад", score: "2,450", kd: "2.1", result: "VICTORY" },
-                  { name: "ZARUBA #2 Steel Division", map: "Gorodok Invasion v1", time: "2 часа назад", score: "1,820", kd: "0.8", result: "DEFEAT" },
-                  { name: "ZARUBA #1 SUPERMOD", map: "Mutaha RAAS v1", time: "Вчера", score: "3,100", kd: "3.5", result: "VICTORY" }
-               ].map((match, i) => (
-                 <motion.div 
-                   key={i}
-                   initial={{ opacity: 0, x: -20 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   transition={{ delay: i * 0.1 }}
-                   className="group flex flex-col md:flex-row items-start md:items-center justify-between p-5 rounded-2xl bg-zinc-900/30 border border-white/5 hover:border-primary/30 hover:bg-zinc-900/80 transition-all cursor-pointer relative overflow-hidden"
-                 >
-                   <div className={`absolute left-0 top-0 bottom-0 w-1 ${match.result === 'VICTORY' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                   
-                   <div className="flex items-center gap-5 pl-3">
-                      <div className={`p-2.5 rounded-lg ${match.result === 'VICTORY' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                        {match.result === 'VICTORY' ? <Trophy className="w-5 h-5" /> : <Skull className="w-5 h-5" />}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-white text-lg group-hover:text-primary transition-colors">{match.name}</h4>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                          <span className="font-medium text-zinc-400">{match.map}</span>
-                          <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                          <span>{match.time}</span>
-                        </div>
-                      </div>
-                   </div>
-                   
-                   <div className="flex items-center gap-8 md:gap-12 mt-4 md:mt-0 w-full md:w-auto justify-between md:justify-end pl-3 md:pl-0">
-                      <div className="text-center">
-                        <span className="block text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-0.5">Score</span>
-                        <span className="block text-lg font-mono font-bold text-white">{match.score}</span>
-                      </div>
-                      <div className="text-center">
-                        <span className="block text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-0.5">K/D</span>
-                        <span className={`block text-lg font-mono font-bold ${Number(match.kd) > 1 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                          {match.kd}
-                        </span>
-                      </div>
-                      <div className="p-2 rounded-full hover:bg-white/10 transition-colors">
-                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-white transition-colors" />
-                      </div>
-                   </div>
-                 </motion.div>
-               ))}
-             </div>
           </motion.div>
 
         </div>

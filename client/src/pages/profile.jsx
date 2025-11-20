@@ -38,12 +38,7 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-type UserRole = "guest" | "member" | "owner";
-type ClanRole = "Офицер" | "Боец" | "Рекрут";
-type OwnerTab = "squad" | "applications" | "settings";
-type SortOption = "default" | "kd" | "hours" | "winrate" | "kills";
-
-const parseGameDuration = (durationStr: string) => {
+const parseGameDuration = (durationStr) => {
   if (!durationStr) return 0;
   let totalHours = 0;
   const daysMatch = durationStr.match(/(\d+)д/);
@@ -56,7 +51,7 @@ const parseGameDuration = (durationStr: string) => {
 };
 
 export default function ProfilePage() {
-  const [userRole, setUserRole] = useState<UserRole>("guest"); // Default to guest for demo
+  const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
   const [isVip, setIsVip] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -64,9 +59,9 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState("https://api.dicebear.com/7.x/avataaars/svg?seed=TacticalViper");
   
   // Owner specific state
-  const [ownerTab, setOwnerTab] = useState<OwnerTab>("squad");
-  const [selectedMemberStats, setSelectedMemberStats] = useState<any>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [ownerTab, setOwnerTab] = useState("squad");
+  const [selectedMemberStats, setSelectedMemberStats] = useState(null);
+  const [sortBy, setSortBy] = useState("default");
   
   // Clan Assets State (Owner Settings)
   const [clanBanner, setClanBanner] = useState(alphaBanner);
@@ -111,7 +106,7 @@ export default function ProfilePage() {
     },
   ]);
 
-  const handleRoleChange = (memberId: number, newRole: ClanRole) => {
+  const handleRoleChange = (memberId, newRole) => {
     setSquadMembers(prev => prev.map(member => {
       if (member.id === memberId) {
         let roleColor = '';
@@ -125,11 +120,11 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleRejectApp = (id: number) => {
+  const handleRejectApp = (id) => {
     setApplications(prev => prev.filter(app => app.id !== id));
   };
 
-  const handleAcceptApp = (id: number) => {
+  const handleAcceptApp = (id) => {
     const app = applications.find(a => a.id === id);
     if (app) {
         setSquadMembers(prev => [...prev, {
@@ -1189,7 +1184,7 @@ export default function ProfilePage() {
                                                       <User className="w-4 h-4 mr-2" /> Изменить роль
                                                     </DropdownMenuSubTrigger>
                                                     <DropdownMenuSubContent className="bg-zinc-900 border-white/10">
-                                                      <DropdownMenuRadioGroup value={member.role} onValueChange={(val) => handleRoleChange(member.id, val as ClanRole)}>
+                                                      <DropdownMenuRadioGroup value={member.role} onValueChange={(val) => handleRoleChange(member.id, val)}>
                                                         <DropdownMenuRadioItem value="Офицер" className="cursor-pointer text-orange-400 focus:text-orange-400">Офицер</DropdownMenuRadioItem>
                                                         <DropdownMenuRadioItem value="Боец" className="cursor-pointer text-white focus:text-white">Боец</DropdownMenuRadioItem>
                                                         <DropdownMenuRadioItem value="Рекрут" className="cursor-pointer text-emerald-500 focus:text-emerald-500">Рекрут</DropdownMenuRadioItem>

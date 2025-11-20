@@ -1,5 +1,5 @@
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
-import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon, Link as LinkIcon } from "lucide-react";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useAnimation } from "framer-motion";
+import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon, Link as LinkIcon, Radar, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Radar as RadarChart, RadarChart as RechartsRadar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
 import { useState, useRef, useEffect } from "react";
@@ -25,6 +26,55 @@ import skullLogo from "@assets/generated_images/tactical_skull_logo_for_clan.png
 
 // --- Animation Components ---
 
+const GlitchText = ({ text, className }) => {
+  return (
+    <div className={`relative inline-block group ${className}`}>
+      <span className="relative z-10">{text}</span>
+      <span className="absolute top-0 left-0 -ml-0.5 translate-x-[2px] text-red-500 opacity-0 group-hover:opacity-70 animate-pulse z-0 mix-blend-screen" style={{ clipPath: 'inset(40% 0 61% 0)' }}>{text}</span>
+      <span className="absolute top-0 left-0 ml-0.5 -translate-x-[2px] text-blue-500 opacity-0 group-hover:opacity-70 animate-pulse z-0 mix-blend-screen" style={{ clipPath: 'inset(10% 0 50% 0)' }}>{text}</span>
+    </div>
+  );
+};
+
+const MagneticButton = ({ children, className, onClick, variant = "default", size = "default" }) => {
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
+  const springX = useSpring(x, springConfig);
+  const springY = useSpring(y, springConfig);
+
+  const handleMouseMove = (e) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = ref.current.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    x.set((clientX - centerX) * 0.3); // Reduced strength
+    y.set((clientY - centerY) * 0.3);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+        ref={ref}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ x: springX, y: springY }}
+        className="inline-block"
+    >
+        <Button className={className} onClick={onClick} variant={variant} size={size}>
+            {children}
+        </Button>
+    </motion.div>
+  );
+};
+
 const TiltCard = ({ children, className }) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -32,8 +82,8 @@ const TiltCard = ({ children, className }) => {
   const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
   const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
 
-  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["15deg", "-15deg"]);
-  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-15deg", "15deg"]);
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["10deg", "-10deg"]); // Reduced rotation for subtlety
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-10deg", "10deg"]);
 
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -63,7 +113,7 @@ const TiltCard = ({ children, className }) => {
       }}
       className={className}
     >
-      <div style={{ transform: "translateZ(50px)" }} className="h-full">
+      <div style={{ transform: "translateZ(30px)" }} className="h-full">
         {children}
       </div>
     </motion.div>
@@ -74,6 +124,16 @@ const AnimatedCounter = ({ value }) => {
     // Simple counter placeholder - full animated counter would need useEffect/raf
     return <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>{value}</motion.span>;
 };
+
+// --- Skill Radar Chart Data ---
+const skillData = [
+  { subject: 'Стрельба', A: 120, fullMark: 150 },
+  { subject: 'Тактика', A: 98, fullMark: 150 },
+  { subject: 'Вождение', A: 86, fullMark: 150 },
+  { subject: 'Лидерство', A: 99, fullMark: 150 },
+  { subject: 'Коммуникация', A: 85, fullMark: 150 },
+  { subject: 'Выживание', A: 65, fullMark: 150 },
+];
 
 const container = {
   hidden: { opacity: 0 },
@@ -489,6 +549,8 @@ export default function ProfilePage() {
           >
             <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background/50 backdrop-blur-sm shadow-[0_0_40px_rgba(255,102,0,0.2)] group-hover:shadow-[0_0_60px_rgba(255,102,0,0.6)] transition-all duration-500 bg-zinc-900 relative z-10">
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              {/* Scanner Effect */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent h-[20%] w-full animate-scanline pointer-events-none z-20" />
             </div>
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-background p-1.5 rounded-full z-20">
               <Badge className="bg-primary text-black hover:bg-primary/90 border-4 border-background px-4 py-1.5 text-lg font-black font-display shadow-lg whitespace-nowrap flex items-center gap-2">
@@ -506,7 +568,7 @@ export default function ProfilePage() {
                 transition={{ delay: 0.2 }}
                 className="text-5xl md:text-7xl font-black text-white font-display tracking-tighter uppercase drop-shadow-2xl shadow-black"
               >
-                {username}
+                <GlitchText text={username} />
               </motion.h1>
               
               {isVip && (
@@ -526,9 +588,14 @@ export default function ProfilePage() {
             </div>
             
             <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-muted-foreground">
-              <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5 hover:bg-white/5 transition-colors cursor-pointer">
-                 <Progress value={68} className="w-24 h-2 bg-white/10" />
-                 <span className="text-xs font-mono text-white">XP: 68%</span>
+              <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+                 <div className="flex flex-col gap-1">
+                    <div className="flex justify-between w-24 text-[10px] font-mono uppercase text-white/50 group-hover:text-primary/80 transition-colors">
+                        <span>XP</span>
+                        <span>68%</span>
+                    </div>
+                    <Progress value={68} className="w-24 h-1.5 bg-white/10 group-hover:bg-white/20" indicatorClassName="bg-primary group-hover:shadow-[0_0_10px_rgba(255,102,0,0.5)] transition-all" />
+                 </div>
               </div>
 
               <span className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5 hover:border-primary/30 transition-colors cursor-pointer">
@@ -548,10 +615,10 @@ export default function ProfilePage() {
           <div className="flex gap-3 w-full md:w-auto mt-6 md:mt-0">
              <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                <DialogTrigger asChild>
-                 <Button variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow transition-all duration-300">
+                 <MagneticButton variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow transition-all duration-300">
                    <Settings className="w-5 h-5 mr-2" />
                    Настройки
-                 </Button>
+                 </MagneticButton>
                </DialogTrigger>
                <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px]">
                  <DialogHeader>
@@ -593,9 +660,9 @@ export default function ProfilePage() {
                </DialogContent>
              </Dialog>
              
-             <Button variant="ghost" size="icon" className="h-12 w-12 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300">
+             <MagneticButton variant="ghost" size="icon" className="h-12 w-12 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300">
                 <LogOut className="w-5 h-5" />
-             </Button>
+             </MagneticButton>
           </div>
         </div>
       </TiltCard>
@@ -605,6 +672,33 @@ export default function ProfilePage() {
         {/* Left Column - Stats & Info */}
         <div className="lg:col-span-4 space-y-8">
           
+          {/* Radar Chart - Skills Analysis */}
+          <motion.div variants={container} initial="hidden" animate="show" className="hidden md:block">
+            <Card className="bg-zinc-900/40 border-white/5 backdrop-blur-md overflow-hidden relative">
+                <CardHeader className="pb-0">
+                   <CardTitle className="text-lg font-display flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-primary" />
+                      Анализ Навыков
+                   </CardTitle>
+                </CardHeader>
+                <div className="h-64 w-full relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <RechartsRadar cx="50%" cy="50%" outerRadius="70%" data={skillData}>
+                            <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                            <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
+                            <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                            <RechartsRadar name="Skill" dataKey="A" stroke="#FF6600" strokeWidth={2} fill="#FF6600" fillOpacity={0.2} />
+                            <RechartsTooltip 
+                                contentStyle={{ backgroundColor: '#09090b', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
+                                itemStyle={{ color: '#FF6600' }}
+                            />
+                        </RechartsRadar>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 bg-gradient-radial from-transparent to-zinc-900/20 pointer-events-none" />
+                </div>
+            </Card>
+          </motion.div>
+
           {/* Stats Grid */}
           <motion.div 
             variants={container}
@@ -907,9 +1001,9 @@ export default function ProfilePage() {
                                </div>
                              </div>
                              <div className="flex justify-end pt-2">
-                               <Button size="lg" className={`w-full md:w-auto bg-white text-black font-black font-display tracking-wider hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:-translate-y-1 h-14 px-8 text-lg border-none`}>
+                               <MagneticButton size="lg" className={`w-full md:w-auto bg-white text-black font-black font-display tracking-wider hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:-translate-y-1 h-14 px-8 text-lg border-none`}>
                                  ОТПРАВИТЬ ЗАЯВКУ
-                               </Button>
+                               </MagneticButton>
                              </div>
                           </div>
                        </div>

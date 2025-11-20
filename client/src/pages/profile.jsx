@@ -18,7 +18,6 @@ import { useState, useRef, useEffect } from "react";
 
 // Squad Stats Components
 import { useSquadStats } from "@/hooks/useSquadStats";
-import { SquadStatsCompact } from "@/components/squad-stats-compact";
 
 // Generated Assets
 import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
@@ -524,108 +523,96 @@ export default function ProfilePage() {
       </Dialog>
 
       {/* Dev Tool for Role Switching (Hidden in prod) */}
-      <div className="fixed top-24 right-4 z-50 bg-black/80 backdrop-blur border border-white/10 p-2 rounded-lg space-y-2">
-        <p className="text-[10px] text-muted-foreground mb-1 font-mono">DEMO MODE: ROLE SWITCHER</p>
-        <div className="flex gap-2 flex-wrap">
-          <Button size="sm" variant={userRole === "guest" ? "default" : "outline"} onClick={() => setUserRole("guest")} className="h-6 text-[10px]">Guest</Button>
-          <Button size="sm" variant={userRole === "member" ? "default" : "outline"} onClick={() => setUserRole("member")} className="h-6 text-[10px]">Member</Button>
-          <Button size="sm" variant={userRole === "owner" ? "default" : "outline"} onClick={() => setUserRole("owner")} className="h-6 text-[10px]">Owner</Button>
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-           <label className="text-[10px] text-white cursor-pointer flex items-center gap-2 select-none">
-             <input type="checkbox" checked={isVip} onChange={(e) => setIsVip(e.target.checked)} />
-             Toggle VIP Status
-           </label>
+      <div className="fixed bottom-4 right-4 z-50 bg-black/90 backdrop-blur border border-white/10 p-2 rounded-lg space-y-1 shadow-xl">
+        <p className="text-[9px] text-muted-foreground font-mono">DEMO</p>
+        <div className="flex gap-1">
+          <Button size="sm" variant={userRole === "guest" ? "default" : "outline"} onClick={() => setUserRole("guest")} className="h-5 text-[9px] px-2">G</Button>
+          <Button size="sm" variant={userRole === "member" ? "default" : "outline"} onClick={() => setUserRole("member")} className="h-5 text-[9px] px-2">M</Button>
+          <Button size="sm" variant={userRole === "owner" ? "default" : "outline"} onClick={() => setUserRole("owner")} className="h-5 text-[9px] px-2">O</Button>
+          <Button size="sm" variant={isVip ? "default" : "outline"} onClick={() => setIsVip(!isVip)} className="h-5 text-[9px] px-2">V</Button>
         </div>
       </div>
 
-      {/* Header / Identity Section */}
-      <TiltCard className="relative mb-12 rounded-3xl overflow-hidden border border-white/10 shadow-2xl group perspective-1000">
-        {/* Dynamic Banner Background */}
-        <div className="absolute inset-0 h-64 md:h-72 z-0">
+      {/* Header / Identity Section - Compressed */}
+      <TiltCard className="relative mb-8 rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
+        {/* Dynamic Banner Background - Reduced height */}
+        <div className="absolute inset-0 h-48 z-0">
            <img src={profileBg} className="w-full h-full object-cover opacity-60 mix-blend-overlay" />
-           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
-           <div className="absolute inset-0 bg-scanline opacity-20" />
+           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-transparent" />
         </div>
         
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-8 pt-24 px-6 md:px-10 pb-8">
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-4 pt-16 px-6 md:px-8 pb-6">
           <motion.div 
             className="relative group cursor-pointer"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background/50 backdrop-blur-sm shadow-[0_0_40px_rgba(255,102,0,0.2)] group-hover:shadow-[0_0_60px_rgba(255,102,0,0.6)] transition-all duration-500 bg-zinc-900 relative z-10">
+            <div className="w-28 h-28 rounded-xl overflow-hidden border-4 border-background/50 backdrop-blur-sm shadow-[0_0_30px_rgba(255,102,0,0.2)] group-hover:shadow-[0_0_50px_rgba(255,102,0,0.5)] transition-all duration-500 bg-zinc-900 relative">
               <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-              {/* Scanner Effect */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent h-[20%] w-full animate-scanline pointer-events-none z-20" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/20 to-transparent h-[20%] w-full animate-scanline pointer-events-none" />
             </div>
-            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-background p-1.5 rounded-full z-20">
-              <Badge className="bg-primary text-black hover:bg-primary/90 border-4 border-background px-4 py-1.5 text-lg font-black font-display shadow-lg whitespace-nowrap flex items-center gap-2">
-                <Crown className="w-4 h-4 fill-black" />
-                LVL 52
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-background p-1 rounded-full">
+              <Badge className="bg-primary text-black hover:bg-primary/90 border-2 border-background px-2 py-0.5 text-sm font-black font-display shadow-lg flex items-center gap-1">
+                <Crown className="w-3 h-3 fill-black" />
+                52
               </Badge>
             </div>
           </motion.div>
 
-          <div className="flex-1 space-y-4 mb-2">
-            <div className="flex flex-wrap items-center gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
               <motion.h1 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-5xl md:text-7xl font-black text-white font-display tracking-tighter uppercase drop-shadow-2xl shadow-black"
+                className="text-4xl md:text-5xl font-black text-white font-display tracking-tighter uppercase drop-shadow-2xl"
               >
                 <GlitchText text={username} />
               </motion.h1>
               
               {isVip && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                    <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md animate-pulse shadow-[0_0_15px_rgba(255,102,0,0.4)]">
-                    VIP Account
-                    </Badge>
-                </motion.div>
+                <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase animate-pulse shadow-[0_0_10px_rgba(255,102,0,0.3)]">
+                  VIP
+                </Badge>
               )}
               
               {userRole !== "guest" && (
-                 <Badge variant="outline" className="border-white/20 text-white bg-white/5 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md flex items-center gap-2">
-                   <Shield className="w-3 h-3" />
-                   ALPHA MEMBER
+                 <Badge variant="outline" className="border-white/20 text-white bg-white/5 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1">
+                   <Shield className="w-2.5 h-2.5" />
+                   ALPHA
                  </Badge>
               )}
             </div>
             
-            <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-muted-foreground">
-              <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
-                 <div className="flex flex-col gap-1">
-                    <div className="flex justify-between w-24 text-[10px] font-mono uppercase text-white/50 group-hover:text-primary/80 transition-colors">
-                        <span>XP</span>
-                        <span>68%</span>
-                    </div>
-                    <Progress value={68} className="w-24 h-1.5 bg-white/10 group-hover:bg-white/20" indicatorClassName="bg-primary group-hover:shadow-[0_0_10px_rgba(255,102,0,0.5)] transition-all" />
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/5">
+                 <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] font-mono uppercase text-white/50">XP</span>
+                    <Progress value={68} className="w-16 h-1 bg-white/10" indicatorClassName="bg-primary" />
+                    <span className="text-[9px] font-mono text-primary">68%</span>
                  </div>
               </div>
-
-              <span className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5 hover:border-primary/30 transition-colors cursor-pointer">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" className="w-4 h-4 opacity-70" />
-                <span className="font-mono text-white/70">STEAM_0:1:12345678</span>
+              <span className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full border border-white/5">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Steam_icon_logo.svg/512px-Steam_icon_logo.svg.png" className="w-3 h-3 opacity-70" />
+                <span className="font-mono text-white/70 text-[10px]">STEAM_0:1:12345678</span>
               </span>
-              <span className="flex items-center gap-2 text-emerald-400 bg-emerald-500/5 px-3 py-1.5 rounded-full border border-emerald-500/10 backdrop-blur-md shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                <span className="relative flex h-2 w-2">
+              <span className="flex items-center gap-1.5 text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-full border border-emerald-500/10">
+                <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                 </span>
-                Online
+                <span className="text-[10px]">Online</span>
               </span>
             </div>
           </div>
 
-          <div className="flex gap-3 w-full md:w-auto mt-6 md:mt-0">
+          <div className="flex gap-2 w-full md:w-auto">
              <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
                <DialogTrigger asChild>
-                 <MagneticButton variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow transition-all duration-300">
-                   <Settings className="w-5 h-5 mr-2" />
-                   Настройки
-                 </MagneticButton>
+                 <Button variant="outline" size="sm" className="flex-1 md:flex-none h-9 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm text-xs">
+                   <Settings className="w-4 h-4 md:mr-2" />
+                   <span className="hidden md:inline">Настройки</span>
+                 </Button>
                </DialogTrigger>
                <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px]">
                  <DialogHeader>
@@ -667,78 +654,148 @@ export default function ProfilePage() {
                </DialogContent>
              </Dialog>
              
-             <MagneticButton variant="ghost" size="icon" className="h-12 w-12 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm transition-all duration-300">
-                <LogOut className="w-5 h-5" />
-             </MagneticButton>
+             <Button variant="ghost" size="sm" className="h-9 w-9 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm">
+                <LogOut className="w-4 h-4" />
+             </Button>
           </div>
         </div>
       </TiltCard>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column - Stats & Info */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-6 space-y-6">
           
-          {/* Radar Chart - Skills Analysis */}
-          <motion.div variants={container} initial="hidden" animate="show" className="hidden md:block">
-            <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-primary/10 backdrop-blur-md overflow-hidden relative group hover:border-primary/30 hover:shadow-[0_0_20px_rgba(255,102,0,0.15)] transition-all duration-500">
-                <CardHeader className="pb-0 relative z-10">
-                   <CardTitle className="text-lg font-display flex items-center gap-2">
-                      <Activity className="w-5 h-5 text-primary" />
-                      Анализ Навыков
-                   </CardTitle>
-                </CardHeader>
-                <div className="h-64 w-full relative">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <RechartsRadar cx="50%" cy="50%" outerRadius="70%" data={skillData}>
-                            <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                            <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
-                            <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                            <RechartsRadar name="Skill" dataKey="A" stroke="#FF6600" strokeWidth={2} fill="#FF6600" fillOpacity={0.2} />
-                            <RechartsTooltip 
-                                contentStyle={{ backgroundColor: '#09090b', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                                itemStyle={{ color: '#FF6600' }}
-                            />
-                        </RechartsRadar>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 bg-gradient-radial from-transparent to-zinc-900/20 pointer-events-none" />
-                </div>
-            </Card>
-          </motion.div>
-
-          {/* Squad Stats Section - Компактная версия */}
+          {/* Combined Performance Card - Radar + Squad Stats */}
           {squadStats && (
-            <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.2 }}>
-              <SquadStatsCompact stats={squadStats} />
+            <motion.div variants={container} initial="hidden" animate="show">
+              <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-primary/10 backdrop-blur-md overflow-hidden relative group hover:border-primary/30 hover:shadow-[0_0_20px_rgba(255,102,0,0.15)] transition-all duration-500">
+                <Tabs defaultValue="stats" className="w-full">
+                  <CardHeader className="pb-3 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg font-display flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-primary" />
+                        Боевая Статистика
+                      </CardTitle>
+                      <TabsList className="h-8 bg-zinc-800/50">
+                        <TabsTrigger value="stats" className="text-xs">Squad</TabsTrigger>
+                        <TabsTrigger value="radar" className="text-xs hidden md:inline-flex">Навыки</TabsTrigger>
+                      </TabsList>
+                    </div>
+                  </CardHeader>
+                  
+                  <TabsContent value="stats" className="mt-0 p-6 pt-0">
+                    <div className="space-y-4">
+                      {/* Rank and Progress */}
+                      {squadStats.rank && squadStats.rank.current && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-primary/30 bg-zinc-800/50 flex items-center justify-center shrink-0">
+                            {squadStats.rank.current.iconUrl ? (
+                              <img src={squadStats.rank.current.iconUrl} alt="Rank" className="w-full h-full object-contain" />
+                            ) : (
+                              <Star className="w-6 h-6 text-primary" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-muted-foreground">Ранг</span>
+                              <span className="text-primary font-bold">{squadStats.rank.progress.toFixed(1)}%</span>
+                            </div>
+                            <Progress value={squadStats.rank.progress} className="h-2" />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Main Stats Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                          <Crosshair className="w-4 h-4 text-primary mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">K/D</div>
+                          <div className="text-sm font-bold text-primary">{squadStats.kd?.toFixed(2)}</div>
+                        </div>
+                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                          <Trophy className="w-4 h-4 text-yellow-400 mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">Винрейт</div>
+                          <div className="text-sm font-bold text-yellow-400">{squadStats.winrate?.toFixed(0)}%</div>
+                        </div>
+                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                          <Target className="w-4 h-4 text-red-400 mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">Убийств</div>
+                          <div className="text-sm font-bold text-red-400">{squadStats.kills}</div>
+                        </div>
+                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                          <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
+                          <div className="text-xs text-muted-foreground">Время</div>
+                          <div className="text-sm font-bold text-blue-400">{squadStats.playtime}</div>
+                        </div>
+                      </div>
+
+                      {/* Top Weapon & Role */}
+                      {squadStats.topWeapon && (
+                        <div className="flex gap-2">
+                          <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
+                            <div className="text-[10px] text-muted-foreground mb-1">🔫 Оружие</div>
+                            <div className="text-sm font-bold truncate">{squadStats.topWeapon.name}</div>
+                            <div className="text-xs text-primary">{squadStats.topWeapon.kills} убийств</div>
+                          </div>
+                          {squadStats.topRole && (
+                            <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
+                              <div className="text-[10px] text-muted-foreground mb-1">🎖️ Роль</div>
+                              <div className="text-sm font-bold truncate">{squadStats.topRole.name}</div>
+                              <div className="text-xs text-primary">{squadStats.topRole.time}</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="radar" className="mt-0 p-6 pt-0 hidden md:block">
+                    <div className="h-64 w-full relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsRadar cx="50%" cy="50%" outerRadius="70%" data={skillData}>
+                          <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                          <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
+                          <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
+                          <RechartsRadar name="Skill" dataKey="A" stroke="#FF6600" strokeWidth={2} fill="#FF6600" fillOpacity={0.2} />
+                          <RechartsTooltip 
+                            contentStyle={{ backgroundColor: '#09090b', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
+                            itemStyle={{ color: '#FF6600' }}
+                          />
+                        </RechartsRadar>
+                      </ResponsiveContainer>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </Card>
             </motion.div>
           )}
           
-          {/* Achievements Section (New Idea) */}
+          {/* Achievements Section - Compact Horizontal */}
           <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.4 }}>
-             <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-yellow-500/10 backdrop-blur-md overflow-hidden group hover:border-yellow-500/20 hover:shadow-[0_0_15px_rgba(234,179,8,0.1)] transition-all duration-500 relative">
-                <CardHeader className="relative z-10">
-                   <CardTitle className="text-lg font-display flex items-center gap-2">
-                      <Medal className="w-5 h-5 text-yellow-500" />
+             <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-yellow-500/10 backdrop-blur-md overflow-hidden group hover:border-yellow-500/20 hover:shadow-[0_0_15px_rgba(234,179,8,0.1)] transition-all duration-500">
+                <CardHeader className="pb-3">
+                   <CardTitle className="text-base font-display flex items-center gap-2">
+                      <Medal className="w-4 h-4 text-yellow-500" />
                       Достижения
                    </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                   {achievements.map((ach, i) => (
-                      <motion.div 
-                        key={i} 
-                        className="flex items-center gap-4 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-default"
-                        whileHover={{ x: 5 }}
-                      >
-                         <div className={`p-2 rounded-lg bg-zinc-900 border border-white/10 ${ach.color} shadow-inner`}>
-                            <ach.icon className="w-5 h-5" />
-                         </div>
-                         <div>
-                            <h4 className="font-bold text-sm text-white">{ach.name}</h4>
-                            <p className="text-xs text-muted-foreground">{ach.desc}</p>
-                         </div>
-                      </motion.div>
-                   ))}
-                   <Button variant="link" className="w-full text-muted-foreground text-xs uppercase tracking-widest h-auto p-0 mt-2 hover:text-white">Показать все</Button>
+                <CardContent>
+                   <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                      {achievements.map((ach, i) => (
+                         <motion.div 
+                           key={i} 
+                           className="flex-shrink-0 w-36 p-3 rounded-lg bg-zinc-900/50 border border-white/5 hover:border-white/10 hover:bg-zinc-900/70 transition-all cursor-pointer"
+                           whileHover={{ y: -2 }}
+                         >
+                            <div className={`p-2 rounded-lg bg-zinc-900 border border-white/10 ${ach.color} shadow-inner mb-2 w-fit mx-auto`}>
+                               <ach.icon className="w-5 h-5" />
+                            </div>
+                            <h4 className="font-bold text-xs text-white text-center mb-1">{ach.name}</h4>
+                            <p className="text-[10px] text-muted-foreground text-center line-clamp-2">{ach.desc}</p>
+                         </motion.div>
+                      ))}
+                   </div>
                 </CardContent>
              </Card>
           </motion.div>
@@ -790,7 +847,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Right Column - Clan Management */}
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-6">
           <motion.div 
             variants={item} 
             initial="hidden" 

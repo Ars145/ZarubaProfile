@@ -706,33 +706,12 @@ export default function ProfilePage() {
             </Card>
           </motion.div>
 
-          {/* Stats Grid */}
-          <motion.div 
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-2 gap-4"
-          >
-            {[
-              { label: "Убийств", value: "1,245", icon: Crosshair, color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-500/20" },
-              { label: "Смертей", value: "892", icon: Skull, color: "text-zinc-400", bg: "bg-zinc-500/10", border: "border-zinc-500/20" },
-              { label: "K/D Ratio", value: "1.42", icon: Target, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-              { label: "В Игре", value: "342ч", icon: Clock, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-            ].map((stat, i) => (
-              <motion.div variants={item} key={i}>
-                  <Card className={`bg-zinc-900/40 border-white/5 backdrop-blur-md hover:bg-zinc-900/60 transition-all group overflow-hidden relative hover:-translate-y-1 duration-300 border ${stat.border} h-full`}>
-                    <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-${stat.color.split('-')[1]}-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                    <CardContent className="p-5 flex flex-col items-center text-center relative z-10">
-                      <div className={`p-3 rounded-xl ${stat.bg} ${stat.color} mb-3 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500 shadow-lg`}>
-                        <stat.icon className="w-6 h-6" />
-                      </div>
-                      <span className="text-3xl font-black font-display text-white tracking-wide drop-shadow-md"><AnimatedCounter value={stat.value}/></span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mt-1 opacity-70 group-hover:opacity-100 transition-opacity">{stat.label}</span>
-                    </CardContent>
-                  </Card>
-              </motion.div>
-            ))}
-          </motion.div>
+          {/* Squad Stats Section - Компактная версия */}
+          {squadStats && (
+            <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.2 }}>
+              <SquadStatsCompact stats={squadStats} />
+            </motion.div>
+          )}
           
           {/* Achievements Section (New Idea) */}
           <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.4 }}>
@@ -807,13 +786,6 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </motion.div>
-
-          {/* Squad Stats Section - Компактная версия */}
-          {squadStats && (
-            <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.8 }}>
-              <SquadStatsCompact stats={squadStats} />
-            </motion.div>
-          )}
         </div>
 
         {/* Right Column - Clan Management */}

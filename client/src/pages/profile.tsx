@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare } from "lucide-react";
+import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
 import { useState } from "react";
@@ -30,10 +31,36 @@ const item = {
 };
 
 type UserRole = "guest" | "member" | "owner";
+type ClanRole = "Офицер" | "Боец" | "Рекрут";
 
 export default function ProfilePage() {
   const [userRole, setUserRole] = useState<UserRole>("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
+  const [isVip, setIsVip] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [username, setUsername] = useState("TacticalViper");
+  const [avatarUrl, setAvatarUrl] = useState("https://api.dicebear.com/7.x/avataaars/svg?seed=TacticalViper");
+
+  // Mock data for squad members with roles
+  const [squadMembers, setSquadMembers] = useState([
+    { id: 1, name: 'TacticalViper', role: 'Офицер', status: 'В ИГРЕ', statusColor: 'text-blue-400', roleColor: 'text-orange-400 border-orange-400/20 bg-orange-400/10', avatar: 'TV' },
+    { id: 2, name: 'SniperWolf', role: 'Боец', status: 'НЕ В СЕТИ', statusColor: 'text-zinc-500', roleColor: 'text-muted-foreground border-white/10 bg-white/5', avatar: 'SW' },
+    { id: 3, name: 'MedicMain', role: 'Рекрут', status: 'В СЕТИ', statusColor: 'text-emerald-500', roleColor: 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5', avatar: 'MM' }
+  ]);
+
+  const handleRoleChange = (memberId: number, newRole: ClanRole) => {
+    setSquadMembers(prev => prev.map(member => {
+      if (member.id === memberId) {
+        let roleColor = '';
+        if (newRole === 'Офицер') roleColor = 'text-orange-400 border-orange-400/20 bg-orange-400/10';
+        else if (newRole === 'Боец') roleColor = 'text-muted-foreground border-white/10 bg-white/5';
+        else roleColor = 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5'; // Recruit
+        
+        return { ...member, role: newRole, roleColor };
+      }
+      return member;
+    }));
+  };
 
   const clans = [
     { 
@@ -84,12 +111,18 @@ export default function ProfilePage() {
     <div className="container mx-auto px-4 py-8 md:py-12 relative">
       
       {/* Dev Tool for Role Switching (Hidden in prod) */}
-      <div className="fixed top-24 right-4 z-50 bg-black/80 backdrop-blur border border-white/10 p-2 rounded-lg">
-        <p className="text-[10px] text-muted-foreground mb-2 font-mono">DEMO MODE: ROLE SWITCHER</p>
-        <div className="flex gap-2">
-          <Button size="sm" variant={userRole === "guest" ? "default" : "outline"} onClick={() => setUserRole("guest")} className="h-7 text-xs">Guest</Button>
-          <Button size="sm" variant={userRole === "member" ? "default" : "outline"} onClick={() => setUserRole("member")} className="h-7 text-xs">Member</Button>
-          <Button size="sm" variant={userRole === "owner" ? "default" : "outline"} onClick={() => setUserRole("owner")} className="h-7 text-xs">Owner</Button>
+      <div className="fixed top-24 right-4 z-50 bg-black/80 backdrop-blur border border-white/10 p-2 rounded-lg space-y-2">
+        <p className="text-[10px] text-muted-foreground mb-1 font-mono">DEMO MODE: ROLE SWITCHER</p>
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant={userRole === "guest" ? "default" : "outline"} onClick={() => setUserRole("guest")} className="h-6 text-[10px]">Guest</Button>
+          <Button size="sm" variant={userRole === "member" ? "default" : "outline"} onClick={() => setUserRole("member")} className="h-6 text-[10px]">Member</Button>
+          <Button size="sm" variant={userRole === "owner" ? "default" : "outline"} onClick={() => setUserRole("owner")} className="h-6 text-[10px]">Owner</Button>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+           <label className="text-[10px] text-white cursor-pointer flex items-center gap-2 select-none">
+             <input type="checkbox" checked={isVip} onChange={(e) => setIsVip(e.target.checked)} />
+             Toggle VIP Status
+           </label>
         </div>
       </div>
 
@@ -109,7 +142,7 @@ export default function ProfilePage() {
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-end gap-8 pt-24 px-6 md:px-10 pb-8">
           <div className="relative group">
             <div className="w-32 h-32 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background/50 backdrop-blur-sm shadow-[0_0_40px_rgba(255,102,0,0.2)] group-hover:shadow-[0_0_60px_rgba(255,102,0,0.4)] transition-all duration-500 bg-zinc-900">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=TacticalViper" alt="Avatar" className="w-full h-full object-cover" />
+              <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             </div>
             <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-background p-1.5 rounded-full">
               <Badge className="bg-primary text-black hover:bg-primary/90 border-4 border-background px-4 py-1.5 text-lg font-black font-display shadow-lg whitespace-nowrap flex items-center gap-2">
@@ -122,11 +155,15 @@ export default function ProfilePage() {
           <div className="flex-1 space-y-4 mb-2">
             <div className="flex flex-wrap items-center gap-4">
               <h1 className="text-5xl md:text-7xl font-black text-white font-display tracking-tighter uppercase drop-shadow-2xl shadow-black">
-                TacticalViper
+                {username}
               </h1>
-              <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md">
-                VIP Account
-              </Badge>
+              
+              {isVip && (
+                <Badge variant="outline" className="border-primary text-primary bg-primary/10 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md animate-in fade-in zoom-in duration-300">
+                  VIP Account
+                </Badge>
+              )}
+              
               {userRole !== "guest" && (
                  <Badge variant="outline" className="border-white/20 text-white bg-white/5 px-3 py-1 text-xs font-bold tracking-widest uppercase backdrop-blur-md flex items-center gap-2">
                    <Shield className="w-3 h-3" />
@@ -156,10 +193,53 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex gap-3 w-full md:w-auto mt-6 md:mt-0">
-             <Button variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow">
-               <Settings className="w-5 h-5 mr-2" />
-               Настройки
-             </Button>
+             <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+               <DialogTrigger asChild>
+                 <Button variant="outline" className="flex-1 md:flex-none h-12 border-white/10 hover:border-white/20 hover:bg-white/5 text-white bg-zinc-900/50 backdrop-blur-sm hover-glow">
+                   <Settings className="w-5 h-5 mr-2" />
+                   Настройки
+                 </Button>
+               </DialogTrigger>
+               <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px]">
+                 <DialogHeader>
+                   <DialogTitle className="text-xl font-display tracking-wide">Настройки профиля</DialogTitle>
+                   <DialogDescription>
+                     Измените ваш публичный профиль.
+                   </DialogDescription>
+                 </DialogHeader>
+                 <div className="grid gap-6 py-4">
+                   <div className="flex flex-col items-center gap-4">
+                     <div className="relative group cursor-pointer">
+                       <Avatar className="w-24 h-24 border-2 border-white/10 group-hover:border-primary transition-colors">
+                         <AvatarImage src={avatarUrl} />
+                         <AvatarFallback>AV</AvatarFallback>
+                       </Avatar>
+                       <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                         <Camera className="w-6 h-6 text-white" />
+                       </div>
+                     </div>
+                     <Button variant="outline" size="sm" className="text-xs" onClick={() => setAvatarUrl(`https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`)}>
+                       Случайный аватар
+                     </Button>
+                   </div>
+                   <div className="grid gap-2">
+                     <Label htmlFor="username" className="text-left">
+                       Никнейм
+                     </Label>
+                     <Input
+                       id="username"
+                       value={username}
+                       onChange={(e) => setUsername(e.target.value)}
+                       className="bg-zinc-900 border-white/10 focus:border-primary/50"
+                     />
+                   </div>
+                 </div>
+                 <DialogFooter>
+                   <Button type="submit" className="bg-primary text-black font-bold hover:bg-primary/90" onClick={() => setIsSettingsOpen(false)}>Сохранить изменения</Button>
+                 </DialogFooter>
+               </DialogContent>
+             </Dialog>
+             
              <Button variant="ghost" size="icon" className="h-12 w-12 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm">
                 <LogOut className="w-5 h-5" />
              </Button>
@@ -476,10 +556,7 @@ export default function ProfilePage() {
                           </div>
                           
                           {userRole === "owner" ? (
-                             <Button className="w-full bg-white text-black hover:bg-zinc-200 font-bold font-display tracking-wide h-12 shadow-lg hover-glow border-none">
-                                 <MessageSquare className="w-4 h-4 mr-2" />
-                                 Общее Объявление
-                             </Button>
+                             <div /> /* Removed Announcement Button */
                           ) : (
                              <Button variant="destructive" className="w-full font-bold font-display tracking-wide h-12 shadow-lg border-none bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20">
                                  <LogOut className="w-4 h-4 mr-2" />
@@ -534,12 +611,8 @@ export default function ProfilePage() {
                               </div>
 
                               {/* Members */}
-                              {[
-                                  { name: 'TacticalViper', role: 'Офицер', status: 'В ИГРЕ', statusColor: 'text-blue-400', roleColor: 'text-orange-400 border-orange-400/20 bg-orange-400/10', avatar: 'TV' },
-                                  { name: 'SniperWolf', role: 'Боец', status: 'НЕ В СЕТИ', statusColor: 'text-zinc-500', roleColor: 'text-muted-foreground border-white/10 bg-white/5', avatar: 'SW' },
-                                  { name: 'MedicMain', role: 'Боец', status: 'В СЕТИ', statusColor: 'text-emerald-500', roleColor: 'text-muted-foreground border-white/10 bg-white/5', avatar: 'MM' }
-                              ].map((member, i) => (
-                                  <div key={i} className="flex items-center justify-between p-3 bg-zinc-900/40 border border-white/5 rounded-xl group hover:bg-zinc-900/80 hover:border-white/10 transition-all">
+                              {squadMembers.map((member, i) => (
+                                  <div key={member.id} className="flex items-center justify-between p-3 bg-zinc-900/40 border border-white/5 rounded-xl group hover:bg-zinc-900/80 hover:border-white/10 transition-all">
                                       <div className="flex items-center gap-4">
                                           <Avatar className="h-10 w-10 border border-white/10 group-hover:border-white/30 transition-colors">
                                               <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold">{member.avatar}</AvatarFallback>
@@ -566,12 +639,18 @@ export default function ProfilePage() {
                                               </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="bg-zinc-900 border-white/10">
-                                              <DropdownMenuItem className="text-white hover:bg-white/10 cursor-pointer">
-                                                <UserPlus className="w-4 h-4 mr-2" /> Повысить
-                                              </DropdownMenuItem>
-                                              <DropdownMenuItem className="text-white hover:bg-white/10 cursor-pointer">
-                                                <UserMinus className="w-4 h-4 mr-2" /> Понизить
-                                              </DropdownMenuItem>
+                                              <DropdownMenuSub>
+                                                <DropdownMenuSubTrigger className="text-white hover:bg-white/10 cursor-pointer">
+                                                  <User className="w-4 h-4 mr-2" /> Изменить роль
+                                                </DropdownMenuSubTrigger>
+                                                <DropdownMenuSubContent className="bg-zinc-900 border-white/10">
+                                                  <DropdownMenuRadioGroup value={member.role} onValueChange={(val) => handleRoleChange(member.id, val as ClanRole)}>
+                                                    <DropdownMenuRadioItem value="Офицер" className="cursor-pointer text-orange-400 focus:text-orange-400">Офицер</DropdownMenuRadioItem>
+                                                    <DropdownMenuRadioItem value="Боец" className="cursor-pointer text-white focus:text-white">Боец</DropdownMenuRadioItem>
+                                                    <DropdownMenuRadioItem value="Рекрут" className="cursor-pointer text-emerald-500 focus:text-emerald-500">Рекрут</DropdownMenuRadioItem>
+                                                  </DropdownMenuRadioGroup>
+                                                </DropdownMenuSubContent>
+                                              </DropdownMenuSub>
                                               <DropdownMenuItem className="text-red-500 hover:bg-red-500/10 cursor-pointer focus:text-red-500 focus:bg-red-500/10">
                                                 <Trash2 className="w-4 h-4 mr-2" /> Исключить
                                               </DropdownMenuItem>

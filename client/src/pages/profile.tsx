@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle } from "lucide-react";
+import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
@@ -33,6 +33,19 @@ const item = {
 type UserRole = "guest" | "member" | "owner";
 type ClanRole = "Офицер" | "Боец" | "Рекрут";
 type OwnerTab = "squad" | "applications" | "settings";
+type SortOption = "default" | "kd" | "hours" | "winrate" | "kills";
+
+const parseGameDuration = (durationStr: string) => {
+  if (!durationStr) return 0;
+  let totalHours = 0;
+  const daysMatch = durationStr.match(/(\d+)д/);
+  const hoursMatch = durationStr.match(/(\d+)ч/);
+  
+  if (daysMatch) totalHours += parseInt(daysMatch[1]) * 24;
+  if (hoursMatch) totalHours += parseInt(hoursMatch[1]);
+  
+  return totalHours;
+};
 
 export default function ProfilePage() {
   const [userRole, setUserRole] = useState<UserRole>("guest"); // Default to guest for demo
@@ -45,6 +58,7 @@ export default function ProfilePage() {
   // Owner specific state
   const [ownerTab, setOwnerTab] = useState<OwnerTab>("squad");
   const [selectedMemberStats, setSelectedMemberStats] = useState<any>(null);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
 
   // Mock data for squad members with roles
   const [squadMembers, setSquadMembers] = useState([
@@ -53,11 +67,35 @@ export default function ProfilePage() {
     { id: 3, name: 'MedicMain', role: 'Рекрут', status: 'В СЕТИ', statusColor: 'text-emerald-500', roleColor: 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5', avatar: 'MM', stats: { games: 42, hours: '1д 8ч', sl: '0ч', driver: '5ч', pilot: '0ч', cmd: '0ч', likes: 24, tk: 2, winrate: 42, kills: 89, deaths: 150, kd: 0.59, wins: 18, avgKills: 2, vehicleKills: 0, knifeKills: 1 } }
   ]);
 
-  // Mock applications
+  // Mock applications with full stats
   const [applications, setApplications] = useState([
-    { id: 1, name: "Rookie_One", hours: 120, kd: 1.1, message: "Хочу в крутой клан, играю каждый день!", time: "2ч назад", avatar: "R1" },
-    { id: 2, name: "Tank_Master", hours: 850, kd: 2.4, message: "Ищу стак для игры на технике. Мейн мехвод.", time: "5ч назад", avatar: "TM" },
-    { id: 3, name: "Silent_Bob", hours: 45, kd: 0.8, message: "Возьмите пж", time: "1д назад", avatar: "SB" },
+    { 
+      id: 101, 
+      name: "Rookie_One", 
+      role: "Кандидат",
+      avatar: "R1",
+      message: "Хочу в крутой клан, играю каждый день!", 
+      time: "2ч назад",
+      stats: { games: 50, hours: '5д 0ч', sl: '0ч', driver: '10ч', pilot: '0ч', cmd: '0ч', likes: 5, tk: 0, winrate: 45, kills: 150, deaths: 130, kd: 1.1, wins: 22, avgKills: 3, vehicleKills: 10, knifeKills: 0 }
+    },
+    { 
+      id: 102, 
+      name: "Tank_Master", 
+      role: "Кандидат",
+      avatar: "TM",
+      message: "Ищу стак для игры на технике. Мейн мехвод.", 
+      time: "5ч назад",
+      stats: { games: 300, hours: '35д 10ч', sl: '0ч', driver: '200ч', pilot: '0ч', cmd: '0ч', likes: 100, tk: 5, winrate: 60, kills: 2400, deaths: 1000, kd: 2.4, wins: 180, avgKills: 8, vehicleKills: 1500, knifeKills: 10 }
+    },
+    { 
+      id: 103, 
+      name: "Silent_Bob", 
+      role: "Кандидат",
+      avatar: "SB",
+      message: "Возьмите пж", 
+      time: "1д назад",
+      stats: { games: 20, hours: '1д 21ч', sl: '0ч', driver: '0ч', pilot: '0ч', cmd: '0ч', likes: 2, tk: 0, winrate: 35, kills: 40, deaths: 50, kd: 0.8, wins: 7, avgKills: 2, vehicleKills: 0, knifeKills: 0 }
+    },
   ]);
 
   const handleRoleChange = (memberId: number, newRole: ClanRole) => {
@@ -89,10 +127,24 @@ export default function ProfilePage() {
             statusColor: 'text-zinc-500',
             roleColor: 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5',
             avatar: app.avatar,
-            stats: { games: 0, hours: '0ч', sl: '0ч', driver: '0ч', pilot: '0ч', cmd: '0ч', likes: 0, tk: 0, winrate: 0, kills: 0, deaths: 0, kd: 0, wins: 0, avgKills: 0, vehicleKills: 0, knifeKills: 0 }
+            stats: app.stats
         }]);
         setApplications(prev => prev.filter(a => a.id !== id));
     }
+  };
+
+  const getSortedMembers = () => {
+    if (sortBy === "default") return squadMembers;
+
+    return [...squadMembers].sort((a, b) => {
+      switch (sortBy) {
+        case "kd": return b.stats.kd - a.stats.kd;
+        case "winrate": return b.stats.winrate - a.stats.winrate;
+        case "kills": return b.stats.kills - a.stats.kills;
+        case "hours": return parseGameDuration(b.stats.hours) - parseGameDuration(a.stats.hours);
+        default: return 0;
+      }
+    });
   };
 
   const clans = [
@@ -143,6 +195,191 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12 relative">
       
+      {/* Player Stats Modal (Shared) */}
+      <Dialog open={!!selectedMemberStats} onOpenChange={(open) => !open && setSelectedMemberStats(null)}>
+        <DialogContent className="max-w-4xl bg-transparent border-none p-0 shadow-none overflow-hidden">
+          {selectedMemberStats && (
+            <div className="relative w-full max-w-4xl mx-auto bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-300">
+                {/* Decorative Glow */}
+                <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+                
+                {/* Main Content */}
+                <div className="flex-1 p-8 relative z-10 space-y-8">
+                    {/* Header */}
+                    <div className="space-y-4">
+                        <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-4">
+                                {selectedMemberStats.avatar && (
+                                    <Avatar className="w-16 h-16 border-2 border-white/10 shadow-lg md:hidden">
+                                        <AvatarFallback className="bg-zinc-800 font-bold text-xl">{selectedMemberStats.avatar}</AvatarFallback>
+                                    </Avatar>
+                                )}
+                                <h2 className="text-4xl font-black font-display text-white uppercase tracking-tight">{selectedMemberStats.name}</h2>
+                            </div>
+                            <div className="text-right">
+                                <span className="text-xs text-muted-foreground font-display uppercase tracking-widest block mb-1">Медленно, но верно!</span>
+                            </div>
+                        </div>
+                        
+                        {/* Rank Progress */}
+                        <div className="relative">
+                            <div className="h-8 bg-zinc-800/50 rounded-sm overflow-hidden border border-white/5 relative">
+                                <div className="absolute inset-0 bg-primary w-[86%] flex items-center justify-end px-4">
+                                    <span className="text-xs font-bold text-black font-mono">8660/10000</span>
+                                </div>
+                            </div>
+                            <div className="flex justify-between mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                <span className="flex items-center gap-1"><ChevronRight className="w-3 h-3 text-primary"/> Текущий ранг</span>
+                                <span className="flex items-center gap-1">Следующий ранг <ChevronRight className="w-3 h-3 text-zinc-600"/></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-4 gap-y-8 gap-x-4 py-4 border-y border-white/5">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <Play className="w-4 h-4 text-primary" /> Всего игр
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.games}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <Clock className="w-4 h-4 text-primary" /> Все часы
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.hours}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <Users className="w-4 h-4 text-primary" /> Сквадной
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.sl}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <Car className="w-4 h-4 text-primary" /> Мехвод
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.driver}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <Plane className="w-4 h-4 text-primary" /> Пилот
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.pilot}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <Star className="w-4 h-4 text-primary" /> CMD
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.cmd}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <ThumbsUp className="w-4 h-4 text-primary" /> Помощь
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.likes}</div>
+                        </div>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                                <ThumbsDown className="w-4 h-4 text-primary" /> Тимкилы
+                            </div>
+                            <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.tk}</div>
+                        </div>
+                    </div>
+
+                    {/* Favorites */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full border-2 border-white/10 flex items-center justify-center bg-white/5">
+                                <Shield className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Любимая роль</div>
+                                <div className="text-xl font-black text-white font-display">SL</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-right">
+                            <div>
+                                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Любимое оружие</div>
+                                <div className="text-xl font-black text-white font-display">31 убийств</div>
+                            </div>
+                            <Gun className="w-10 h-10 text-white/50" />
+                        </div>
+                    </div>
+
+                    {/* Bottom Cards */}
+                    <div className="grid grid-cols-2 gap-4 pt-4">
+                        {/* Win Rate Card */}
+                        <div className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 border border-white/5 relative overflow-hidden">
+                            <div className="absolute -right-4 -top-4 text-white/5">
+                                <Trophy className="w-24 h-24" />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="text-xs text-white font-bold mb-1">Побед</div>
+                                <div className="text-5xl font-black text-white font-display tracking-tighter mb-4">{selectedMemberStats.stats.winrate}%</div>
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                    <div>
+                                        <div className="text-muted-foreground mb-0.5">У/С</div>
+                                        <div className="font-bold text-white">{selectedMemberStats.stats.kd}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted-foreground mb-0.5">Смертей</div>
+                                        <div className="font-bold text-white">{selectedMemberStats.stats.deaths}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted-foreground mb-0.5">Кол-во побед</div>
+                                        <div className="font-bold text-white">{selectedMemberStats.stats.wins}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Kills Card */}
+                        <div className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 border border-white/5 relative overflow-hidden">
+                            <div className="absolute -right-4 -top-4 text-white/5">
+                                <Crosshair className="w-24 h-24" />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="text-xs text-white font-bold mb-1">Всего убийств</div>
+                                <div className="text-5xl font-black text-white font-display tracking-tighter mb-4">{selectedMemberStats.stats.kills}</div>
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                    <div>
+                                        <div className="text-muted-foreground mb-0.5">Сред. за игры</div>
+                                        <div className="font-bold text-white">{selectedMemberStats.stats.avgKills}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted-foreground mb-0.5">Уб. техникой</div>
+                                        <div className="font-bold text-white">{selectedMemberStats.stats.vehicleKills}</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-muted-foreground mb-0.5">Уб. ножом</div>
+                                        <div className="font-bold text-white">{selectedMemberStats.stats.knifeKills}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Right Side Image (Mocked with Soldier) */}
+                <div className="w-80 relative hidden md:block">
+                    <div className="absolute inset-0 bg-[url('https://w.forfun.com/fetch/9c/9c028de189727234587a8d47d6d8e606.jpeg')] bg-cover bg-center">
+                        <div className="absolute inset-0 bg-gradient-to-l from-zinc-950 via-zinc-950/50 to-transparent" />
+                    </div>
+                    <div className="absolute bottom-8 right-8">
+                        <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,102,0,0.5)] border-4 border-black">
+                            <div className="text-center leading-none">
+                                <div className="font-black text-black text-lg font-display">ZARUBA</div>
+                                <div className="font-bold text-black text-[8px] tracking-widest uppercase">SERVER</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Dev Tool for Role Switching (Hidden in prod) */}
       <div className="fixed top-24 right-4 z-50 bg-black/80 backdrop-blur border border-white/10 p-2 rounded-lg space-y-2">
         <p className="text-[10px] text-muted-foreground mb-1 font-mono">DEMO MODE: ROLE SWITCHER</p>
@@ -589,27 +826,27 @@ export default function ProfilePage() {
                       ) : (
                         <div className="grid grid-cols-1 gap-4">
                           {applications.map((app) => (
-                            <div key={app.id} className="group relative bg-zinc-900/40 border border-white/5 rounded-2xl p-6 overflow-hidden hover:bg-zinc-900/60 transition-all duration-300">
+                            <div key={app.id} onClick={() => setSelectedMemberStats(app)} className="cursor-pointer group relative bg-zinc-900/40 border border-white/5 rounded-2xl p-6 overflow-hidden hover:bg-zinc-900/60 transition-all duration-300">
                               <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-50 group-hover:opacity-100 transition-opacity" />
                               
                               <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between relative z-10">
                                 <div className="flex items-start gap-4">
-                                  <Avatar className="w-16 h-16 border-2 border-white/10 shadow-lg">
+                                  <Avatar className="w-16 h-16 border-2 border-white/10 shadow-lg group-hover:scale-105 transition-transform">
                                     <AvatarFallback className="bg-zinc-800 font-bold text-xl">{app.avatar}</AvatarFallback>
                                   </Avatar>
                                   <div>
                                     <div className="flex items-center gap-2">
-                                      <h4 className="text-xl font-bold text-white">{app.name}</h4>
+                                      <h4 className="text-xl font-bold text-white group-hover:text-primary transition-colors">{app.name}</h4>
                                       <span className="text-xs text-muted-foreground bg-zinc-900 px-2 py-0.5 rounded border border-white/5">{app.time}</span>
                                     </div>
                                     <div className="flex items-center gap-4 mt-2 text-sm">
                                       <div className="flex items-center gap-1.5 text-zinc-400">
                                         <Clock className="w-4 h-4 text-primary" />
-                                        <span className="font-mono text-white">{app.hours}ч</span>
+                                        <span className="font-mono text-white">{app.stats.hours}</span>
                                       </div>
                                       <div className="flex items-center gap-1.5 text-zinc-400">
                                         <Target className="w-4 h-4 text-rose-500" />
-                                        <span className="font-mono text-white">K/D {app.kd}</span>
+                                        <span className="font-mono text-white">K/D {app.stats.kd}</span>
                                       </div>
                                     </div>
                                   </div>
@@ -619,7 +856,7 @@ export default function ProfilePage() {
                                   <p className="text-sm text-zinc-300 italic">"{app.message}"</p>
                                 </div>
 
-                                <div className="flex items-center gap-3 shrink-0">
+                                <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
                                   <Button onClick={() => handleAcceptApp(app.id)} className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black border border-emerald-500/20 hover:border-emerald-500 transition-all font-bold gap-2">
                                     <Check className="w-4 h-4" />
                                     Принять
@@ -698,7 +935,30 @@ export default function ProfilePage() {
                                   <Swords className="w-4 h-4" />
                                   Активный Состав
                               </h3>
-                              <span className="text-xs font-mono bg-zinc-800 px-3 py-1.5 rounded border border-white/5 text-muted-foreground font-bold">5 / 50</span>
+                              <div className="flex items-center gap-2">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-8 text-xs font-mono bg-zinc-900 border-white/10 text-muted-foreground hover:text-white">
+                                      <ListFilter className="w-3 h-3 mr-2" />
+                                      {sortBy === "default" ? "Сортировка" : 
+                                       sortBy === "kd" ? "По K/D" : 
+                                       sortBy === "hours" ? "По Часам" : 
+                                       sortBy === "winrate" ? "По Винрейту" : 
+                                       sortBy === "kills" ? "По Убийствам" : "Сортировка"}
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-zinc-900 border-white/10">
+                                    <DropdownMenuLabel className="text-xs text-muted-foreground">Сортировать по</DropdownMenuLabel>
+                                    <DropdownMenuSeparator className="bg-white/10" />
+                                    <DropdownMenuItem onClick={() => setSortBy("default")} className="text-white hover:bg-white/10 cursor-pointer text-xs">По Умолчанию</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("kd")} className="text-white hover:bg-white/10 cursor-pointer text-xs">K/D Ratio</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("hours")} className="text-white hover:bg-white/10 cursor-pointer text-xs">Часы в игре</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("winrate")} className="text-white hover:bg-white/10 cursor-pointer text-xs">Винрейт</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSortBy("kills")} className="text-white hover:bg-white/10 cursor-pointer text-xs">Убийства</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                                <span className="text-xs font-mono bg-zinc-800 px-3 py-1.5 rounded border border-white/5 text-muted-foreground font-bold">5 / 50</span>
+                              </div>
                           </div>
 
                           <div className="space-y-3">
@@ -737,10 +997,10 @@ export default function ProfilePage() {
                               </div>
 
                               {/* Members */}
-                              {squadMembers.map((member, i) => (
+                              {getSortedMembers().map((member, i) => (
                                   <Dialog key={member.id} open={selectedMemberStats?.id === member.id} onOpenChange={(open) => !open && setSelectedMemberStats(null)}>
                                     <DialogTrigger asChild>
-                                      <div onClick={() => userRole === "owner" && setSelectedMemberStats(member)} className={`flex items-center justify-between p-3 bg-zinc-900/40 border border-white/5 rounded-xl group hover:bg-zinc-900/80 hover:border-white/10 transition-all ${userRole === "owner" ? "cursor-pointer" : ""}`}>
+                                      <div onClick={() => setSelectedMemberStats(member)} className={`flex items-center justify-between p-3 bg-zinc-900/40 border border-white/5 rounded-xl group hover:bg-zinc-900/80 hover:border-white/10 transition-all cursor-pointer`}>
                                           <div className="flex items-center gap-4">
                                               <Avatar className="h-10 w-10 border border-white/10 group-hover:border-white/30 transition-colors">
                                                   <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold">{member.avatar}</AvatarFallback>
@@ -754,6 +1014,14 @@ export default function ProfilePage() {
                                                       <span className="w-1 h-1 rounded-full bg-zinc-700" />
                                                       <span className={`${member.statusColor} font-medium`}>{member.status}</span>
                                                   </div>
+                                                  {sortBy !== "default" && (
+                                                     <div className="text-[10px] text-muted-foreground mt-1 font-mono">
+                                                        {sortBy === "kd" && `K/D: ${member.stats.kd}`}
+                                                        {sortBy === "hours" && `${member.stats.hours}`}
+                                                        {sortBy === "winrate" && `Win: ${member.stats.winrate}%`}
+                                                        {sortBy === "kills" && `Kills: ${member.stats.kills}`}
+                                                     </div>
+                                                  )}
                                               </div>
                                           </div>
                                           
@@ -788,182 +1056,6 @@ export default function ProfilePage() {
                                           )}
                                       </div>
                                     </DialogTrigger>
-
-                                    {/* PLAYER STATS MODAL */}
-                                    <DialogContent className="max-w-4xl bg-transparent border-none p-0 shadow-none overflow-hidden">
-                                      {selectedMemberStats && (
-                                        <div className="relative w-full max-w-4xl mx-auto bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row">
-                                            {/* Decorative Glow */}
-                                            <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-                                            
-                                            {/* Main Content */}
-                                            <div className="flex-1 p-8 relative z-10 space-y-8">
-                                                {/* Header */}
-                                                <div className="space-y-4">
-                                                    <div className="flex items-start justify-between">
-                                                        <h2 className="text-4xl font-black font-display text-white uppercase tracking-tight">{selectedMemberStats.name}</h2>
-                                                        <div className="text-right">
-                                                            <span className="text-xs text-muted-foreground font-display uppercase tracking-widest block mb-1">Медленно, но верно!</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {/* Rank Progress */}
-                                                    <div className="relative">
-                                                        <div className="h-8 bg-zinc-800/50 rounded-sm overflow-hidden border border-white/5 relative">
-                                                            <div className="absolute inset-0 bg-primary w-[86%] flex items-center justify-end px-4">
-                                                                <span className="text-xs font-bold text-black font-mono">8660/10000</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex justify-between mt-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                                            <span className="flex items-center gap-1"><ChevronRight className="w-3 h-3 text-primary"/> Текущий ранг</span>
-                                                            <span className="flex items-center gap-1">Следующий ранг <ChevronRight className="w-3 h-3 text-zinc-600"/></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Stats Grid */}
-                                                <div className="grid grid-cols-4 gap-y-8 gap-x-4 py-4 border-y border-white/5">
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <Play className="w-4 h-4 text-primary" /> Всего игр
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.games}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <Clock className="w-4 h-4 text-primary" /> Все часы
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.hours}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <Users className="w-4 h-4 text-primary" /> Сквадной
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.sl}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <Car className="w-4 h-4 text-primary" /> Мехвод
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.driver}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <Plane className="w-4 h-4 text-primary" /> Пилот
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.pilot}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <Star className="w-4 h-4 text-primary" /> CMD
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.cmd}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <ThumbsUp className="w-4 h-4 text-primary" /> Помощь
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.likes}</div>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                                                            <ThumbsDown className="w-4 h-4 text-primary" /> Тимкилы
-                                                        </div>
-                                                        <div className="text-2xl font-black text-white font-display">{selectedMemberStats.stats.tk}</div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Favorites */}
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-full border-2 border-white/10 flex items-center justify-center bg-white/5">
-                                                            <Shield className="w-6 h-6 text-white" />
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Любимая роль</div>
-                                                            <div className="text-xl font-black text-white font-display">SL</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-4 text-right">
-                                                        <div>
-                                                            <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Любимое оружие</div>
-                                                            <div className="text-xl font-black text-white font-display">31 убийств</div>
-                                                        </div>
-                                                        <Gun className="w-10 h-10 text-white/50" />
-                                                    </div>
-                                                </div>
-
-                                                {/* Bottom Cards */}
-                                                <div className="grid grid-cols-2 gap-4 pt-4">
-                                                    {/* Win Rate Card */}
-                                                    <div className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 border border-white/5 relative overflow-hidden">
-                                                        <div className="absolute -right-4 -top-4 text-white/5">
-                                                            <Trophy className="w-24 h-24" />
-                                                        </div>
-                                                        <div className="relative z-10">
-                                                            <div className="text-xs text-white font-bold mb-1">Побед</div>
-                                                            <div className="text-5xl font-black text-white font-display tracking-tighter mb-4">{selectedMemberStats.stats.winrate}%</div>
-                                                            <div className="grid grid-cols-3 gap-2 text-xs">
-                                                                <div>
-                                                                    <div className="text-muted-foreground mb-0.5">У/С</div>
-                                                                    <div className="font-bold text-white">{selectedMemberStats.stats.kd}</div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-muted-foreground mb-0.5">Смертей</div>
-                                                                    <div className="font-bold text-white">{selectedMemberStats.stats.deaths}</div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-muted-foreground mb-0.5">Кол-во побед</div>
-                                                                    <div className="font-bold text-white">{selectedMemberStats.stats.wins}</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Kills Card */}
-                                                    <div className="bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-xl p-4 border border-white/5 relative overflow-hidden">
-                                                        <div className="absolute -right-4 -top-4 text-white/5">
-                                                            <Crosshair className="w-24 h-24" />
-                                                        </div>
-                                                        <div className="relative z-10">
-                                                            <div className="text-xs text-white font-bold mb-1">Всего убийств</div>
-                                                            <div className="text-5xl font-black text-white font-display tracking-tighter mb-4">{selectedMemberStats.stats.kills}</div>
-                                                            <div className="grid grid-cols-3 gap-2 text-xs">
-                                                                <div>
-                                                                    <div className="text-muted-foreground mb-0.5">Сред. за игры</div>
-                                                                    <div className="font-bold text-white">{selectedMemberStats.stats.avgKills}</div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-muted-foreground mb-0.5">Уб. техникой</div>
-                                                                    <div className="font-bold text-white">{selectedMemberStats.stats.vehicleKills}</div>
-                                                                </div>
-                                                                <div>
-                                                                    <div className="text-muted-foreground mb-0.5">Уб. ножом</div>
-                                                                    <div className="font-bold text-white">{selectedMemberStats.stats.knifeKills}</div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Right Side Image (Mocked with Soldier) */}
-                                            <div className="w-80 relative hidden md:block">
-                                                <div className="absolute inset-0 bg-[url('https://w.forfun.com/fetch/9c/9c028de189727234587a8d47d6d8e606.jpeg')] bg-cover bg-center">
-                                                    <div className="absolute inset-0 bg-gradient-to-l from-zinc-950 via-zinc-950/50 to-transparent" />
-                                                </div>
-                                                <div className="absolute bottom-8 right-8">
-                                                    <div className="w-24 h-24 bg-orange-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,102,0,0.5)] border-4 border-black">
-                                                        <div className="text-center leading-none">
-                                                            <div className="font-black text-black text-lg font-display">ZARUBA</div>
-                                                            <div className="font-bold text-black text-[8px] tracking-widest uppercase">SERVER</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                      )}
-                                    </DialogContent>
                                   </Dialog>
                               ))}
                               

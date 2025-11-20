@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter } from "lucide-react";
+import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
 import { useState } from "react";
+
+// Generated Assets
+import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
+import deltaBanner from "@assets/generated_images/blue_tactical_gaming_clan_banner_with_delta_force_theme.png";
+import eliteBanner from "@assets/generated_images/yellow_tactical_gaming_clan_banner_with_elite_theme.png";
+import wolfLogo from "@assets/generated_images/tactical_wolf_logo_for_clan.png";
+import eagleLogo from "@assets/generated_images/tactical_eagle_logo_for_clan.png";
+import skullLogo from "@assets/generated_images/tactical_skull_logo_for_clan.png";
 
 const container = {
   hidden: { opacity: 0 },
@@ -59,6 +67,10 @@ export default function ProfilePage() {
   const [ownerTab, setOwnerTab] = useState<OwnerTab>("squad");
   const [selectedMemberStats, setSelectedMemberStats] = useState<any>(null);
   const [sortBy, setSortBy] = useState<SortOption>("default");
+  
+  // Clan Assets State (Owner Settings)
+  const [clanBanner, setClanBanner] = useState(alphaBanner);
+  const [clanLogo, setClanLogo] = useState(wolfLogo);
 
   // Mock data for squad members with roles
   const [squadMembers, setSquadMembers] = useState([
@@ -158,7 +170,9 @@ export default function ProfilePage() {
       color: "text-primary",
       bgColor: "bg-primary/10",
       borderColor: "border-primary/30",
-      glow: "shadow-primary/20"
+      glow: "shadow-primary/20",
+      banner: alphaBanner,
+      logo: wolfLogo
     },
     { 
       id: "df", 
@@ -170,7 +184,9 @@ export default function ProfilePage() {
       color: "text-blue-500",
       bgColor: "bg-blue-500/10",
       borderColor: "border-blue-500/30",
-      glow: "shadow-blue-500/20"
+      glow: "shadow-blue-500/20",
+      banner: deltaBanner,
+      logo: eagleLogo
     },
     { 
       id: "ze", 
@@ -182,7 +198,9 @@ export default function ProfilePage() {
       color: "text-yellow-500",
       bgColor: "bg-yellow-500/10",
       borderColor: "border-yellow-500/30",
-      glow: "shadow-yellow-500/20"
+      glow: "shadow-yellow-500/20",
+      banner: eliteBanner,
+      logo: skullLogo
     }
   ];
 
@@ -702,43 +720,51 @@ export default function ProfilePage() {
                              <span className="text-xs text-muted-foreground bg-zinc-900 px-2 py-1 rounded border border-white/5">{clans.length} доступно</span>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              {clans.map((clan) => (
                                 <div 
                                   key={clan.id}
                                   onClick={() => setSelectedClan(clan.id)}
-                                  className={`relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] group ${selectedClan === clan.id ? `${clan.bgColor} ${clan.borderColor} ${clan.glow} ring-1 ring-offset-0 ring-white/20 shadow-lg` : "bg-zinc-950/50 border-white/10 hover:border-white/20 hover:bg-zinc-900"}`}
+                                  className={`relative rounded-2xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] group overflow-hidden ${selectedClan === clan.id ? `${clan.borderColor} ring-1 ring-offset-0 ring-white/20 shadow-2xl scale-[1.02]` : "border-white/10 hover:border-white/20"}`}
                                 >
-                                   {selectedClan === clan.id && (
-                                     <div className="absolute top-4 right-4 animate-in zoom-in duration-300">
-                                       <div className="relative">
-                                         <div className={`absolute inset-0 ${clan.color} blur-sm opacity-50`} />
-                                         <CheckCircle2 className={`w-6 h-6 ${clan.color} relative z-10`} />
-                                       </div>
-                                     </div>
-                                   )}
+                                   {/* Clan Banner Image */}
+                                   <div className="h-32 relative overflow-hidden">
+                                      <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                      <div className={`absolute inset-0 ${selectedClan === clan.id ? "bg-black/20" : "bg-black/60 group-hover:bg-black/40"} transition-colors duration-300`} />
+                                      
+                                      {/* Clan Logo */}
+                                      <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
+                                        <div className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clan.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}>
+                                           <img src={clan.logo} className="w-full h-full object-cover" />
+                                        </div>
+                                      </div>
+                                   </div>
                                    
-                                   <div className="space-y-4">
-                                      <div className="flex items-center gap-4">
-                                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg border border-white/10 bg-black/40 ${clan.color} shadow-inner`}>
-                                           {clan.tag}
-                                         </div>
-                                         <div>
-                                           <h4 className="font-bold text-white leading-tight text-lg group-hover:text-white/90">{clan.name}</h4>
-                                           <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1 mt-0.5">
+                                   <div className="pt-10 pb-6 px-5 bg-zinc-950/80 backdrop-blur-sm relative">
+                                      {selectedClan === clan.id && (
+                                        <div className="absolute top-4 right-4 animate-in zoom-in duration-300">
+                                            <CheckCircle2 className={`w-5 h-5 ${clan.color}`} />
+                                        </div>
+                                      )}
+
+                                      <div className="text-center space-y-2">
+                                         <h4 className={`font-black text-white text-lg uppercase tracking-tight group-hover:text-white/90 ${clan.color}`}>{clan.name}</h4>
+                                         <div className="flex items-center justify-center gap-2">
+                                           <Badge variant="outline" className="border-white/10 bg-white/5 text-[10px] px-1.5 h-5">{clan.tag}</Badge>
+                                           <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
                                              <Users className="w-3 h-3" />
-                                             {clan.members} бойцов
+                                             {clan.members}
                                            </span>
                                          </div>
                                       </div>
                                       
-                                      <Separator className={`bg-white/5 ${selectedClan === clan.id ? "opacity-50" : ""}`} />
+                                      <Separator className={`bg-white/5 my-4 ${selectedClan === clan.id ? "opacity-50" : ""}`} />
                                       
-                                      <div className="space-y-2">
-                                        <p className="text-xs text-muted-foreground line-clamp-2 h-8 leading-relaxed group-hover:text-muted-foreground/80">
+                                      <div className="space-y-3">
+                                        <p className="text-xs text-muted-foreground text-center line-clamp-2 h-8 leading-relaxed">
                                           {clan.description}
                                         </p>
-                                        <div className="flex items-center gap-2 pt-2">
+                                        <div className="flex justify-center">
                                            <Badge variant="outline" className={`text-[10px] h-6 border-white/10 ${clan.color} bg-black/40 backdrop-blur-md`}>
                                              {clan.req}
                                            </Badge>
@@ -751,7 +777,7 @@ export default function ProfilePage() {
                        </div>
 
                        {/* Requirements & Form */}
-                       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-4 border-t border-white/5">
                           <div className="md:col-span-4 space-y-4">
                              <div className={`rounded-2xl p-6 border backdrop-blur-sm ${clans.find(c => c.id === selectedClan)?.bgColor} ${clans.find(c => c.id === selectedClan)?.borderColor} shadow-lg`}>
                                 <h4 className={`font-display font-bold text-xl mb-4 flex items-center gap-2 ${clans.find(c => c.id === selectedClan)?.color}`}>
@@ -797,6 +823,95 @@ export default function ProfilePage() {
                              </div>
                           </div>
                        </div>
+                    </motion.div>
+                  )}
+
+                  {/* OWNER - SETTINGS VIEW */}
+                  {userRole === "owner" && ownerTab === "settings" && (
+                    <motion.div 
+                      key="settings-view"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="space-y-8 max-w-3xl mx-auto"
+                    >
+                      <div className="text-center mb-8">
+                         <h3 className="text-2xl font-display font-bold text-white">Настройки Клана</h3>
+                         <p className="text-muted-foreground mt-2">Управляйте внешним видом и информацией о вашем отряде.</p>
+                      </div>
+
+                      {/* Visual Settings */}
+                      <div className="space-y-6 bg-black/20 p-6 rounded-2xl border border-white/5">
+                         <div className="flex items-center gap-3 mb-4">
+                            <ImageIcon className="w-5 h-5 text-primary" />
+                            <h4 className="font-bold text-white text-lg">Визуальное оформление</h4>
+                         </div>
+                         
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Banner Upload */}
+                            <div className="space-y-3">
+                               <Label className="text-xs uppercase font-bold text-muted-foreground">Баннер Отряда</Label>
+                               <div className="relative h-40 rounded-xl overflow-hidden border border-white/10 group cursor-pointer">
+                                  <img src={clanBanner} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                     <Camera className="w-8 h-8 text-white" />
+                                  </div>
+                               </div>
+                               <p className="text-[10px] text-muted-foreground">Рекомендуемый размер: 1920x1080px (16:9)</p>
+                            </div>
+
+                            {/* Logo Upload */}
+                            <div className="space-y-3">
+                               <Label className="text-xs uppercase font-bold text-muted-foreground">Логотип Отряда</Label>
+                               <div className="flex items-center gap-4">
+                                  <div className="w-24 h-24 rounded-xl border border-white/10 overflow-hidden group cursor-pointer relative">
+                                     <img src={clanLogo} className="w-full h-full object-cover" />
+                                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Camera className="w-6 h-6 text-white" />
+                                     </div>
+                                  </div>
+                                  <div className="flex-1">
+                                     <Button variant="outline" size="sm" className="w-full border-white/10 mb-2">Загрузить</Button>
+                                     <p className="text-[10px] text-muted-foreground">Квадратное изображение, мин. 512x512px</p>
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      {/* General Info Settings */}
+                      <div className="space-y-6 bg-black/20 p-6 rounded-2xl border border-white/5">
+                         <div className="flex items-center gap-3 mb-4">
+                            <Edit className="w-5 h-5 text-primary" />
+                            <h4 className="font-bold text-white text-lg">Информация</h4>
+                         </div>
+
+                         <div className="grid gap-4">
+                            <div className="grid gap-2">
+                               <Label>Название Отряда</Label>
+                               <Input defaultValue="Отряд Альфа" className="bg-black/20 border-white/10" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                               <div className="grid gap-2">
+                                  <Label>Тег Клана</Label>
+                                  <Input defaultValue="ALPHA" className="bg-black/20 border-white/10" />
+                               </div>
+                               <div className="grid gap-2">
+                                  <Label>Требования</Label>
+                                  <Input defaultValue="100ч+, KD > 1.0" className="bg-black/20 border-white/10" />
+                               </div>
+                            </div>
+                            <div className="grid gap-2">
+                               <Label>Описание</Label>
+                               <textarea className="flex min-h-[100px] w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none" defaultValue="Элитный отряд для опытных игроков. Только командная игра." />
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="flex justify-end gap-4">
+                         <Button variant="ghost" className="text-muted-foreground hover:text-white">Отмена</Button>
+                         <Button className="bg-primary text-black font-bold hover:bg-primary/90">Сохранить изменения</Button>
+                      </div>
                     </motion.div>
                   )}
 
@@ -890,9 +1005,10 @@ export default function ProfilePage() {
                               <div className="absolute top-0 right-0 p-24 bg-primary/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/20 transition-colors duration-700" />
                               <div className="absolute inset-0 bg-scanline opacity-10" />
                               
+                              {/* Clan Logo & Banner in Stats Card */}
                               <div className="flex items-start justify-between mb-8 relative z-10">
-                                  <div className="p-4 bg-gradient-to-br from-primary to-orange-600 rounded-xl shadow-[0_0_20px_rgba(255,102,0,0.4)] text-white transform group-hover:scale-105 transition-transform duration-300 border border-white/10">
-                                      <Crown className="w-8 h-8" />
+                                  <div className="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                                      <img src={clanLogo} className="w-full h-full object-cover" />
                                   </div>
                                   <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">LVL 5</Badge>
                               </div>

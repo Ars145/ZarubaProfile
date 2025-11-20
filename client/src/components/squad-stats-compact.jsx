@@ -15,8 +15,8 @@ export function SquadStatsCompact({ stats }) {
   if (!stats) return null;
 
   return (
-    <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden">
-      <CardHeader className="pb-4">
+    <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-blue-500/10 overflow-hidden relative group hover:border-blue-500/20 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all duration-500">
+      <CardHeader className="pb-4 relative z-10">
         <CardTitle className="flex items-center gap-2 text-primary">
           <Activity className="w-5 h-5" />
           Squad Intelligence

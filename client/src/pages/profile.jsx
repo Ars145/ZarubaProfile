@@ -681,8 +681,8 @@ export default function ProfilePage() {
           
           {/* Radar Chart - Skills Analysis */}
           <motion.div variants={container} initial="hidden" animate="show" className="hidden md:block">
-            <Card className="bg-zinc-900/40 border-white/5 backdrop-blur-md overflow-hidden relative">
-                <CardHeader className="pb-0">
+            <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-primary/10 backdrop-blur-md overflow-hidden relative group hover:border-primary/30 hover:shadow-[0_0_20px_rgba(255,102,0,0.15)] transition-all duration-500">
+                <CardHeader className="pb-0 relative z-10">
                    <CardTitle className="text-lg font-display flex items-center gap-2">
                       <Activity className="w-5 h-5 text-primary" />
                       Анализ Навыков
@@ -715,8 +715,8 @@ export default function ProfilePage() {
           
           {/* Achievements Section (New Idea) */}
           <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.4 }}>
-             <Card className="bg-zinc-900/40 border-white/5 backdrop-blur-md overflow-hidden group hover:border-white/10 transition-colors">
-                <CardHeader>
+             <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-yellow-500/10 backdrop-blur-md overflow-hidden group hover:border-yellow-500/20 hover:shadow-[0_0_15px_rgba(234,179,8,0.1)] transition-all duration-500 relative">
+                <CardHeader className="relative z-10">
                    <CardTitle className="text-lg font-display flex items-center gap-2">
                       <Medal className="w-5 h-5 text-yellow-500" />
                       Достижения
@@ -745,9 +745,9 @@ export default function ProfilePage() {
 
           {/* Discord Integration Card */}
           <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.6 }}>
-            <Card className="bg-[#5865F2] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-shadow duration-500 cursor-pointer transform hover:scale-[1.02] duration-300">
+            <Card className="bg-gradient-to-br from-[#5865F2] via-[#5865F2] to-[#4752C4] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-all duration-500 cursor-pointer transform hover:scale-[1.02]">
               <div className="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3109/636e0a6918e57475a843f59f_layer_1.svg')] opacity-10 bg-repeat" />
-              <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors duration-500 animate-pulse" />
+              <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/15 transition-colors duration-500" />
               
               <CardHeader className="relative z-10 pb-2">
                 <CardTitle className="flex items-center gap-3 text-white font-display text-xl">
@@ -780,7 +780,8 @@ export default function ProfilePage() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <Button className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11 group-hover:scale-[1.02] transition-transform">
+                <Button className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11 group-hover:scale-[1.02] transition-transform gap-2">
+                  <img src={discordLogo} className="w-5 h-5" />
                   ОБНОВИТЬ ПРИВЯЗКУ
                 </Button>
               </CardContent>

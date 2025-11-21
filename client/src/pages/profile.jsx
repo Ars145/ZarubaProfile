@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Radar as RadarChart, RadarChart as RechartsRadar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
 import { useState, useRef, useEffect } from "react";
@@ -127,16 +126,6 @@ const AnimatedCounter = ({ value }) => {
     // Simple counter placeholder - full animated counter would need useEffect/raf
     return <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>{value}</motion.span>;
 };
-
-// --- Skill Radar Chart Data ---
-const skillData = [
-  { subject: 'Стрельба', A: 120, fullMark: 150 },
-  { subject: 'Тактика', A: 98, fullMark: 150 },
-  { subject: 'Вождение', A: 86, fullMark: 150 },
-  { subject: 'Лидерство', A: 99, fullMark: 150 },
-  { subject: 'Коммуникация', A: 85, fullMark: 150 },
-  { subject: 'Выживание', A: 65, fullMark: 150 },
-];
 
 const container = {
   hidden: { opacity: 0 },
@@ -713,25 +702,18 @@ export default function ProfilePage() {
         {/* Left Column - Stats & Info */}
         <div className="lg:col-span-6 space-y-6">
           
-          {/* Combined Performance Card - Radar + Squad Stats */}
+          {/* Squad Stats Card */}
           {squadStats && (
             <motion.div variants={container} initial="hidden" animate="show">
               <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-primary/10 backdrop-blur-md overflow-hidden relative group hover:border-primary/30 hover:shadow-[0_0_20px_rgba(255,102,0,0.15)] transition-all duration-500">
-                <Tabs defaultValue="stats" className="w-full">
-                  <CardHeader className="pb-3 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg font-display flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-primary" />
-                        Боевая Статистика
-                      </CardTitle>
-                      <TabsList className="h-8 bg-zinc-800/50">
-                        <TabsTrigger value="stats" className="text-xs">Squad</TabsTrigger>
-                        <TabsTrigger value="radar" className="text-xs hidden md:inline-flex">Навыки</TabsTrigger>
-                      </TabsList>
-                    </div>
-                  </CardHeader>
+                <CardHeader className="pb-3 relative z-10">
+                  <CardTitle className="text-lg font-display flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-primary" />
+                    Боевая Статистика
+                  </CardTitle>
+                </CardHeader>
                   
-                  <TabsContent value="stats" className="mt-0 p-6 pt-0">
+                <CardContent className="pt-0">
                     <div className="space-y-4">
                       {/* Rank and Progress */}
                       {squadStats.rank && squadStats.rank.current && (
@@ -795,25 +777,7 @@ export default function ProfilePage() {
                         </div>
                       )}
                     </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="radar" className="mt-0 p-6 pt-0 hidden md:block">
-                    <div className="h-64 w-full relative">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RechartsRadar cx="50%" cy="50%" outerRadius="70%" data={skillData}>
-                          <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                          <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }} />
-                          <PolarRadiusAxis angle={30} domain={[0, 150]} tick={false} axisLine={false} />
-                          <RechartsRadar name="Skill" dataKey="A" stroke="#FF6600" strokeWidth={2} fill="#FF6600" fillOpacity={0.2} />
-                          <RechartsTooltip 
-                            contentStyle={{ backgroundColor: '#09090b', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                            itemStyle={{ color: '#FF6600' }}
-                          />
-                        </RechartsRadar>
-                      </ResponsiveContainer>
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                </CardContent>
               </Card>
             </motion.div>
           )}

@@ -1,659 +1,459 @@
-# План Бэкенда для Компонента Профиля и Кланов ZARUBA
+# План реализации частичного бекэнда для ZARUBA Clan Management
 
-## 📋 Оглавление
-1. [Обзор](#обзор)
-2. [Текущее Состояние Проекта](#текущее-состояние-проекта)
-3. [Структура Данных](#структура-данных)
-4. [API Endpoints](#api-endpoints)
-5. [План Реализации](#план-реализации)
-6. [Интеграция в Основной Проект](#интеграция-в-основной-проект)
+## Цель
+Создать REST API бекэнд для управления кланами, заявками и членством, который легко интегрируется в основной проект ZARUBA. Бекэнд будет обрабатывать данные приложения в PostgreSQL и читать игровую статистику из существующей MongoDB базы данных SquadJS.
 
----
+## Архитектура
 
-## 🎯 Обзор
+### Двухбазовая стратегия
+- **PostgreSQL (Neon)**: Хранение данных приложения (кланы, игроки, заявки, членство)
+- **MongoDB (SquadJS)**: Только чтение игровой статистики Squad (kill/death, playtime, weapons, etc.)
 
-### Цель
-Создать частичный бэкенд для компонента профиля игрока и управления кланами, который можно легко интегрировать в основной проект ZARUBA.
-
-### Что Будет Реализовано
-- ✅ REST API для управления профилями игроков
-- ✅ REST API для управления кланами
-- ✅ REST API для обработки заявок в кланы
-- ✅ PostgreSQL схема базы данных
-- ✅ Drizzle ORM интеграция
-- ✅ TypeScript типы для всех сущностей
-
-### Что НЕ Будет Реализовано
-- ❌ Полная аутентификация (предполагается интеграция с основным проектом)
-- ❌ Steam API интеграция (mock данные для демонстрации)
-- ❌ Discord OAuth (только хранение Discord ID и ссылок)
-- ❌ Websocket для real-time обновлений статуса игроков
-- ❌ Система достижений (hardcoded на фронтенде)
-
----
-
-## 📊 Текущее Состояние Проекта
-
-### Фронтенд Компоненты (Готово)
+### Слои приложения
 ```
-client/src/pages/profile.jsx - Основная страница профиля
-├── Роли пользователей: Guest, Member, Owner
-├── Управление кланами (Owner)
-├── Просмотр состава клана (Member/Owner)
-├── Поиск и заявки в кланы (Guest)
-└── Настройки профиля и клана
-```
-
-### Mock Данные на Фронтенде (Требуют API)
-
-#### 1. **Профиль Игрока**
-```javascript
-{
-  username: "TacticalViper",
-  level: 52,
-  xp: 68,
-  avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=TacticalViper",
-  isVip: false,
-  steamId: "STEAM_0:1:12345678",
-  discordId: "TacticalViper#9999",
-  status: "online" | "offline" | "in_game"
-}
-```
-
-#### 2. **Статистика Игрока**
-```javascript
-{
-  kills: 1245,
-  deaths: 892,
-  kd: 1.42,
-  playtime: "342ч",
-  games: 178,
-  hours: "6д 20ч",
-  sl: "4д 7ч",        // Squad Leader time
-  driver: "2ч",        // Driver time
-  pilot: "0",          // Pilot time
-  cmd: "21ч",          // Commander time
-  likes: 82,           // Teamwork points
-  tk: 39,              // Team kills
-  winrate: 49,         // Win percentage
-  wins: 88,
-  avgKills: 1,
-  vehicleKills: 9,
-  knifeKills: 0
-}
-```
-
-#### 3. **Клан**
-```javascript
-{
-  id: "alpha",
-  name: "Отряд Альфа",
-  tag: "ALPHA",
-  members: 5,
-  maxMembers: 50,
-  level: 5,
-  requirements: "100ч+, KD > 1.0",
-  description: "Элитный отряд для опытных игроков...",
-  bannerUrl: "/path/to/banner.png",
-  logoUrl: "/path/to/logo.png",
-  discordLink: "https://discord.gg/clan-alpha",
-  winrate: 68,
-  ownerId: "uuid-owner"
-}
-```
-
-#### 4. **Член Клана**
-```javascript
-{
-  id: 1,
-  userId: "user-uuid",
-  clanId: "alpha",
-  name: "TacticalViper",
-  role: "Офицер" | "Боец" | "Рекрут",
-  status: "В ИГРЕ" | "В СЕТИ" | "НЕ В СЕТИ",
-  joinedAt: "2024-01-15T10:00:00Z",
-  stats: { /* player stats */ }
-}
-```
-
-#### 5. **Заявка в Клан**
-```javascript
-{
-  id: 101,
-  applicantId: "user-uuid",
-  clanId: "alpha",
-  name: "Rookie_One",
-  message: "Хочу в крутой клан, играю каждый день!",
-  createdAt: "2024-11-20T10:00:00Z",
-  status: "pending" | "accepted" | "rejected",
-  stats: { /* player stats */ }
-}
+Client (React) → REST API (/api/*) → Storage Interface → Databases
+                                    ↓
+                              Squad Stats Service → MongoDB (Read-Only)
 ```
 
 ---
 
-## 🗄️ Структура Данных
+## 1. Схема базы данных (shared/schema.ts)
 
-### Database Schema (PostgreSQL + Drizzle)
+### Таблицы PostgreSQL
 
+#### 1.1 players (Игроки)
 ```typescript
-// shared/schema.ts
+{
+  id: uuid (PK, auto)
+  steamId: text (unique, NOT NULL) - Steam ID игрока
+  username: text (NOT NULL) - Игровое имя
+  discordId: text (nullable) - Discord ID для привязки
+  currentClanId: uuid (FK → clans.id, nullable) - Текущий клан игрока
+}
+```
 
-// 1. Players Table
+**Назначение**: Профили игроков, связь Steam ID с кланом и Discord аккаунтом.
+
+#### 1.2 clans (Кланы)
+```typescript
+{
+  id: uuid (PK, auto)
+  name: text (NOT NULL) - Название клана ("Отряд Альфа")
+  tag: text (NOT NULL, unique) - Тег клана ("ALPHA")
+  description: text (NOT NULL) - Описание клана
+  theme: text (NOT NULL, default: "orange") - Цветовая тема: orange|blue|yellow
+  bannerUrl: text (nullable) - URL баннера клана
+  logoUrl: text (nullable) - URL логотипа клана
+  requirements: jsonb (NOT NULL, default: {}) - Требования к вступлению
+    {
+      microphone: boolean,
+      ageRestriction: boolean,
+      customRequirement: string (max 30 chars)
+    }
+  createdAt: timestamp (default: now())
+}
+```
+
+**Назначение**: Основная информация о кланах, настройки владельца (требования и тема).
+
+#### 1.3 clan_members (Члены кланов)
+```typescript
+{
+  id: uuid (PK, auto)
+  clanId: uuid (FK → clans.id, NOT NULL, ON DELETE CASCADE)
+  playerId: uuid (FK → players.id, NOT NULL, ON DELETE CASCADE)
+  role: text (NOT NULL) - Роль: "owner" | "member"
+  statsSnapshot: jsonb (nullable) - Снимок статистики на момент вступления
+    {
+      kills: number,
+      deaths: number,
+      kd: number,
+      winrate: number,
+      playtime: string
+    }
+  joinedAt: timestamp (default: now())
+}
+```
+
+**Unique constraint**: (clanId, playerId) - игрок может быть только в одном клане
+**Назначение**: Связь многие-ко-многим между игроками и кланами, роли и история.
+
+#### 1.4 clan_applications (Заявки на вступление)
+```typescript
+{
+  id: uuid (PK, auto)
+  clanId: uuid (FK → clans.id, NOT NULL, ON DELETE CASCADE)
+  playerName: text (NOT NULL) - Имя кандидата (из Squad stats)
+  playerSteamId: text (NOT NULL) - Steam ID кандидата
+  message: text (NOT NULL) - Сопроводительное письмо (max 500 chars)
+  status: text (NOT NULL, default: "pending") - Статус: pending|accepted|rejected
+  statsSnapshot: jsonb (NOT NULL) - Статистика игрока на момент подачи заявки
+    {
+      games: number,
+      hours: string,
+      kills: number,
+      deaths: number,
+      kd: number,
+      winrate: number,
+      // ... другие поля из Squad stats
+    }
+  createdAt: timestamp (default: now())
+}
+```
+
+**Назначение**: Заявки на вступление в клан с прикреплённой статистикой для оценки владельцем.
+
+### Drizzle Schema Example
+```typescript
+import { pgTable, uuid, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+
 export const players = pgTable("players", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  steamId: text("steam_id").unique(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  steamId: text("steam_id").notNull().unique(),
+  username: text("username").notNull(),
   discordId: text("discord_id"),
-  avatarUrl: text("avatar_url"),
-  level: integer("level").default(1),
-  xp: integer("xp").default(0),
-  isVip: boolean("is_vip").default(false),
-  status: text("status").default("offline"), // online, offline, in_game
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
+  currentClanId: uuid("current_clan_id").references(() => clans.id)
 });
 
-// 2. Player Stats Table
-export const playerStats = pgTable("player_stats", {
-  playerId: varchar("player_id").references(() => players.id).primaryKey(),
-  kills: integer("kills").default(0),
-  deaths: integer("deaths").default(0),
-  wins: integer("wins").default(0),
-  games: integer("games").default(0),
-  playtimeMinutes: integer("playtime_minutes").default(0),
-  squadLeaderMinutes: integer("squad_leader_minutes").default(0),
-  driverMinutes: integer("driver_minutes").default(0),
-  pilotMinutes: integer("pilot_minutes").default(0),
-  commanderMinutes: integer("commander_minutes").default(0),
-  likes: integer("likes").default(0),
-  teamKills: integer("team_kills").default(0),
-  vehicleKills: integer("vehicle_kills").default(0),
-  knifeKills: integer("knife_kills").default(0)
-});
-
-// 3. Clans Table
 export const clans = pgTable("clans", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: text("name").notNull().unique(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
   tag: text("tag").notNull().unique(),
-  ownerId: varchar("owner_id").references(() => players.id).notNull(),
-  description: text("description"),
-  requirements: text("requirements"),
+  description: text("description").notNull(),
+  theme: text("theme").notNull().default("orange"), // enum: orange, blue, yellow
   bannerUrl: text("banner_url"),
   logoUrl: text("logo_url"),
-  discordLink: text("discord_link"),
-  level: integer("level").default(1),
-  maxMembers: integer("max_members").default(50),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
+  requirements: jsonb("requirements").notNull().default({}),
+  createdAt: timestamp("created_at").defaultNow()
 });
 
-// 4. Clan Members Table
 export const clanMembers = pgTable("clan_members", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  clanId: varchar("clan_id").references(() => clans.id).notNull(),
-  playerId: varchar("player_id").references(() => players.id).notNull(),
-  role: text("role").default("Рекрут"), // Офицер, Боец, Рекрут
+  id: uuid("id").primaryKey().defaultRandom(),
+  clanId: uuid("clan_id").notNull().references(() => clans.id, { onDelete: "cascade" }),
+  playerId: uuid("player_id").notNull().references(() => players.id, { onDelete: "cascade" }),
+  role: text("role").notNull(), // enum: owner, member
+  statsSnapshot: jsonb("stats_snapshot"),
   joinedAt: timestamp("joined_at").defaultNow()
 });
 
-// 5. Clan Applications Table
 export const clanApplications = pgTable("clan_applications", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  clanId: varchar("clan_id").references(() => clans.id).notNull(),
-  playerId: varchar("player_id").references(() => players.id).notNull(),
+  id: uuid("id").primaryKey().defaultRandom(),
+  clanId: uuid("clan_id").notNull().references(() => clans.id, { onDelete: "cascade" }),
+  playerName: text("player_name").notNull(),
+  playerSteamId: text("player_steam_id").notNull(),
   message: text("message").notNull(),
-  status: text("status").default("pending"), // pending, accepted, rejected
-  createdAt: timestamp("created_at").defaultNow(),
-  reviewedAt: timestamp("reviewed_at"),
-  reviewedBy: varchar("reviewed_by").references(() => players.id)
+  status: text("status").notNull().default("pending"), // enum: pending, accepted, rejected
+  statsSnapshot: jsonb("stats_snapshot").notNull(),
+  createdAt: timestamp("created_at").defaultNow()
 });
 ```
 
-### TypeScript Types
-```typescript
-export type Player = typeof players.$inferSelect;
-export type InsertPlayer = z.infer<typeof insertPlayerSchema>;
-
-export type PlayerStats = typeof playerStats.$inferSelect;
-export type InsertPlayerStats = z.infer<typeof insertPlayerStatsSchema>;
-
-export type Clan = typeof clans.$inferSelect;
-export type InsertClan = z.infer<typeof insertClanSchema>;
-
-export type ClanMember = typeof clanMembers.$inferSelect;
-export type InsertClanMember = z.infer<typeof insertClanMemberSchema>;
-
-export type ClanApplication = typeof clanApplications.$inferSelect;
-export type InsertClanApplication = z.infer<typeof insertClanApplicationSchema>;
-```
-
 ---
 
-## 🔌 API Endpoints
+## 2. REST API Endpoints (server/routes.ts)
 
-### Base URL
+### Base URL: `/api`
+
+#### 2.1 Clans
 ```
-/api
+GET    /api/clans                      - Список всех кланов
+GET    /api/clans/:id                  - Детали клана
+POST   /api/clans                      - Создать клан (auth required)
+PATCH  /api/clans/:id/settings         - Обновить настройки клана (owner only)
+DELETE /api/clans/:id                  - Удалить клан (owner only)
 ```
 
-### Authentication
-Все эндпоинты (кроме public) требуют header:
-```
-Authorization: Bearer <token>
-```
-**Примечание:** Аутентификация будет реализована в основном проекте. Для демо можно использовать фиктивный middleware.
-
----
-
-### 📱 Players API
-
-#### `GET /api/players/me`
-Получить профиль текущего игрока
-
-**Response:**
+**GET /api/clans** - Возвращает список всех кланов
 ```json
-{
-  "player": {
+Response 200:
+[
+  {
     "id": "uuid",
-    "username": "TacticalViper",
-    "steamId": "STEAM_0:1:12345678",
-    "discordId": "TacticalViper#9999",
-    "avatarUrl": "https://...",
-    "level": 52,
-    "xp": 6800,
-    "isVip": false,
-    "status": "online"
-  },
-  "stats": {
-    "kills": 1245,
-    "deaths": 892,
-    "kd": 1.42,
-    "wins": 88,
-    "games": 178,
-    "winrate": 49.44,
-    "playtime": "342ч",
-    // ... остальные статы
-  },
-  "clan": {
-    "id": "alpha",
     "name": "Отряд Альфа",
     "tag": "ALPHA",
-    "role": "Офицер"
-  } | null
-}
+    "description": "Элитный отряд...",
+    "theme": "orange",
+    "bannerUrl": "https://...",
+    "logoUrl": "https://...",
+    "requirements": {
+      "microphone": true,
+      "ageRestriction": true,
+      "customRequirement": "100ч+"
+    },
+    "memberCount": 5
+  }
+]
 ```
 
-#### `PATCH /api/players/me`
-Обновить профиль игрока
-
-**Request Body:**
+**GET /api/clans/:id** - Детали клана с членами
 ```json
+Response 200:
 {
-  "username": "NewUsername",
-  "avatarUrl": "https://...",
-  "discordId": "NewDiscord#1234"
-}
-```
-
-**Response:**
-```json
-{
-  "player": { /* updated player */ }
-}
-```
-
-#### `GET /api/players/:id`
-Получить публичный профиль игрока
-
-**Response:**
-```json
-{
-  "player": { /* player info */ },
-  "stats": { /* player stats */ },
-  "clan": { /* clan info or null */ }
-}
-```
-
----
-
-### 🛡️ Clans API
-
-#### `GET /api/clans`
-Получить список всех кланов
-
-**Query Params:**
-- `search` - поиск по названию/тегу
-- `limit` - количество результатов (default: 50)
-- `offset` - смещение для пагинации
-
-**Response:**
-```json
-{
-  "clans": [
-    {
-      "id": "alpha",
-      "name": "Отряд Альфа",
-      "tag": "ALPHA",
-      "description": "...",
-      "requirements": "100ч+, KD > 1.0",
-      "members": 5,
-      "maxMembers": 50,
-      "level": 5,
-      "bannerUrl": "...",
-      "logoUrl": "...",
-      "winrate": 68
-    }
-  ],
-  "total": 3
-}
-```
-
-#### `GET /api/clans/:id`
-Получить детальную информацию о клане
-
-**Response:**
-```json
-{
-  "clan": {
-    "id": "alpha",
-    "name": "Отряд Альфа",
-    // ... clan info
-  },
-  "owner": {
-    "id": "uuid",
-    "username": "CommanderX"
-  },
+  "clan": { /* clan object */ },
   "members": [
     {
-      "id": "member-uuid",
-      "playerId": "player-uuid",
-      "username": "TacticalViper",
-      "role": "Офицер",
-      "status": "online",
-      "stats": { /* player stats */ }
+      "id": "uuid",
+      "playerId": "uuid",
+      "playerName": "TacticalViper",
+      "role": "owner",
+      "joinedAt": "2024-01-15T10:00:00Z"
     }
-  ],
-  "stats": {
-    "totalMembers": 5,
-    "onlineMembers": 3,
-    "avgKD": 1.2,
-    "winrate": 68
+  ]
+}
+```
+
+**PATCH /api/clans/:id/settings** - Обновить настройки (owner only)
+```json
+Request Body:
+{
+  "theme": "blue",
+  "requirements": {
+    "microphone": false,
+    "ageRestriction": true,
+    "customRequirement": "Steam level 10+"
   }
 }
-```
 
-#### `POST /api/clans`
-Создать новый клан (Owner only)
-
-**Request Body:**
-```json
+Response 200:
 {
-  "name": "Новый Клан",
-  "tag": "NEW",
-  "description": "Описание",
-  "requirements": "50ч+",
-  "bannerUrl": "https://...",
-  "logoUrl": "https://...",
-  "discordLink": "https://discord.gg/..."
+  "clan": { /* updated clan */ }
 }
 ```
 
-**Response:**
-```json
-{
-  "clan": { /* created clan */ }
-}
+#### 2.2 Clan Members
+```
+GET    /api/clans/:id/members          - Список членов клана
+POST   /api/clans/:id/members          - Добавить игрока в клан (owner only)
+PATCH  /api/clans/:id/members/:memberId - Изменить роль члена (owner only)
+DELETE /api/clans/:id/members/:memberId - Удалить из клана (owner or self)
 ```
 
-#### `PATCH /api/clans/:id`
-Обновить настройки клана (Owner only)
-
-**Request Body:**
-```json
-{
-  "description": "Новое описание",
-  "requirements": "100ч+",
-  "bannerUrl": "https://...",
-  "logoUrl": "https://...",
-  "discordLink": "https://discord.gg/..."
-}
+#### 2.3 Applications
+```
+GET    /api/clans/:id/applications     - Список заявок клана (owner only)
+POST   /api/clans/:id/applications     - Подать заявку на вступление
+POST   /api/clans/:id/applications/:appId/approve  - Одобрить заявку (owner only)
+POST   /api/clans/:id/applications/:appId/reject   - Отклонить заявку (owner only)
 ```
 
-#### `DELETE /api/clans/:id`
-Удалить клан (Owner only)
-
----
-
-### 👥 Clan Members API
-
-#### `GET /api/clans/:clanId/members`
-Получить список членов клана
-
-**Query Params:**
-- `sortBy` - сортировка: `kd`, `hours`, `winrate`, `kills`, `default`
-
-**Response:**
+**POST /api/clans/:id/applications** - Подать заявку
 ```json
+Request Body:
 {
-  "members": [
-    {
-      "id": "member-uuid",
-      "playerId": "player-uuid",
-      "username": "TacticalViper",
-      "role": "Офицер",
-      "status": "online",
-      "joinedAt": "2024-01-15T10:00:00Z",
-      "stats": { /* player stats */ }
-    }
-  ]
+  "playerName": "Rookie_One",
+  "playerSteamId": "STEAM_0:1:12345678",
+  "message": "Хочу в крутой клан, играю каждый день!",
+  "statsSnapshot": {
+    "games": 50,
+    "hours": "5д 0ч",
+    "kills": 150,
+    "deaths": 130,
+    "kd": 1.15,
+    "winrate": 45
+  }
 }
-```
 
-#### `PATCH /api/clans/:clanId/members/:memberId`
-Изменить роль члена клана (Owner/Officers only)
-
-**Request Body:**
-```json
-{
-  "role": "Офицер" | "Боец" | "Рекрут"
-}
-```
-
-#### `DELETE /api/clans/:clanId/members/:memberId`
-Удалить члена из клана (Owner/Officers only)
-
-#### `POST /api/clans/:clanId/leave`
-Покинуть клан
-
----
-
-### 📝 Clan Applications API
-
-#### `GET /api/clans/:clanId/applications`
-Получить заявки в клан (Owner only)
-
-**Response:**
-```json
-{
-  "applications": [
-    {
-      "id": "app-uuid",
-      "player": {
-        "id": "player-uuid",
-        "username": "Rookie_One",
-        "avatarUrl": "..."
-      },
-      "message": "Хочу в крутой клан!",
-      "status": "pending",
-      "createdAt": "2024-11-20T10:00:00Z",
-      "stats": { /* player stats */ }
-    }
-  ]
-}
-```
-
-#### `POST /api/clans/:clanId/apply`
-Подать заявку в клан
-
-**Request Body:**
-```json
-{
-  "message": "Хочу вступить в клан потому что..."
-}
-```
-
-**Response:**
-```json
+Response 201:
 {
   "application": { /* created application */ }
 }
 ```
 
-#### `POST /api/clans/:clanId/applications/:appId/accept`
-Принять заявку (Owner only)
+#### 2.4 Squad Statistics (MongoDB Integration)
+```
+GET    /api/stats/:steamId             - Получить Squad статистику игрока
+```
 
-**Response:**
+**GET /api/stats/:steamId** - Читает из MongoDB
 ```json
+Response 200:
 {
-  "member": { /* new clan member */ }
-}
-```
-
-#### `POST /api/clans/:clanId/applications/:appId/reject`
-Отклонить заявку (Owner only)
-
----
-
-## 🚀 План Реализации
-
-### Этап 1: Database Schema (Приоритет: ВЫСОКИЙ)
-- [ ] Создать миграцию для всех таблиц
-- [ ] Добавить индексы для производительности
-- [ ] Создать Zod схемы для валидации
-- [ ] Экспортировать TypeScript типы
-
-**Файлы:**
-- `shared/schema.ts` - основные схемы
-- `drizzle/migrations/` - миграции БД
-
-### Этап 2: Storage Interface (Приоритет: ВЫСОКИЙ)
-- [ ] Расширить `IStorage` интерфейс
-- [ ] Реализовать методы для работы с Players
-- [ ] Реализовать методы для работы с Clans
-- [ ] Реализовать методы для работы с Applications
-- [ ] Добавить транзакции для критичных операций
-
-**Файлы:**
-- `server/storage.ts`
-
-### Этап 3: API Routes (Приоритет: СРЕДНИЙ)
-- [ ] Players endpoints
-- [ ] Clans endpoints
-- [ ] Clan Members endpoints
-- [ ] Applications endpoints
-- [ ] Error handling middleware
-- [ ] Request validation
-
-**Файлы:**
-- `server/routes.ts`
-
-### Этап 4: Frontend Integration (Приоритет: СРЕДНИЙ)
-- [ ] Создать API клиент (fetch wrapper)
-- [ ] Заменить mock данные на API calls
-- [ ] Добавить TanStack Query для кеширования
-- [ ] Обработка ошибок и loading states
-
-**Файлы:**
-- `client/src/lib/api.ts` - новый файл
-- `client/src/pages/profile.jsx` - обновить
-
-### Этап 5: Testing & Demo Data (Приоритет: НИЗКИЙ)
-- [ ] Seed скрипт для тестовых данных
-- [ ] Тестирование основных сценариев
-- [ ] Документация API (Swagger/OpenAPI)
-
----
-
-## 🔗 Интеграция в Основной Проект
-
-### Что Нужно от Основного Проекта
-
-#### 1. Аутентификация
-```typescript
-// Middleware для получения текущего пользователя
-app.use('/api', async (req, res, next) => {
-  // Ваша логика аутентификации
-  const userId = await getUserIdFromToken(req.headers.authorization);
-  req.userId = userId; // Добавить userId в request
-  next();
-});
-```
-
-#### 2. Steam API Integration (опционально)
-```typescript
-// Синхронизация статистики с Steam
-async function syncPlayerStats(steamId: string) {
-  // Логика получения статистики из Steam API
-  // Обновление в базе через storage.updatePlayerStats()
-}
-```
-
-#### 3. Discord Integration (опционально)
-```typescript
-// Discord OAuth callback
-app.get('/auth/discord/callback', async (req, res) => {
-  const discordId = /* получить из Discord */;
-  await storage.updatePlayer(userId, { discordId });
-});
-```
-
-### Как Использовать API
-
-#### Пример: Получение профиля
-```typescript
-// Frontend
-const { data, isLoading } = useQuery({
-  queryKey: ['profile'],
-  queryFn: async () => {
-    const res = await fetch('/api/players/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    return res.json();
-  }
-});
-```
-
-#### Пример: Подача заявки в клан
-```typescript
-// Frontend
-const applyMutation = useMutation({
-  mutationFn: async ({ clanId, message }) => {
-    const res = await fetch(`/api/clans/${clanId}/apply`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ message })
-    });
-    return res.json();
+  "steamId": "STEAM_0:1:12345678",
+  "name": "TacticalViper",
+  "kills": 1245,
+  "deaths": 892,
+  "kd": 1.4,
+  "matches": {
+    "matches": 178,
+    "won": 88,
+    "winrate": 49.44
   },
-  onSuccess: () => {
-    queryClient.invalidateQueries(['applications']);
+  "playtime": "342ч",
+  "rank": {
+    "current": {
+      "iconUrl": "https://...",
+      "needScore": 10000
+    },
+    "progress": 54.2
+  },
+  "topWeapon": {
+    "name": "M4A1",
+    "kills": 245
+  },
+  "topRole": {
+    "name": "Rifleman",
+    "time": "90ч"
   }
-});
+}
 ```
+
+---
+
+## 3. Storage Interface (server/storage.ts)
+
+### Расширение IStorage интерфейса
+
+```typescript
+export interface IStorage {
+  // === PLAYERS ===
+  getPlayerBySteamId(steamId: string): Promise<Player | undefined>;
+  upsertPlayer(data: { steamId: string; username: string; discordId?: string }): Promise<Player>;
+  
+  // === CLANS ===
+  listClans(): Promise<Clan[]>;
+  getClanById(clanId: string): Promise<Clan | undefined>;
+  createClan(data: InsertClan, ownerId: string): Promise<Clan>; // Creates clan + owner member
+  updateClanSettings(clanId: string, data: UpdateClanSettings): Promise<Clan>;
+  
+  // === CLAN MEMBERS ===
+  getClanMembers(clanId: string): Promise<ClanMember[]>;
+  addClanMember(data: InsertClanMember): Promise<ClanMember>;
+  removeClanMember(memberId: string): Promise<void>;
+  
+  // === APPLICATIONS ===
+  listApplicationsByClan(clanId: string): Promise<ClanApplication[]>;
+  createApplication(data: InsertClanApplication): Promise<ClanApplication>;
+  approveApplication(applicationId: string): Promise<{ application: ClanApplication; member: ClanMember }>;
+  rejectApplication(applicationId: string): Promise<ClanApplication>;
+}
+```
+
+---
+
+## 4. MongoDB Integration (server/services/squadStats.ts)
 
 ### Environment Variables
-```env
-# Database
-DATABASE_URL=postgresql://user:pass@host:5432/zaruba
+```
+MONGO_URI=mongodb://username:password@host:port/database
+MONGO_DB=squadjs
+MONGO_COLLECTION=mainstats
+```
 
-# Optional
+### Service Implementation
+```typescript
+import { MongoClient } from 'mongodb';
+
+export class SquadStatsService {
+  private client: MongoClient;
+  private dbName: string;
+  private collectionName: string;
+  
+  constructor() {
+    const mongoUri = process.env.MONGO_URI || '';
+    this.dbName = process.env.MONGO_DB || 'squadjs';
+    this.collectionName = process.env.MONGO_COLLECTION || 'mainstats';
+    this.client = new MongoClient(mongoUri);
+  }
+  
+  async getPlayerStats(steamId: string): Promise<any> {
+    // Read from MongoDB and normalize data
+    // Fallback to mock data if connection fails
+  }
+}
+```
+
+---
+
+## 5. Авторизация (stub для будущей интеграции)
+
+Для текущей реализации авторизация будет stub-заглушкой. В будущем интегрируется Steam OAuth или Discord OAuth.
+
+```typescript
+// server/middleware/auth.ts
+export function requireAuth(req, res, next) {
+  // TODO: Implement actual auth
+  req.user = { id: 'uuid', steamId: 'STEAM_0:1:12345678', role: 'member' };
+  next();
+}
+```
+
+---
+
+## 6. План реализации (пошаговый)
+
+### Шаг 1: Расширить shared/schema.ts
+- [ ] Добавить таблицы: players, clans, clan_members, clan_applications
+- [ ] Создать Zod схемы для валидации
+- [ ] Экспортировать типы
+
+### Шаг 2: Обновить server/storage.ts
+- [ ] Расширить IStorage интерфейс
+- [ ] Реализовать методы в PostgresStorage (с Drizzle ORM)
+- [ ] Добавить транзакции для approveApplication
+
+### Шаг 3: Создать Squad Stats Service
+- [ ] Файл server/services/squadStats.ts
+- [ ] MongoDB клиент и подключение
+- [ ] Метод getPlayerStats с нормализацией данных
+- [ ] Fallback на mock данные
+
+### Шаг 4: Реализовать API routes
+- [ ] Clans endpoints (CRUD)
+- [ ] Members endpoints
+- [ ] Applications endpoints
+- [ ] Stats proxy endpoint
+
+### Шаг 5: Тестирование
+- [ ] Создать seed data для разработки
+- [ ] Протестировать все endpoints
+- [ ] Проверить валидацию Zod
+
+### Шаг 6: Документация
+- [ ] API Reference
+- [ ] Примеры запросов
+- [ ] Инструкции по интеграции
+
+---
+
+## 7. Интеграция с фронтендом
+
+### Замена mock данных на API calls
+
+**Текущее состояние**: Все данные захардкожены в profile.jsx
+**Целевое состояние**: Использовать TanStack Query для API запросов
+
+### Пример миграции
+```typescript
+// До (mock)
+const [clans, setClans] = useState([...hardcoded data...]);
+
+// После (API)
+import { useQuery } from '@tanstack/react-query';
+
+const { data: clans, isLoading } = useQuery({
+  queryKey: ['clans'],
+  queryFn: async () => {
+    const res = await fetch('/api/clans');
+    return res.json();
+  }
+});
+```
+
+---
+
+## 8. Environment Variables Summary
+
+```env
+# PostgreSQL (Neon)
+DATABASE_URL=postgresql://user:password@host/database
+
+# MongoDB (SquadJS - Read Only)
+MONGO_URI=mongodb://username:password@host:port/squadjs
+MONGO_DB=squadjs
+MONGO_COLLECTION=mainstats
+
+# Optional: Auth (future)
 STEAM_API_KEY=your_steam_api_key
 DISCORD_CLIENT_ID=your_discord_client_id
 DISCORD_CLIENT_SECRET=your_discord_client_secret
@@ -661,49 +461,25 @@ DISCORD_CLIENT_SECRET=your_discord_client_secret
 
 ---
 
-## 📝 Дополнительные Заметки
+## 9. Преимущества этого подхода
 
-### Безопасность
-- Все эндпоинты требуют аутентификации (кроме public)
-- Валидация входных данных через Zod
-- Rate limiting для API (рекомендуется)
-- SQL injection защита через Drizzle ORM
-
-### Производительность
-- Индексы на часто используемых полях
-- Пагинация для списков
-- Кеширование на фронтенде через TanStack Query
-- N+1 queries решаются через JOIN
-
-### Масштабируемость
-- Архитектура позволяет добавить Redis для кеширования
-- Возможность добавить WebSocket для real-time
-- Микросервисная архитектура (при необходимости)
-
-### Будущие Улучшения
-- [ ] Система достижений
-- [ ] Турниры и рейтинги
-- [ ] Clan Wars (войны кланов)
-- [ ] Детальная статистика по картам
-- [ ] История матчей
-- [ ] Clan chat через WebSocket
+✅ **Модульность**: Бекэнд работает независимо от основного проекта
+✅ **Минимальная схема**: Только необходимые поля без избыточности
+✅ **Безопасность**: Read-only доступ к MongoDB, данные приложения изолированы
+✅ **Масштабируемость**: Storage interface позволяет легко добавить кеширование/оптимизацию
+✅ **Типобезопасность**: Drizzle + Zod обеспечивают end-to-end type safety
+✅ **Легкая интеграция**: REST API совместим с любым фронтендом
 
 ---
 
-## ✅ Checklist для Интеграции
+## Следующие шаги
 
-- [ ] Настроить PostgreSQL базу данных
-- [ ] Запустить миграции
-- [ ] Настроить environment variables
-- [ ] Добавить middleware аутентификации
-- [ ] Протестировать все endpoints
-- [ ] Обновить frontend для использования API
-- [ ] Добавить обработку ошибок
-- [ ] Настроить CORS если необходимо
-- [ ] Задокументировать изменения
+1. ✅ **Создан план** - Документация готова
+2. **Реализация схемы** - Расширить shared/schema.ts
+3. **Storage layer** - Реализовать методы в storage.ts
+4. **API routes** - Создать endpoints
+5. **MongoDB service** - Настроить чтение из SquadJS
+6. **Тестирование** - Проверить всё работает
+7. **Интеграция** - Подключить фронтенд
 
----
-
-**Автор:** Replit Agent  
-**Дата создания:** 20 ноября 2024  
-**Версия:** 1.0.0
+**Документация готова к реализации!**

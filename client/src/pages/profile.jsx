@@ -195,6 +195,14 @@ export default function ProfilePage() {
   const [clanBanner, setClanBanner] = useState(alphaBanner);
   const [clanLogo, setClanLogo] = useState(wolfLogo);
   const [discordLink, setDiscordLink] = useState("https://discord.gg/clan-alpha");
+  
+  // Clan Requirements & Theme Settings
+  const [clanRequirements, setClanRequirements] = useState({
+    microphone: true,
+    ageRestriction: true,
+    customRequirement: ""
+  });
+  const [clanTheme, setClanTheme] = useState("orange"); // orange, blue, yellow
 
   // Mock data for squad members with roles
   const [squadMembers, setSquadMembers] = useState([
@@ -281,6 +289,45 @@ export default function ProfilePage() {
         default: return 0;
       }
     });
+  };
+  
+  // Get theme colors based on clanTheme state
+  const getThemeColors = () => {
+    switch(clanTheme) {
+      case "blue":
+        return {
+          color: "text-blue-500",
+          bgColor: "bg-blue-500/10",
+          borderColor: "border-blue-500/30",
+          glow: "shadow-blue-500/20"
+        };
+      case "yellow":
+        return {
+          color: "text-yellow-500",
+          bgColor: "bg-yellow-500/10",
+          borderColor: "border-yellow-500/30",
+          glow: "shadow-yellow-500/20"
+        };
+      default: // orange
+        return {
+          color: "text-primary",
+          bgColor: "bg-primary/10",
+          borderColor: "border-primary/30",
+          glow: "shadow-primary/20"
+        };
+    }
+  };
+  
+  // Generate requirements badge summary from state  
+  const getRequirementsBadge = () => {
+    const parts = [];
+    if (clanRequirements.microphone) parts.push("Микрофон");
+    if (clanRequirements.ageRestriction) parts.push("Возраст 18+");
+    // Show full custom requirement without truncation
+    if (clanRequirements.customRequirement) {
+      parts.push(clanRequirements.customRequirement);
+    }
+    return parts.length > 0 ? parts.join(", ") : "Открыто для всех";
   };
 
   const clans = [
@@ -936,13 +983,21 @@ export default function ProfilePage() {
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                             {clans.map((clan) => (
+                             {clans.map((clan) => {
+                                // Use theme colors for "alpha" clan (owner's clan), static colors for others
+                                const clanColors = clan.id === "alpha" ? getThemeColors() : {
+                                  color: clan.color,
+                                  bgColor: clan.bgColor,
+                                  borderColor: clan.borderColor
+                                };
+                                
+                                return (
                                 <motion.div 
                                   key={clan.id}
                                   onClick={() => setSelectedClan(clan.id)}
                                   whileHover={{ scale: 1.03, y: -5 }}
                                   whileTap={{ scale: 0.98 }}
-                                  className={`relative rounded-2xl border cursor-pointer transition-all duration-300 group overflow-hidden ${selectedClan === clan.id ? `${clan.borderColor} ring-1 ring-offset-0 ring-white/20 shadow-2xl scale-[1.02]` : "border-white/10 hover:border-white/20"}`}
+                                  className={`relative rounded-2xl border cursor-pointer transition-all duration-300 group overflow-hidden ${selectedClan === clan.id ? `${clanColors.borderColor} ring-1 ring-offset-0 ring-white/20 shadow-2xl scale-[1.02]` : "border-white/10 hover:border-white/20"}`}
                                 >
                                    {/* Clan Banner Image */}
                                    <div className="h-32 relative">
@@ -955,7 +1010,7 @@ export default function ProfilePage() {
                                             initial={{ y: 20, opacity: 0 }}
                                             animate={{ y: 0, opacity: 1 }}
                                             transition={{ delay: 0.2 }}
-                                            className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clan.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}
+                                            className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clanColors.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}
                                         >
                                            <img src={clan.logo} className="w-full h-full object-cover" />
                                         </motion.div>
@@ -965,12 +1020,12 @@ export default function ProfilePage() {
                                    <div className="pt-12 pb-6 px-5 bg-zinc-950/80 backdrop-blur-sm relative z-10">
                                       {selectedClan === clan.id && (
                                         <div className="absolute top-4 right-4 animate-in zoom-in duration-300">
-                                            <CheckCircle2 className={`w-5 h-5 ${clan.color}`} />
+                                            <CheckCircle2 className={`w-5 h-5 ${clanColors.color}`} />
                                         </div>
                                       )}
 
                                       <div className="text-center space-y-2">
-                                         <h4 className={`font-black text-white text-lg uppercase tracking-tight group-hover:text-white/90 ${clan.color}`}>{clan.name}</h4>
+                                         <h4 className={`font-black text-white text-lg uppercase tracking-tight group-hover:text-white/90 ${clanColors.color}`}>{clan.name}</h4>
                                          <div className="flex items-center justify-center gap-2">
                                            <Badge variant="outline" className="border-white/10 bg-white/5 text-[10px] px-1.5 h-5">{clan.tag}</Badge>
                                            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
@@ -983,38 +1038,49 @@ export default function ProfilePage() {
                                       <Separator className={`bg-white/5 my-4 ${selectedClan === clan.id ? "opacity-50" : ""}`} />
                                       
                                       <div className="space-y-3">
-                                        <p className="text-xs text-muted-foreground text-center line-clamp-2 h-8 leading-relaxed">
+                                        <p className="text-xs text-muted-foreground text-center line-clamp-2 min-h-[32px] leading-relaxed px-1">
                                           {clan.description}
                                         </p>
-                                        <div className="flex justify-center">
-                                           <Badge variant="outline" className={`text-[10px] h-6 border-white/10 ${clan.color} bg-black/40 backdrop-blur-md`}>
-                                             {clan.req}
+                                        <div className="flex justify-center pt-1">
+                                           <Badge variant="outline" className={`text-[10px] h-6 px-2 border-white/10 ${clanColors.color} bg-black/40 backdrop-blur-md`}>
+                                             {clan.id === "alpha" ? getRequirementsBadge() : clan.req}
                                            </Badge>
                                         </div>
                                       </div>
                                    </div>
                                 </motion.div>
-                             ))}
+                                );
+                             })}
                           </div>
                        </div>
 
                        {/* Requirements & Form */}
                        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pt-4 border-t border-white/5">
                           <div className="md:col-span-4 space-y-4">
-                             <div className={`rounded-2xl p-6 border backdrop-blur-sm ${clans.find(c => c.id === selectedClan)?.bgColor} ${clans.find(c => c.id === selectedClan)?.borderColor} shadow-lg`}>
-                                <h4 className={`font-display font-bold text-xl mb-4 flex items-center gap-2 ${clans.find(c => c.id === selectedClan)?.color}`}>
+                             <div className={`rounded-2xl p-6 border backdrop-blur-sm ${getThemeColors().bgColor} ${getThemeColors().borderColor} shadow-lg`}>
+                                <h4 className={`font-display font-bold text-xl mb-4 flex items-center gap-2 ${getThemeColors().color}`}>
                                    <AlertCircle className="w-6 h-6" />
                                    Требования
                                 </h4>
                                 <ul className="space-y-4">
-                                   <li className="flex items-start gap-3 text-sm text-white/90">
-                                      <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${clans.find(c => c.id === selectedClan)?.color}`} />
-                                      <span className="leading-relaxed">Наличие микрофона и Discord</span>
-                                   </li>
-                                   <li className="flex items-start gap-3 text-sm text-white/90">
-                                      <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${clans.find(c => c.id === selectedClan)?.color}`} />
-                                      <span className="leading-relaxed">Возраст 18+</span>
-                                   </li>
+                                   {clanRequirements.microphone && (
+                                     <li className="flex items-start gap-3 text-sm text-white/90">
+                                        <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
+                                        <span className="leading-relaxed">Наличие микрофона и Discord</span>
+                                     </li>
+                                   )}
+                                   {clanRequirements.ageRestriction && (
+                                     <li className="flex items-start gap-3 text-sm text-white/90">
+                                        <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
+                                        <span className="leading-relaxed">Возраст 18+</span>
+                                     </li>
+                                   )}
+                                   {clanRequirements.customRequirement && (
+                                     <li className="flex items-start gap-3 text-sm text-white/90">
+                                        <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
+                                        <span className="leading-relaxed">{clanRequirements.customRequirement}</span>
+                                     </li>
+                                   )}
                                    <li className="flex items-center gap-3 text-sm font-bold text-white pt-4 border-t border-white/10 mt-2">
                                       <div className="p-1 rounded-full bg-emerald-500/20">
                                         <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -1129,6 +1195,78 @@ export default function ProfilePage() {
                                   />
                                </div>
                                <p className="text-[10px] text-muted-foreground">Эта ссылка будет использоваться для кнопки вступления в Discord.</p>
+                            </div>
+                         </div>
+                      </div>
+
+                      {/* Requirements & Theme Settings */}
+                      <div className="space-y-6 bg-black/20 p-6 rounded-2xl border border-white/5">
+                         <div className="flex items-center gap-3 mb-4">
+                            <AlertCircle className="w-5 h-5 text-primary" />
+                            <h4 className="font-bold text-white text-lg">Дополнительные требования</h4>
+                         </div>
+                         
+                         <div className="grid gap-4">
+                            <div className="space-y-3">
+                               <Label className="text-xs uppercase font-bold text-muted-foreground">Условия для вступления</Label>
+                               <div className="space-y-2">
+                                  <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20 border border-white/10">
+                                     <input 
+                                       type="checkbox" 
+                                       checked={clanRequirements.microphone}
+                                       onChange={(e) => setClanRequirements({...clanRequirements, microphone: e.target.checked})}
+                                       className="w-4 h-4 rounded border-white/20 bg-black/20 text-primary focus:ring-primary focus:ring-offset-0" 
+                                       id="req-mic" 
+                                     />
+                                     <Label htmlFor="req-mic" className="flex-1 cursor-pointer text-sm">Наличие микрофона и Discord</Label>
+                                  </div>
+                                  <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20 border border-white/10">
+                                     <input 
+                                       type="checkbox" 
+                                       checked={clanRequirements.ageRestriction}
+                                       onChange={(e) => setClanRequirements({...clanRequirements, ageRestriction: e.target.checked})}
+                                       className="w-4 h-4 rounded border-white/20 bg-black/20 text-primary focus:ring-primary focus:ring-offset-0" 
+                                       id="req-age" 
+                                     />
+                                     <Label htmlFor="req-age" className="flex-1 cursor-pointer text-sm">Возраст 18+</Label>
+                                  </div>
+                                  <div className="flex items-center gap-3 p-3 rounded-lg bg-black/20 border border-white/10">
+                                     <Input 
+                                       placeholder="Добавить своё требование..." 
+                                       value={clanRequirements.customRequirement}
+                                       onChange={(e) => setClanRequirements({...clanRequirements, customRequirement: e.target.value})}
+                                       className="flex-1 bg-transparent border-none p-0 h-auto focus-visible:ring-0 text-sm" 
+                                     />
+                                  </div>
+                               </div>
+                            </div>
+                            
+                            <div className="grid gap-2 pt-2">
+                               <Label className="text-xs uppercase font-bold text-muted-foreground">Цветовая тема клана</Label>
+                               <div className="grid grid-cols-3 gap-3">
+                                  <div 
+                                    onClick={() => setClanTheme("orange")}
+                                    className={`flex items-center gap-2 p-3 rounded-lg bg-black/20 border cursor-pointer hover:bg-black/30 transition-colors ${clanTheme === "orange" ? "border-primary/30 ring-1 ring-primary/20" : "border-white/10"}`}
+                                  >
+                                     <div className="w-6 h-6 rounded-full bg-primary border-2 border-white/20" />
+                                     <span className="text-xs font-bold text-primary">Оранжевый</span>
+                                  </div>
+                                  <div 
+                                    onClick={() => setClanTheme("blue")}
+                                    className={`flex items-center gap-2 p-3 rounded-lg bg-black/20 border cursor-pointer hover:bg-black/30 transition-colors ${clanTheme === "blue" ? "border-blue-500/30 ring-1 ring-blue-500/20" : "border-white/10"}`}
+                                  >
+                                     <div className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white/20" />
+                                     <span className="text-xs font-bold text-blue-500">Синий</span>
+                                  </div>
+                                  <div 
+                                    onClick={() => setClanTheme("yellow")}
+                                    className={`flex items-center gap-2 p-3 rounded-lg bg-black/20 border cursor-pointer hover:bg-black/30 transition-colors ${clanTheme === "yellow" ? "border-yellow-500/30 ring-1 ring-yellow-500/20" : "border-white/10"}`}
+                                  >
+                                     <div className="w-6 h-6 rounded-full bg-yellow-500 border-2 border-white/20" />
+                                     <span className="text-xs font-bold text-yellow-500">Золотой</span>
+                                  </div>
+                               </div>
+                               <p className="text-[10px] text-muted-foreground mt-1">Цвет будет использоваться для акцентов на карточке клана и в интерфейсе.</p>
                             </div>
                          </div>
                       </div>

@@ -4,7 +4,7 @@ import {
   clans,
   clanMembers,
   clanApplications,
-} from "@shared/schema.js";
+} from "../shared/schema.js";
 import { randomUUID } from "crypto";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pkg from "pg";

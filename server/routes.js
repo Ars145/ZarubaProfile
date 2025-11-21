@@ -7,7 +7,7 @@ import {
   insertClanApplicationSchema,
   insertClanMemberSchema,
   upsertPlayerSchema,
-} from "@shared/schema.js";
+} from "../shared/schema.js";
 
 export async function registerRoutes(app) {
   // === PLAYERS ===

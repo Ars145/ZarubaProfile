@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, uuid, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, uuid, timestamp, jsonb, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -49,7 +49,9 @@ export const clanMembers = pgTable("clan_members", {
   role: text("role").notNull(),
   statsSnapshot: jsonb("stats_snapshot"),
   joinedAt: timestamp("joined_at").defaultNow(),
-});
+}, (table) => ({
+  uniqueClanPlayer: unique().on(table.clanId, table.playerId),
+}));
 
 // Clan applications table - заявки на вступление
 export const clanApplications = pgTable("clan_applications", {

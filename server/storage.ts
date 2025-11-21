@@ -18,11 +18,17 @@ import {
   clanApplications,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
-import { drizzle } from "drizzle-orm/neon-serverless";
-import { Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pkg from "pg";
+const { Pool } = pkg;
 import { eq, and } from "drizzle-orm";
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const databaseUrl = process.env.DATABASE_URL!;
+const poolUrl = databaseUrl.replace('.us-east-2', '-pooler.us-east-2');
+const pool = new Pool({
+  connectionString: poolUrl,
+  max: 10,
+});
 const db = drizzle(pool);
 
 export interface IStorage {
@@ -114,17 +120,27 @@ export class PostgresStorage implements IStorage {
   }
 
   async createClan(data: InsertClan, ownerId: string): Promise<Clan> {
-    const [clan] = await db.insert(clans).values(data).returning();
-    
-    await db.insert(clanMembers).values({
-      clanId: clan.id,
-      playerId: ownerId,
-      role: "owner",
+    const owner = await this.getPlayerBySteamId(ownerId);
+    if (!owner) {
+      const [ownerById] = await db.select().from(players).where(eq(players.id, ownerId));
+      if (!ownerById) {
+        throw new Error("Owner player not found");
+      }
+    }
+
+    return await db.transaction(async (tx) => {
+      const [clan] = await tx.insert(clans).values(data).returning();
+      
+      await tx.insert(clanMembers).values({
+        clanId: clan.id,
+        playerId: owner?.id || ownerId,
+        role: "owner",
+      });
+      
+      await tx.update(players).set({ currentClanId: clan.id }).where(eq(players.id, owner?.id || ownerId));
+      
+      return clan;
     });
-    
-    await db.update(players).set({ currentClanId: clan.id }).where(eq(players.id, ownerId));
-    
-    return clan;
   }
 
   async updateClanSettings(clanId: string, data: UpdateClanSettings): Promise<Clan> {
@@ -163,11 +179,21 @@ export class PostgresStorage implements IStorage {
   }
 
   async addClanMember(data: InsertClanMember): Promise<ClanMember> {
-    const [member] = await db.insert(clanMembers).values(data).returning();
-    
-    await db.update(players).set({ currentClanId: data.clanId }).where(eq(players.id, data.playerId));
-    
-    return member;
+    const [player] = await db.select().from(players).where(eq(players.id, data.playerId));
+    if (!player) {
+      throw new Error("Player not found");
+    }
+
+    const existingMember = await this.getClanMemberByPlayer(data.clanId, data.playerId);
+    if (existingMember) {
+      throw new Error("Player is already a clan member");
+    }
+
+    return await db.transaction(async (tx) => {
+      const [member] = await tx.insert(clanMembers).values(data).returning();
+      await tx.update(players).set({ currentClanId: data.clanId }).where(eq(players.id, data.playerId));
+      return member;
+    });
   }
 
   async updateMemberRole(memberId: string, role: "owner" | "member"): Promise<ClanMember> {
@@ -181,10 +207,14 @@ export class PostgresStorage implements IStorage {
 
   async removeClanMember(memberId: string): Promise<void> {
     const [member] = await db.select().from(clanMembers).where(eq(clanMembers.id, memberId));
-    if (member) {
-      await db.update(players).set({ currentClanId: null }).where(eq(players.id, member.playerId));
+    if (!member) {
+      throw new Error("Clan member not found");
     }
-    await db.delete(clanMembers).where(eq(clanMembers.id, memberId));
+
+    await db.transaction(async (tx) => {
+      await tx.update(players).set({ currentClanId: null }).where(eq(players.id, member.playerId));
+      await tx.delete(clanMembers).where(eq(clanMembers.id, memberId));
+    });
   }
   
   // === APPLICATIONS ===
@@ -217,28 +247,56 @@ export class PostgresStorage implements IStorage {
       throw new Error("Application not found");
     }
 
-    let player = await this.getPlayerBySteamId(application.playerSteamId);
-    if (!player) {
-      player = await this.upsertPlayer({
-        steamId: application.playerSteamId,
-        username: application.playerName,
-      });
+    if (application.status !== "pending") {
+      throw new Error("Application is not pending");
     }
 
-    const [updatedApplication] = await db
-      .update(clanApplications)
-      .set({ status: "accepted" })
-      .where(eq(clanApplications.id, applicationId))
-      .returning();
+    return await db.transaction(async (tx) => {
+      let player = await this.getPlayerBySteamId(application.playerSteamId);
+      if (!player) {
+        const [newPlayer] = await tx
+          .insert(players)
+          .values({
+            steamId: application.playerSteamId,
+            username: application.playerName,
+          })
+          .onConflictDoUpdate({
+            target: players.steamId,
+            set: { username: application.playerName },
+          })
+          .returning();
+        player = newPlayer;
+      }
 
-    const member = await this.addClanMember({
-      clanId: application.clanId,
-      playerId: player.id,
-      role: "member",
-      statsSnapshot: application.statsSnapshot as any,
+      const [existingMember] = await tx
+        .select()
+        .from(clanMembers)
+        .where(and(eq(clanMembers.clanId, application.clanId), eq(clanMembers.playerId, player.id)));
+      
+      if (existingMember) {
+        throw new Error("Player is already a clan member");
+      }
+
+      const [updatedApplication] = await tx
+        .update(clanApplications)
+        .set({ status: "accepted" })
+        .where(eq(clanApplications.id, applicationId))
+        .returning();
+
+      const [member] = await tx
+        .insert(clanMembers)
+        .values({
+          clanId: application.clanId,
+          playerId: player.id,
+          role: "member",
+          statsSnapshot: application.statsSnapshot as any,
+        })
+        .returning();
+
+      await tx.update(players).set({ currentClanId: application.clanId }).where(eq(players.id, player.id));
+
+      return { application: updatedApplication, member };
     });
-
-    return { application: updatedApplication, member };
   }
 
   async rejectApplication(applicationId: string): Promise<ClanApplication> {

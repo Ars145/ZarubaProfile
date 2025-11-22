@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from sqlalchemy.exc import IntegrityError
 from . import api
-from ..models import db, Clan, ClanMember, Player
+from models import db, Clan, ClanMember, Player
 
 
 @api.route('/clans', methods=['GET'])

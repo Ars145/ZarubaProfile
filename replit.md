@@ -29,8 +29,13 @@ Preferred communication style: Simple, everyday language.
 │   ├── vite.config.js    # Конфигурация Vite
 │   └── postcss.config.js # Конфигурация PostCSS/Tailwind
 │
-├── backend/              # Flask бэкенд (будет добавлен)
-│   └── data/             # SQLite база данных
+├── backend/              # Flask бэкенд (REST API)
+│   ├── app.py           # Точка входа Flask
+│   ├── config.py        # Конфигурация
+│   ├── requirements.txt # Python зависимости
+│   ├── models/          # SQLAlchemy модели (PostgreSQL)
+│   ├── routes/          # API endpoints
+│   └── services/        # Бизнес-логика (будет добавлено)
 │
 ├── static/               # Загружаемый контент
 │   └── uploads/          # Пользовательские файлы
@@ -66,12 +71,40 @@ Preferred communication style: Simple, everyday language.
 - Calculation utilities separated into pure functions (`client/src/lib/statsCalculations.js`)
 
 **Key Architectural Decisions:**
-- **Frontend-only application** - no backend currently implemented
 - Gaming-focused theme with custom fonts (Oxanium, Rajdhani, Inter) and dark color scheme
 - Russian language documentation and comments throughout codebase
 - Statistics calculations ported from Discord bot to web interface
-- Client-side mock data for development and demonstration
 - All TypeScript removed - pure JavaScript implementation
+
+### Backend Architecture
+
+**Technology Stack:**
+- Flask 3.0 (Python web framework)
+- PostgreSQL (Neon-hosted via Replit integration)
+- SQLAlchemy ORM for database operations
+- Flask-CORS for cross-origin requests
+- Gunicorn for production deployment
+
+**Database Schema:**
+- **players**: UUID, steam_id (unique), username, discord_id, current_clan_id
+- **clans**: UUID, name, tag (unique), theme (orange|blue|yellow), JSONB requirements, timestamps
+- **clan_members**: UUID, UNIQUE(clan_id, player_id), role (owner|member), JSONB stats_snapshot, CASCADE deletes
+- **clan_applications**: UUID, status (pending|accepted|rejected), JSONB stats_snapshot, CASCADE deletes
+
+**API Endpoints (Implemented):**
+- `GET /api/clans` - список всех кланов
+- `GET /api/clans/:id` - информация о клане с участниками
+- `POST /api/clans` - создание клана (валидация theme, JSON)
+- `PUT /api/clans/:id` - обновление клана
+- `DELETE /api/clans/:id` - удаление клана (CASCADE для связей)
+- `GET /api/clans/:id/members` - список участников клана
+
+**Key Features:**
+- UUID primary keys для всех таблиц
+- JSONB поля для complex data (requirements, stats_snapshot)
+- CASCADE deletes для сохранения целостности данных
+- Валидация JSON в POST/PUT (возврат 400 при ошибках)
+- CORS настроен для работы с фронтендом
 
 **Development Setup:**
 - Vite dev server runs on port 5000

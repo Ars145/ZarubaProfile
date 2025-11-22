@@ -9,8 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-
 export default function ClanDetailPage() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
@@ -29,18 +27,7 @@ export default function ClanDetailPage() {
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const accessToken = localStorage.getItem('access_token');
-      const response = await fetch(`${API_URL}/api/clans/${id}/join`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Не удалось вступить в клан');
-      }
+      const response = await apiRequest('POST', `/api/clans/${id}/join`);
       return response.json();
     },
     onSuccess: () => {
@@ -62,19 +49,9 @@ export default function ClanDetailPage() {
 
   const applyMutation = useMutation({
     mutationFn: async () => {
-      const accessToken = localStorage.getItem('access_token');
-      const response = await fetch(`${API_URL}/api/clans/${id}/applications`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: 'Хочу вступить в ваш клан!' })
+      const response = await apiRequest('POST', `/api/clans/${id}/applications`, { 
+        message: 'Хочу вступить в ваш клан!' 
       });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Не удалось подать заявку');
-      }
       return response.json();
     },
     onSuccess: () => {

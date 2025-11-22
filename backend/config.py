@@ -19,8 +19,8 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,  # Проверяет соединение перед использованием
         'pool_recycle': 300,    # Переиспользует соединения каждые 5 минут
-        'pool_size': 10,        # Размер пула
-        'max_overflow': 20,     # Максимальное количество дополнительных соединений
+        'pool_size': 5,         # Размер пула (уменьшен для Replit)
+        'max_overflow': 5,      # Максимальное количество дополнительных соединений
         'connect_args': {
             'connect_timeout': 10
         }

@@ -3,6 +3,15 @@
 ## Overview
 ZARUBA is a tactical gaming community platform for Squad server players, offering player profiles, clan management, and detailed game statistics. It integrates a React frontend with existing Squad server infrastructure (MongoDB statistics) and a Discord bot ecosystem. The platform aims to enhance player engagement by providing statistics, clan functionality, and a ranking system based on in-game performance.
 
+## Recent Changes (Nov 22, 2025)
+- **Frontend-API Integration**: Connected frontend to real backend APIs, removed all mock data
+  - useSquadStats hook refactored to use TanStack Query with /api/stats/:steamId endpoint
+  - Profile page updated with proper auth checks and loading states
+  - Created clan pages (list, detail) with real API integration
+- **Navigation**: Added header with navigation menu (Profile, Clans) and user dropdown
+- **Backend Improvements**: Added PostgreSQL connection pool settings (pool_pre_ping, pool_recycle) to handle SSL connection stability
+- **Mock Data Cleanup**: Removed mockSquadStats.js and all mock data dependencies
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 

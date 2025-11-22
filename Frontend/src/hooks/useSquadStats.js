@@ -26,7 +26,9 @@ export function useSquadStats(steamId) {
     queryKey: ['/api/stats', steamId],
     queryFn: async () => {
       if (!steamId) return null;
-      const response = await fetch(`${API_URL}/api/stats/${steamId}`);
+      const response = await fetch(`${API_URL}/api/stats/${steamId}`, {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch stats');
       }

@@ -2,13 +2,50 @@
 
 ## Overview
 
-ZARUBA is a tactical gaming community platform built for Squad server players. The application provides player profiles, clan management, and detailed game statistics integration. It features a modern React frontend with a REST API backend, designed to integrate with existing Squad server infrastructure (MongoDB statistics database) and Discord bot ecosystem.
+ZARUBA is a tactical gaming community platform built for Squad server players. The application provides player profiles, clan management, and detailed game statistics integration. It features a modern React frontend designed to integrate with existing Squad server infrastructure (MongoDB statistics database) and Discord bot ecosystem.
 
 The platform enables players to view their gaming statistics, join clans, manage clan memberships, and track their progression through a ranking system based on in-game performance.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Project Structure
+
+```
+/
+├── Frontend/              # React приложение
+│   ├── src/              # Исходный код
+│   │   ├── components/   # UI компоненты (55+ shadcn компонентов)
+│   │   ├── pages/        # Страницы приложения
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── lib/          # Утилиты и helpers
+│   │   ├── data/         # Mock данные для разработки
+│   │   ├── App.jsx       # Главный компонент приложения
+│   │   ├── main.jsx      # Точка входа React
+│   │   └── index.css     # Глобальные стили
+│   ├── public/           # Статические файлы
+│   ├── index.html        # HTML шаблон
+│   ├── vite.config.js    # Конфигурация Vite
+│   └── postcss.config.js # Конфигурация PostCSS/Tailwind
+│
+├── backend/              # Flask бэкенд (будет добавлен)
+│   └── data/             # SQLite база данных
+│
+├── static/               # Загружаемый контент
+│   └── uploads/          # Пользовательские файлы
+│       ├── avatars/      # Аватары игроков
+│       ├── clan-logos/   # Логотипы кланов
+│       └── clan-banners/ # Баннеры кланов
+│
+├── attached_assets/      # Ассеты проекта (изображения, шрифты)
+│
+├── package.json          # Зависимости npm
+├── package-lock.json     # Lock file для npm
+├── .gitignore            # Git ignore файл
+├── README.md             # Документация проекта
+└── replit.md             # Техническая документация
+```
 
 ## System Architecture
 

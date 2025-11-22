@@ -4,9 +4,9 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "vite dev --port 5000",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "vite dev --port 5000 --config Frontend/vite.config.js",
+    "build": "vite build --config Frontend/vite.config.js",
+    "preview": "vite preview --config Frontend/vite.config.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

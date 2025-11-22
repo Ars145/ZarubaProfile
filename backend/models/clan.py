@@ -1,0 +1,44 @@
+import uuid
+from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID, JSONB
+from . import db
+
+
+class Clan(db.Model):
+    __tablename__ = 'clans'
+    
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = db.Column(db.Text, nullable=False)
+    tag = db.Column(db.Text, unique=True, nullable=False, index=True)
+    description = db.Column(db.Text, nullable=True)
+    theme = db.Column(db.Text, nullable=False, default='orange')  # orange|blue|yellow
+    banner_url = db.Column(db.Text, nullable=True)
+    logo_url = db.Column(db.Text, nullable=True)
+    requirements = db.Column(JSONB, nullable=True, default=dict)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Relationships
+    members = db.relationship('ClanMember', back_populates='clan', cascade='all, delete-orphan')
+    applications = db.relationship('ClanApplication', back_populates='clan', cascade='all, delete-orphan')
+    
+    def to_dict(self, include_members=False):
+        data = {
+            'id': str(self.id),
+            'name': self.name,
+            'tag': self.tag,
+            'description': self.description,
+            'theme': self.theme,
+            'bannerUrl': self.banner_url,
+            'logoUrl': self.logo_url,
+            'requirements': self.requirements or {},
+            'createdAt': self.created_at.isoformat() if self.created_at else None,
+            'memberCount': len(self.members)
+        }
+        
+        if include_members:
+            data['members'] = [member.to_dict() for member in self.members]
+        
+        return data
+    
+    def __repr__(self):
+        return f'<Clan [{self.tag}] {self.name}>'

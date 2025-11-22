@@ -1,0 +1,47 @@
+import os
+from flask import Flask, jsonify
+from flask_cors import CORS
+from config import config
+from models import db
+
+
+def create_app(config_name=None):
+    """Application factory"""
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'development')
+    
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    
+    # Инициализация расширений
+    db.init_app(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Регистрация blueprints
+    from routes import api
+    app.register_blueprint(api)
+    
+    # Создание таблиц БД
+    with app.app_context():
+        db.create_all()
+    
+    # Базовый маршрут
+    @app.route('/')
+    def index():
+        return jsonify({
+            'name': 'ZARUBA API',
+            'version': '1.0.0',
+            'status': 'running'
+        })
+    
+    # Health check
+    @app.route('/health')
+    def health():
+        return jsonify({'status': 'healthy'}), 200
+    
+    return app
+
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(host='0.0.0.0', port=8000, debug=True)

@@ -33,15 +33,30 @@
 
 ## 🚀 Запуск проекта
 
-### Разработка
+### Frontend (Vite dev server)
 
 ```bash
 npm run dev
 ```
 
-Приложение будет доступно на `http://localhost:5000`
+Frontend будет доступен на `http://localhost:5000`
 
-### Сборка
+### Backend (Flask API)
+
+```bash
+# Установить зависимости Python
+cd backend
+pip install -r requirements.txt
+
+# Создать .env файл с DATABASE_URL
+
+# Запустить сервер
+python app.py
+```
+
+Backend API будет доступен на `http://localhost:8000`
+
+### Сборка Frontend
 
 ```bash
 npm run build

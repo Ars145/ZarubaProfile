@@ -33,23 +33,21 @@ export default function Login() {
         <div className="absolute top-1/2 right-1/3 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl">
-        <CardHeader className="space-y-4 text-center pb-6">
-          {/* Logo */}
+      <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl backdrop-blur-sm">
+        <CardHeader className="space-y-6 text-center pb-8 pt-12">
+          {/* Logo with Enhanced Vignette */}
           <div className="mx-auto relative">
-            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+            <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full scale-150" />
+            <div className="absolute inset-0 bg-gradient-radial from-primary/20 via-transparent to-transparent blur-xl" />
             <img 
               src={zarubaLogo} 
               alt="ZARUBA" 
-              className="w-32 h-32 object-contain mx-auto relative z-10 drop-shadow-lg"
+              className="w-44 h-44 object-contain mx-auto relative z-10 drop-shadow-2xl"
             />
           </div>
           
           <div className="space-y-2">
-            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
-              ZARUBA
-            </CardTitle>
-            <CardDescription className="text-base text-muted-foreground">
+            <CardDescription className="text-lg text-muted-foreground font-medium">
               Добро пожаловать в личный кабинет игрока
             </CardDescription>
           </div>
@@ -61,7 +59,7 @@ export default function Login() {
             <Button
               data-testid="button-steam-login"
               onClick={loginWithSteam}
-              className="w-full h-14 text-base gap-3 shadow-lg hover:shadow-xl transition-all"
+              className="steam-button w-full h-14 text-base gap-3 font-semibold"
               size="lg"
             >
               <Gamepad2 className="w-5 h-5" />
@@ -82,31 +80,33 @@ export default function Login() {
 
           {/* Features */}
           <div className="space-y-4">
-            <p className="text-sm font-medium text-center text-foreground">
-              После авторизации вы получите доступ к:
-            </p>
+            <div className="flex items-center justify-center">
+              <span className="text-xs uppercase tracking-wider text-muted-foreground/70 font-semibold">
+                После авторизации
+              </span>
+            </div>
             
-            <div className="grid gap-3">
-              <div className="flex items-start gap-3 p-3 rounded-md bg-primary/5 border border-primary/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/10 hover:border-primary/20 transition-colors">
                 <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Профилю игрока</p>
-                  <p className="text-xs text-muted-foreground">Статистика, достижения и прогресс</p>
+                  <p className="text-sm font-semibold">Профиль игрока</p>
+                  <p className="text-xs text-muted-foreground">Статистика и прогресс</p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-3 rounded-md bg-accent/5 border border-accent/10">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/5 border border-accent/10 hover:border-accent/20 transition-colors">
                 <Users className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Системе кланов</p>
-                  <p className="text-xs text-muted-foreground">Создание и вступление в кланы</p>
+                  <p className="text-sm font-semibold">Система кланов</p>
+                  <p className="text-xs text-muted-foreground">Создание и участие</p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-3 rounded-md bg-primary/5 border border-primary/10">
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/10 hover:border-primary/20 transition-colors sm:col-span-2">
                 <Trophy className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Рейтинговой системе</p>
+                  <p className="text-sm font-semibold">Рейтинговая система</p>
                   <p className="text-xs text-muted-foreground">Отслеживание рангов и позиций</p>
                 </div>
               </div>

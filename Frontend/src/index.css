@@ -130,3 +130,60 @@
   box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
   border-color: hsl(var(--primary) / 0.4);
 }
+
+/* Steam Button Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3),
+                0 0 40px hsl(var(--primary) / 0.2),
+                0 0 60px hsl(var(--primary) / 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.4),
+                0 0 60px hsl(var(--primary) / 0.3),
+                0 0 90px hsl(var(--primary) / 0.15);
+  }
+}
+
+@keyframes sheen {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.steam-button {
+  position: relative;
+  overflow: hidden;
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.steam-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: translateX(-100%) skewX(-15deg);
+}
+
+.steam-button:hover::before {
+  animation: sheen 1.5s ease-in-out;
+}
+
+.steam-button:hover {
+  transform: scale(1.02);
+}
+
+.steam-button:active {
+  transform: scale(1.02) translateY(2px);
+}

@@ -320,15 +320,25 @@ const DiscordCard = () => {
 };
 
 export default function ProfilePage() {
+  const { user, logout } = useAuth();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
   const [isVip, setIsVip] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [username, setUsername] = useState("TacticalViper");
-  const [avatarUrl, setAvatarUrl] = useState("https://api.dicebear.com/7.x/avataaars/svg?seed=TacticalViper");
+  const [username, setUsername] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   
-  // Squad Stats Integration
-  const squadStats = useSquadStats('STEAM_0:1:12345678');
+  // Обновляем локальное состояние при изменении user
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username || "");
+      setAvatarUrl(user.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username || 'Player'}`);
+    }
+  }, [user]);
+  
+  // Squad Stats Integration - используем Steam ID из user если доступен
+  const steamId = user?.steamId || 'STEAM_0:1:12345678';
+  const squadStats = useSquadStats(steamId);
   
   // Owner specific state
   const [ownerTab, setOwnerTab] = useState("squad");
@@ -845,7 +855,13 @@ export default function ProfilePage() {
                </DialogContent>
              </Dialog>
              
-             <Button variant="ghost" size="sm" className="h-9 w-9 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm">
+             <Button 
+               variant="ghost" 
+               size="sm" 
+               className="h-9 w-9 border border-white/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 bg-zinc-900/50 backdrop-blur-sm"
+               onClick={logout}
+               data-testid="button-logout"
+             >
                 <LogOut className="w-4 h-4" />
              </Button>
           </div>

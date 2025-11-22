@@ -25,10 +25,12 @@ def create_app(config_name=None):
     from routes import api
     from routes import auth
     from routes import uploads
+    from routes import players
     
     app.register_blueprint(api)
     app.register_blueprint(auth.bp)
     app.register_blueprint(uploads.bp)
+    app.register_blueprint(players.bp)
     
     # Создание таблиц БД (PostgreSQL)
     with app.app_context():

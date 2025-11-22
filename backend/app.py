@@ -23,7 +23,12 @@ def create_app(config_name=None):
     
     # Регистрация blueprints
     from routes import api
+    from routes import auth
+    from routes import uploads
+    
     app.register_blueprint(api)
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(uploads.bp)
     
     # Создание таблиц БД (PostgreSQL)
     with app.app_context():

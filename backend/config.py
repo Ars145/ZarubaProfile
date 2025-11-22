@@ -19,6 +19,11 @@ class Config:
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
     MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'SquadJS')
     
+    # Authentication
+    STEAM_API_KEY = os.getenv('STEAM_API_KEY')
+    DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
+    DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')
+    
     # Uploads
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
     UPLOAD_FOLDER = 'static/uploads'

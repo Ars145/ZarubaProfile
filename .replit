@@ -1,10 +1,10 @@
-modules = ["nodejs-20", "web", "bash", "python-3.11"]
+modules = ["nodejs-20", "web", "bash", "python-3.11", "python3"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["cacert", "unzip"]
+packages = ["cacert", "cargo", "freetype", "lcms2", "libiconv", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "openssl", "pkg-config", "rustc", "tcl", "tk", "unzip", "zlib"]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -23,10 +23,6 @@ externalPort = 3000
 [[ports]]
 localPort = 8000
 externalPort = 8000
-
-[[ports]]
-localPort = 35601
-externalPort = 3001
 
 [env]
 PORT = "5000"

@@ -6,5 +6,6 @@ from .player import Player
 from .clan import Clan
 from .clan_member import ClanMember
 from .clan_application import ClanApplication
+from .session import Session
 
-__all__ = ['db', 'Player', 'Clan', 'ClanMember', 'ClanApplication']
+__all__ = ['db', 'Player', 'Clan', 'ClanMember', 'ClanApplication', 'Session']

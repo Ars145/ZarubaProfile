@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, redirect, current_app
 from urllib.parse import urlencode, urlparse
 import requests
+import os
 from models import db, Player, Session, OAuthState
 from services.auth_service import AuthService, require_auth
 from datetime import datetime
@@ -9,12 +10,24 @@ from datetime import datetime
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 
+def get_base_url():
+    """Получить базовый URL приложения (учитывает Replit окружение)"""
+    # В Replit используем REPLIT_DEV_DOMAIN
+    replit_domain = os.getenv('REPLIT_DEV_DOMAIN')
+    if replit_domain:
+        return f'https://{replit_domain}'
+    
+    # Иначе используем request.host_url
+    return request.host_url.rstrip('/')
+
+
 def is_safe_url(target):
     """Проверка безопасности redirect URL (защита от open redirect)"""
     if not target:
         return False
     
-    ref_url = urlparse(request.host_url)
+    base_url = get_base_url()
+    ref_url = urlparse(base_url)
     test_url = urlparse(target)
     
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
@@ -23,17 +36,18 @@ def is_safe_url(target):
 @bp.route('/steam/login', methods=['GET'])
 def steam_login():
     """Начать Steam OpenID авторизацию"""
-    return_url = request.args.get('return_url', request.host_url)
+    base_url = get_base_url()
+    return_url = request.args.get('return_url', base_url)
     
     if not is_safe_url(return_url):
-        return_url = request.host_url
+        return_url = base_url
     
-    realm = request.host_url
+    realm = base_url
     
     params = {
         'openid.ns': 'http://specs.openid.net/auth/2.0',
         'openid.mode': 'checkid_setup',
-        'openid.return_to': f'{realm}api/auth/steam/callback?return_url={return_url}',
+        'openid.return_to': f'{realm}/api/auth/steam/callback?return_url={return_url}',
         'openid.realm': realm,
         'openid.identity': 'http://specs.openid.net/auth/2.0/identifier_select',
         'openid.claimed_id': 'http://specs.openid.net/auth/2.0/identifier_select',
@@ -123,10 +137,11 @@ def discord_link():
     if not client_id:
         return jsonify({'success': False, 'error': 'Discord не настроен'}), 503
     
-    return_url = request.args.get('return_url', request.host_url)
+    base_url = get_base_url()
+    return_url = request.args.get('return_url', base_url)
     
     if not is_safe_url(return_url):
-        return_url = request.host_url
+        return_url = base_url
     
     oauth_state = OAuthState.create(
         player_id=request.current_player.id,
@@ -136,7 +151,7 @@ def discord_link():
     db.session.add(oauth_state)
     db.session.commit()
     
-    redirect_uri = f'{request.host_url}api/auth/discord/callback'
+    redirect_uri = f'{base_url}/api/auth/discord/callback'
     
     params = {
         'client_id': client_id,
@@ -176,9 +191,10 @@ def discord_callback():
     db.session.delete(oauth_state)
     db.session.commit()
     
+    base_url = get_base_url()
     client_id = current_app.config.get('DISCORD_CLIENT_ID')
     client_secret = current_app.config.get('DISCORD_CLIENT_SECRET')
-    redirect_uri = f'{request.host_url}api/auth/discord/callback'
+    redirect_uri = f'{base_url}/api/auth/discord/callback'
     
     try:
         token_response = requests.post(

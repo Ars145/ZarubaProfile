@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Gamepad2, Shield, Users, Trophy } from 'lucide-react';
 import zarubaLogo from '@assets/zaruba_logo_1763633752495.png';
-import FloatingLines from '@/components/FloatingLines';
 
 export default function Login() {
   const { loginWithSteam, isAuthenticated, loading } = useAuth();
@@ -25,35 +24,8 @@ export default function Login() {
     );
   }
 
-  // Check WebGL support
-  const hasWebGL = (() => {
-    try {
-      const canvas = document.createElement('canvas');
-      return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
-    } catch (e) {
-      return false;
-    }
-  })();
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/10 p-4 relative overflow-hidden">
-      {/* Floating Lines Background - only if WebGL is supported */}
-      {hasWebGL && (
-        <div className="fixed inset-0 z-0 opacity-70" style={{ pointerEvents: 'auto' }}>
-          <FloatingLines 
-            enabledWaves={['top', 'middle', 'bottom']}
-            lineCount={14}
-            lineDistance={70}
-            bendRadius={15}
-            bendStrength={11.5}
-            interactive={true}
-            parallax={true}
-            linesGradient={['#ff6b00', '#ff8c00', '#45b7d1']}
-            mixBlendMode="normal"
-          />
-        </div>
-      )}
-
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />

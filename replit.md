@@ -19,10 +19,52 @@ The backend is built with Flask 3.0, using PostgreSQL (Neon-hosted) via SQLAlche
 **MongoDB Statistics Integration (SquadJS):** Consumes read-only player statistics from the Squad game server's MongoDB. This integration includes calculating vehicle time, kills, and a ranking system. The system supports graceful degradation if MongoDB is unavailable.
 
 ### Authentication & Authorization
-Currently, there is no authentication implemented, with mock data used for demonstration. The planned approach involves integrating external authentication services like Steam and Discord OAuth, with role-based access control (Guest, Member, Owner) to dictate UI and capabilities.
+**Discord OAuth** is fully implemented for user authentication, including account linking and unlinking. User sessions are managed with JWT tokens stored in cookies. The `@require_auth` decorator secures all protected endpoints and provides `request.current_player` for accessing authenticated player data. Role-based access control (Guest, Member, Owner) is enforced across clan management endpoints.
+
+**Steam Authentication** is planned for future implementation to provide additional player verification and profile data.
 
 ### Statistics System
 A robust calculation engine, ported from the Discord bot's JavaScript logic to Python, processes complex statistics. It supports 35+ vehicle types, 60+ weapon patterns, and a comprehensive ranking system. Data categories include player performance (K/D, revives), match statistics, time tracking (playtime, commander time), role analysis, weapon proficiency, and vehicle statistics. Calculations are primarily client-side to reduce backend load and maintain consistency with the existing Discord bot.
+
+### Clan Management System
+**Complete Implementation** with 15+ REST API endpoints covering:
+
+**Data Models:**
+- **Clan:** Basic clan info with name, tag, description, logo, and owner relationship
+- **ClanMember:** Membership records with role (owner/member), join dates, and stats snapshots
+- **ClanApplication:** Player applications with status tracking (pending/accepted/rejected/cancelled)
+- **ClanInvitation:** Owner-sent invitations with status tracking and invited_by relationship
+
+**Core Features:**
+- **Clan CRUD:** Create, read, update, delete clans (owner-only operations)
+- **Member Management (4 endpoints):**
+  - Join open clans
+  - Leave clan (owners must transfer ownership first)
+  - Kick members (owner-only)
+  - Change member roles with transactional ownership transfer (ensures exactly one owner at all times)
+  
+- **Application System (5 endpoints):**
+  - Submit applications with current stats snapshot
+  - View clan applications (owner-only)
+  - View personal applications
+  - Approve/reject applications with duplicate membership prevention
+  - Withdraw pending applications
+  
+- **Invitation System (6 endpoints):**
+  - Create invitations (owner-only)
+  - View personal invitations
+  - View clan invitations (owner-only)
+  - Accept invitations with membership checks
+  - Reject invitations
+  - Cancel invitations (owner-only)
+
+**Key Design Decisions:**
+- RESTful resource identification using `ClanMember.id` (not `player_id`) in URL paths
+- Transactional safety: ownership transfers promote target first, then demote others to prevent ownerless clans
+- Defensive checks prevent duplicate memberships (reject applications/invitations if player joined another clan)
+- Single source of truth: `Player.current_clan_id` synced with `ClanMember` records
+- Unique constraints prevent duplicate applications per player per clan
+- CASCADE deletes maintain data integrity when clans or players are removed
 
 ## External Dependencies
 

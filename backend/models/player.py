@@ -20,6 +20,7 @@ class Player(db.Model):
     # Relationships
     current_clan = db.relationship('Clan', foreign_keys=[current_clan_id], backref='current_members')
     memberships = db.relationship('ClanMember', back_populates='player', cascade='all, delete-orphan')
+    applications = db.relationship('ClanApplication', back_populates='player', cascade='all, delete-orphan')
     
     def to_dict(self):
         return {

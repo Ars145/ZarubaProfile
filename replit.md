@@ -15,69 +15,48 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Architecture
 
 **Technology Stack:**
-- React (Vite-based build system)
-- TypeScript/JavaScript hybrid approach
+- React 19 (Vite-based build system)
+- Pure JavaScript/JSX (no TypeScript)
 - shadcn/ui component library with Radix UI primitives
 - TailwindCSS for styling with custom gaming theme
 - TanStack Query for data fetching and state management
 
 **Design Patterns:**
 - Component-based architecture with UI components in `client/src/components/ui/`
+- All components written in pure JSX (55+ UI components)
 - Custom hooks for business logic (e.g., `useSquadStats.js`, `use-toast.js`)
 - Mock data layer for development (`client/src/data/mockSquadStats.js`)
 - Calculation utilities separated into pure functions (`client/src/lib/statsCalculations.js`)
 
 **Key Architectural Decisions:**
+- **Frontend-only application** - no backend currently implemented
 - Gaming-focused theme with custom fonts (Oxanium, Rajdhani, Inter) and dark color scheme
 - Russian language documentation and comments throughout codebase
 - Statistics calculations ported from Discord bot to web interface
-- Client-side mock data allows frontend development independent of backend
+- Client-side mock data for development and demonstration
+- All TypeScript removed - pure JavaScript implementation
 
-### Backend Architecture
-
-**Technology Stack:**
-- Express.js REST API server
-- TypeScript for type safety
-- Drizzle ORM for database operations
-- PostgreSQL (Neon serverless) for relational data
-- In-memory storage abstraction layer
-
-**Design Patterns:**
-- Storage interface pattern (`server/storage.ts`) providing abstraction over data access
-- Currently implements `MemStorage` (in-memory) with plan to add PostgreSQL implementation
-- Route registration pattern in `server/routes.ts`
-- Middleware-based logging and request handling
-
-**Database Schema:**
-- Basic user schema defined in `shared/schema.ts` using Drizzle ORM
-- Schema includes users table with username/password (placeholder for full implementation)
-- Migration system configured via `drizzle.config.ts`
-
-**Planned Features (Not Yet Implemented):**
-- Player profiles and statistics endpoints
-- Clan management CRUD operations
-- Clan application/invitation system
-- Integration with PostgreSQL for persistent storage
+**Development Setup:**
+- Vite dev server runs on port 5000
+- Hot Module Replacement (HMR) enabled
+- Replit-specific plugins for enhanced development experience
 
 ### Data Storage Solutions
 
-**Primary Database (PostgreSQL):**
-- Intended for player profiles, clan data, and application records
-- Configured with Neon serverless PostgreSQL
-- Drizzle ORM manages schema and migrations
-- Connection via `DATABASE_URL` environment variable
+**Current Implementation:**
+- Mock data only - no backend or database connections
+- All statistics displayed from `client/src/data/mockSquadStats.js`
 
-**External Statistics Database (MongoDB):**
-- Existing SquadJS database containing game server statistics
+**Future Integration Options:**
+- External API for player statistics (MongoDB/SquadJS integration)
+- Backend service for clan management and user profiles
+- Direct MongoDB connection for statistics (when backend is added)
+
+**Planned External Statistics Database (MongoDB):**
+- SquadJS database containing game server statistics
 - Collections: `mainstats` (player stats), configuration data
 - Read-only access pattern - web app consumes but doesn't modify
 - Statistics include: kills, deaths, K/D ratio, match history, role time, weapon usage, vehicle time
-
-**Storage Architecture Decision:**
-- Dual database approach: PostgreSQL for application data, MongoDB for game statistics
-- Separation allows leveraging existing Discord bot infrastructure
-- Statistics calculations performed client-side using ported Discord bot logic
-- No real-time synchronization required - statistics updated periodically by game server
 
 ### External Dependencies
 
@@ -111,14 +90,14 @@ Preferred communication style: Simple, everyday language.
 ### Authentication & Authorization
 
 **Current State:**
-- Basic user schema exists but authentication not implemented
-- Documentation references Steam and Discord OAuth integration
-- Token-based auth patterns visible in API example documentation
+- No authentication implemented - frontend only application
+- Mock user data displayed for demonstration purposes
 
 **Planned Approach:**
-- Integration with main ZARUBA project's authentication system
+- Integration with external authentication service (Steam, Discord OAuth)
 - Role-based access: Guest, Member (clan member), Owner (clan leader)
 - Different UI and capabilities based on user role
+- Backend service required for secure authentication implementation
 
 ### Statistics System
 

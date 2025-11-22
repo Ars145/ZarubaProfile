@@ -1,9 +1,9 @@
-modules = ["nodejs-20", "web", "postgresql-16"]
+modules = ["nodejs-20", "web", "bash"]
 run = "npm run dev"
 hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-25_05"
 packages = ["unzip"]
 
 [deployment]
@@ -19,6 +19,10 @@ externalPort = 80
 [[ports]]
 localPort = 45573
 externalPort = 3000
+
+[[ports]]
+localPort = 46243
+externalPort = 3001
 
 [env]
 PORT = "5000"

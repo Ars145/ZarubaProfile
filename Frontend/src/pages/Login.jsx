@@ -33,21 +33,21 @@ export default function Login() {
         <div className="absolute top-1/2 right-1/3 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '0.5s' }} />
       </div>
 
-      <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl backdrop-blur-sm">
-        <CardHeader className="space-y-6 text-center pb-8 pt-12">
+      <Card className="w-full max-w-lg relative z-10 border-border/50 shadow-2xl backdrop-blur-sm bg-card/95">
+        <CardHeader className="space-y-8 text-center pb-10 pt-16">
           {/* Logo with Enhanced Vignette */}
           <div className="mx-auto relative">
-            <div className="absolute inset-0 bg-primary/30 blur-3xl rounded-full scale-150" />
-            <div className="absolute inset-0 bg-gradient-radial from-primary/20 via-transparent to-transparent blur-xl" />
+            <div className="absolute inset-0 bg-primary/40 blur-[80px] rounded-full scale-150 animate-pulse" style={{ animationDuration: '3s' }} />
+            <div className="absolute inset-0 bg-gradient-radial from-primary/30 via-primary/10 to-transparent blur-2xl" />
             <img 
               src={zarubaLogo} 
               alt="ZARUBA" 
-              className="w-44 h-44 object-contain mx-auto relative z-10 drop-shadow-2xl"
+              className="w-52 h-52 object-contain mx-auto relative z-10 drop-shadow-2xl"
             />
           </div>
           
-          <div className="space-y-2">
-            <CardDescription className="text-lg text-muted-foreground font-medium">
+          <div className="space-y-3">
+            <CardDescription className="text-xl text-foreground/90 font-semibold">
               Добро пожаловать в личный кабинет игрока
             </CardDescription>
           </div>
@@ -59,66 +59,55 @@ export default function Login() {
             <Button
               data-testid="button-steam-login"
               onClick={loginWithSteam}
-              className="steam-button w-full h-14 text-base gap-3 font-semibold"
+              className="steam-button w-full h-16 text-lg gap-4 font-bold tracking-wide"
               size="lg"
             >
-              <Gamepad2 className="w-5 h-5" />
+              <Gamepad2 className="w-6 h-6" />
               Войти через Steam
             </Button>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/50"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-3 text-muted-foreground font-medium">
-                  Безопасная авторизация
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Features */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-center">
-              <span className="text-xs uppercase tracking-wider text-muted-foreground/70 font-semibold">
-                После авторизации
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/10 hover:border-primary/20 transition-colors">
-                <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold">Профиль игрока</p>
-                  <p className="text-xs text-muted-foreground">Статистика и прогресс</p>
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="group flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 hover:bg-primary/15 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
+                <div className="p-2.5 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                  <Shield className="w-6 h-6 text-primary" />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <p className="text-base font-bold text-foreground">Профиль игрока</p>
+                  <p className="text-sm text-muted-foreground">Детальная статистика, достижения и прогресс</p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-accent/5 border border-accent/10 hover:border-accent/20 transition-colors">
-                <Users className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold">Система кланов</p>
-                  <p className="text-xs text-muted-foreground">Создание и участие</p>
+              <div className="group flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/20 hover:border-accent/40 hover:bg-accent/15 transition-all duration-300 hover:shadow-lg hover:shadow-accent/20">
+                <div className="p-2.5 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition-colors">
+                  <Users className="w-6 h-6 text-accent" />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <p className="text-base font-bold text-foreground">Система кланов</p>
+                  <p className="text-sm text-muted-foreground">Создавайте кланы и приглашайте друзей</p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/10 hover:border-primary/20 transition-colors sm:col-span-2">
-                <Trophy className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold">Рейтинговая система</p>
-                  <p className="text-xs text-muted-foreground">Отслеживание рангов и позиций</p>
+              <div className="group flex items-start gap-4 p-5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 hover:border-primary/40 hover:bg-primary/15 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20">
+                <div className="p-2.5 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                  <Trophy className="w-6 h-6 text-primary" />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <p className="text-base font-bold text-foreground">Рейтинговая система</p>
+                  <p className="text-sm text-muted-foreground">Отслеживайте свои ранги и позиции</p>
                 </div>
               </div>
             </div>
           </div>
           
           {/* Security Notice */}
-          <div className="pt-4 border-t border-border/50">
-            <p className="text-xs text-center text-muted-foreground leading-relaxed">
-              Нажимая "Войти через Steam", вы будете перенаправлены на официальную страницу авторизации Steam. 
-              <span className="block mt-1 text-primary/80">Мы не храним ваш пароль Steam.</span>
-            </p>
+          <div className="pt-6 border-t border-border/30">
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/80">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Безопасная авторизация через Steam OpenID</span>
+            </div>
           </div>
         </CardContent>
       </Card>

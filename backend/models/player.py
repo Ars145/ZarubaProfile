@@ -12,7 +12,6 @@ class Player(db.Model):
     username = db.Column(db.Text, nullable=False)
     discord_id = db.Column(db.Text, nullable=True, index=True)
     discord_username = db.Column(db.Text, nullable=True)
-    discord_avatar = db.Column(db.Text, nullable=True)
     avatar_url = db.Column(db.Text, nullable=True)
     current_clan_id = db.Column(UUID(as_uuid=True), db.ForeignKey('clans.id', ondelete='SET NULL'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -29,7 +28,6 @@ class Player(db.Model):
             'username': self.username,
             'discordId': self.discord_id,
             'discordUsername': self.discord_username,
-            'discordAvatar': self.discord_avatar,
             'avatarUrl': self.avatar_url,
             'currentClanId': str(self.current_clan_id) if self.current_clan_id else None,
             'createdAt': self.created_at.isoformat() if self.created_at else None,

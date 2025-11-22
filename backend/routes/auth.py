@@ -222,7 +222,6 @@ def discord_callback():
         
         discord_id = user_response.get('id')
         discord_username = user_response.get('username')
-        discord_avatar = user_response.get('avatar')
         
         if not discord_id:
             return redirect(f'{return_url}?error=discord_user_failed')
@@ -231,7 +230,6 @@ def discord_callback():
         if player:
             player.discord_id = discord_id
             player.discord_username = discord_username
-            player.discord_avatar = discord_avatar
             db.session.commit()
         
         return redirect(f'{return_url}?discord_linked=true')
@@ -248,7 +246,6 @@ def discord_unlink():
     
     player.discord_id = None
     player.discord_username = None
-    player.discord_avatar = None
     db.session.commit()
     
     return jsonify({

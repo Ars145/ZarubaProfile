@@ -25,21 +25,33 @@ export default function Login() {
     );
   }
 
+  // Check WebGL support
+  const hasWebGL = (() => {
+    try {
+      const canvas = document.createElement('canvas');
+      return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+    } catch (e) {
+      return false;
+    }
+  })();
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/10 p-4 relative overflow-hidden">
-      {/* Floating Lines Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
-        <FloatingLines 
-          enabledWaves={['top', 'middle', 'bottom']}
-          lineCount={[10, 15, 20]}
-          lineDistance={[8, 6, 4]}
-          bendRadius={5.0}
-          bendStrength={-0.5}
-          interactive={true}
-          parallax={true}
-          linesGradient={['#ff6b00', '#ff8c00', '#45b7d1']}
-        />
-      </div>
+      {/* Floating Lines Background - only if WebGL is supported */}
+      {hasWebGL && (
+        <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
+          <FloatingLines 
+            enabledWaves={['top', 'middle', 'bottom']}
+            lineCount={[10, 15, 20]}
+            lineDistance={[8, 6, 4]}
+            bendRadius={5.0}
+            bendStrength={-0.5}
+            interactive={true}
+            parallax={true}
+            linesGradient={['#ff6b00', '#ff8c00', '#45b7d1']}
+          />
+        </div>
+      )}
 
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">

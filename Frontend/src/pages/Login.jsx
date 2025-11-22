@@ -68,7 +68,7 @@ export default function Login() {
            }} 
       />
 
-      <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl">
+      <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl bg-transparent border-0">
         <CardHeader className="space-y-4 text-center pb-6">
           {/* Logo */}
           <div className="mx-auto relative">

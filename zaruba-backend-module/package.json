@@ -1,0 +1,61 @@
+{
+  "name": "@zaruba/backend-module",
+  "version": "1.0.0",
+  "description": "Автономный бэкенд-модуль для управления кланами, игроками и заявками ZARUBA",
+  "type": "module",
+  "main": "server/routes.js",
+  "exports": {
+    ".": "./server/routes.js",
+    "./storage": "./server/storage.js",
+    "./schema": "./shared/schema.js",
+    "./services/squadStats": "./server/services/squadStats.js"
+  },
+  "files": [
+    "server/",
+    "shared/",
+    "BACKEND_MODULE_README.md"
+  ],
+  "scripts": {
+    "db:generate": "drizzle-kit generate:pg --schema=./shared/schema.js",
+    "db:push": "drizzle-kit push:pg",
+    "db:studio": "drizzle-kit studio"
+  },
+  "keywords": [
+    "zaruba",
+    "clans",
+    "squad",
+    "gaming",
+    "backend",
+    "express",
+    "drizzle",
+    "postgresql"
+  ],
+  "author": "ZARUBA Team",
+  "license": "MIT",
+  "peerDependencies": {
+    "express": "^4.18.0 || ^5.0.0",
+    "drizzle-orm": "^0.39.0",
+    "pg": "^8.11.0",
+    "zod": "^3.22.0"
+  },
+  "dependencies": {
+    "drizzle-zod": "^0.7.0"
+  },
+  "optionalDependencies": {
+    "mongodb": "^7.0.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/zaruba-backend"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/zaruba-backend/issues"
+  },
+  "homepage": "https://github.com/your-org/zaruba-backend#readme"
+}

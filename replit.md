@@ -12,6 +12,23 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (November 22, 2025)
 
+**FloatingLines Animated Background:**
+- ✅ Created FloatingLines component (Frontend/src/components/FloatingLines.jsx)
+  - CSS-based animations instead of Three.js (better Replit compatibility)
+  - Three wave layers with independent animation speeds
+  - SVG-based wavy line rendering with gradients
+  - Configurable line count, distance, colors, and animation
+  - Interactive hover pause and parallax effects supported
+- ✅ Integrated FloatingLines into Login page
+  - Added to page background with 40% opacity
+  - Three waves: orange (top), orange (middle), cyan (bottom)
+  - Enhances visual appeal of authentication interface
+  - Smooth wave motion with cubic bezier paths
+- ✅ Added FloatingLines.css with animations
+  - @keyframes wave-motion for continuous scrolling
+  - Responsive adjustments for mobile screens
+  - Performance-optimized animations
+
 **MongoDB Integration & Statistics Migration:**
 - ✅ Ported Discord bot statistics logic (JavaScript → Python)
   - Created backend/services/mongo_service.py with Singleton pattern
@@ -23,19 +40,6 @@ Preferred communication style: Simple, everyday language.
   - GET /api/stats/search/:playerName - player search
   - GET /api/stats/leaderboard - top players with sorting
   - GET /api/stats/ranks - ranking configuration
-- ✅ Flexible MongoDB schema support
-  - safe_int() helpers handle nested objects and missing fields
-  - Works with standard SquadJS schema and variations
-  - Graceful degradation without MongoDB
-- ✅ Environment configuration
-  - MONGO_URI and MONGO_DB_NAME in config
-  - .env.example updated
-  - Connection pooling and timeout handling
-- ✅ Documentation
-  - backend/README.md: Complete API documentation with examples
-  - MongoDB schema structure documented
-  - Ported calculations documented
-- ✅ Removed Discord bot code (attached_assets/stats_extract)
 
 **Previous Changes:**
 - Converted all .tsx files to .jsx (TypeScript removed)

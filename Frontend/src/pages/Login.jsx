@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Gamepad2, Shield, Users, Trophy } from 'lucide-react';
 import zarubaLogo from '@assets/zaruba_logo_1763633752495.png';
+import FloatingLines from '@/components/FloatingLines';
 
 export default function Login() {
   const { loginWithSteam, isAuthenticated, loading } = useAuth();
@@ -26,6 +27,20 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/10 p-4 relative overflow-hidden">
+      {/* Floating Lines Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
+        <FloatingLines 
+          enabledWaves={['top', 'middle', 'bottom']}
+          lineCount={[10, 15, 20]}
+          lineDistance={[8, 6, 4]}
+          bendRadius={5.0}
+          bendStrength={-0.5}
+          interactive={true}
+          parallax={true}
+          linesGradient={['#ff6b00', '#ff8c00', '#45b7d1']}
+        />
+      </div>
+
       {/* Background Effects */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />

@@ -20,8 +20,8 @@ Preferred communication style: Simple, everyday language.
   - Toast notifications for success/error states
   - URL parameter handling after OAuth redirect
 - ✅ Database schema updated
-  - Added `discord_id` and `discord_username` columns to players table
-  - Player serialization uses camelCase (`discordId`, `discordUsername`)
+  - Added `discord_id`, `discord_username`, and `discord_avatar` columns to players table
+  - Player serialization uses camelCase (`discordId`, `discordUsername`, `discordAvatar`)
 - ✅ Security implementation
   - JWT-based authentication (access + refresh tokens)
   - State parameter validation in OAuth flow
@@ -34,6 +34,9 @@ Preferred communication style: Simple, everyday language.
   - Card title: "Discord аккаунт"
   - Confirmation dialog for unlink action
   - Visual feedback with loading states
+  - Header integration: Discord avatar and username displayed in top bar
+  - Logout button in settings dropdown menu
+  - Discord CDN integration for avatar images (supports animated avatars)
 
 **FloatingLines Animated Background:**
 - ✅ Created FloatingLines component (Frontend/src/components/FloatingLines.jsx)

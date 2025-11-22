@@ -61,17 +61,28 @@ class AuthService:
         return session
     
     @staticmethod
-    def refresh_tokens(refresh_token):
-        """Обновить токены по refresh токену"""
-        session = Session.query.filter_by(refresh_token=refresh_token).first()
+    def refresh_tokens(old_refresh_token, user_agent=None, ip_address=None):
+        """Обновить токены и ротировать refresh токен"""
+        old_session = Session.query.filter_by(refresh_token=old_refresh_token).first()
         
-        if not session or session.is_expired:
-            return None, None
+        if not old_session or old_session.is_expired:
+            return None
         
-        session.last_used = datetime.utcnow()
+        player_id = old_session.player_id
+        
+        db.session.delete(old_session)
         db.session.commit()
         
-        return AuthService.generate_tokens(session.player_id)
+        access_token, new_refresh_token = AuthService.generate_tokens(player_id)
+        
+        AuthService.create_session(
+            player_id=player_id,
+            refresh_token=new_refresh_token,
+            user_agent=user_agent,
+            ip_address=ip_address
+        )
+        
+        return access_token, new_refresh_token
     
     @staticmethod
     def revoke_session(refresh_token):

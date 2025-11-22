@@ -106,8 +106,7 @@ def steam_callback():
         player = Player(
             steam_id=steam_id,
             username=username,
-            avatar_url=avatar_url,
-            last_login=datetime.utcnow()
+            avatar_url=avatar_url
         )
         db.session.add(player)
     else:

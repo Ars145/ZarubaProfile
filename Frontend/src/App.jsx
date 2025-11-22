@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "@/components/layout";
 import NotFound from "@/pages/not-found";
-import ProfilePage from "@/pages/Profile";
+import ProfilePage from "@/pages/profile";
 import Login from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
 

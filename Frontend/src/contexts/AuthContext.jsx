@@ -127,12 +127,10 @@ export function AuthProvider({ children }) {
 
   const linkDiscord = async () => {
     const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) {
-      throw new Error('Not authenticated');
-    }
+    if (!accessToken) return;
 
     try {
-      const returnUrl = `${window.location.origin}/profile`;
+      const returnUrl = `${window.location.origin}/settings`;
       const response = await fetch(`${API_URL}/api/auth/discord/link?return_url=${encodeURIComponent(returnUrl)}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -145,7 +143,6 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error('Discord link failed:', error);
-      throw error;
     }
   };
 

@@ -10,6 +10,42 @@ The platform enables players to view their gaming statistics, join clans, manage
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (November 22, 2025)
+
+**MongoDB Integration & Statistics Migration:**
+- ✅ Ported Discord bot statistics logic (JavaScript → Python)
+  - Created backend/services/mongo_service.py with Singleton pattern
+  - Created backend/services/stats_service.py with calculation functions
+  - Implemented calc_vehicle_time(), calc_vehicle_kills(), format_time()
+  - Ported ranking system (get_user_high_score_and_group)
+- ✅ Implemented stats API endpoints
+  - GET /api/stats/:steamId - full player statistics
+  - GET /api/stats/search/:playerName - player search
+  - GET /api/stats/leaderboard - top players with sorting
+  - GET /api/stats/ranks - ranking configuration
+- ✅ Flexible MongoDB schema support
+  - safe_int() helpers handle nested objects and missing fields
+  - Works with standard SquadJS schema and variations
+  - Graceful degradation without MongoDB
+- ✅ Environment configuration
+  - MONGO_URI and MONGO_DB_NAME in config
+  - .env.example updated
+  - Connection pooling and timeout handling
+- ✅ Documentation
+  - backend/README.md: Complete API documentation with examples
+  - MongoDB schema structure documented
+  - Ported calculations documented
+- ✅ Removed Discord bot code (attached_assets/stats_extract)
+
+**Previous Changes:**
+- Converted all .tsx files to .jsx (TypeScript removed)
+- Implemented PostgreSQL database with SQLAlchemy ORM
+- Created Flask backend with CRUD endpoints for clans
+- Restructured project: Frontend/ (React), backend/ (Flask), static/ (uploads)
+- Added JSONB fields for complex data (requirements, stats snapshots)
+- Configured CASCADE deletes for referential integrity
+- Updated .gitignore for Python and uploads
+
 ## Project Structure
 
 ```
@@ -113,20 +149,24 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 
-**Current Implementation:**
-- Mock data only - no backend or database connections
-- All statistics displayed from `client/src/data/mockSquadStats.js`
+**PostgreSQL Database (Replit-hosted Neon):**
+- Players: UUID PK, steam_id (unique), username, discord_id, current_clan_id
+- Clans: UUID PK, name, tag (unique), theme, JSONB requirements, timestamps
+- Clan Members: UUID PK, UNIQUE(clan_id, player_id), role, JSONB stats_snapshot, CASCADE deletes
+- Clan Applications: UUID PK, status (pending|accepted|rejected), JSONB stats_snapshot, CASCADE deletes
+- SQLAlchemy ORM with migrations support
 
-**Future Integration Options:**
-- External API for player statistics (MongoDB/SquadJS integration)
-- Backend service for clan management and user profiles
-- Direct MongoDB connection for statistics (when backend is added)
-
-**Planned External Statistics Database (MongoDB):**
-- SquadJS database containing game server statistics
-- Collections: `mainstats` (player stats), configuration data
+**MongoDB Statistics Integration (SquadJS):**
+- **Implemented** - graceful degradation without MongoDB
+- Collections: `mainstats` (player stats), `configs` (ranking system)
 - Read-only access pattern - web app consumes but doesn't modify
+- Connection via MONGO_URI environment variable
 - Statistics include: kills, deaths, K/D ratio, match history, role time, weapon usage, vehicle time
+- Flexible schema support with safe field extraction (handles nested objects and missing fields)
+
+**Mock Data (Development):**
+- Frontend: `client/src/data/mockSquadStats.js` for development without MongoDB
+- All statistics calculations work with both mock and real data
 
 ### External Dependencies
 
@@ -152,9 +192,21 @@ Preferred communication style: Simple, everyday language.
 - ESBuild for production builds
 
 **Key Integration Points:**
-- Statistics calculation logic ported from Discord bot ensures consistency
-- Mock data structure matches MongoDB schema exactly
-- Frontend designed to work with or without backend (development flexibility)
+- **Backend Integration Complete**: Flask API with PostgreSQL and MongoDB
+- **Statistics Logic Ported**: Discord bot calculations (JS → Python) in backend/services/stats_service.py
+  - Vehicle time calculations (heavy vehicles, helicopters)
+  - Vehicle kills tracking
+  - Weapon categorization
+  - Ranking system (scoreGroups)
+  - Time formatting utilities
+- **API Endpoints**: 
+  - `/api/clans` - CRUD operations (PostgreSQL)
+  - `/api/stats/:steamId` - player statistics (MongoDB)
+  - `/api/stats/search/:playerName` - search players
+  - `/api/stats/leaderboard` - top players with sorting
+  - `/api/stats/ranks` - ranking configuration
+- **Graceful Degradation**: Backend works without MongoDB (returns 503 for stats endpoints)
+- **Flexible Schema**: safe_int() helpers handle variations in SquadJS MongoDB structure
 - Session management infrastructure prepared but not implemented
 
 ### Authentication & Authorization

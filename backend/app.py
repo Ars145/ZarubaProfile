@@ -17,11 +17,15 @@ def create_app(config_name=None):
     db.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
+    # Инициализация MongoDB
+    from services.mongo_service import init_mongo
+    init_mongo(app)
+    
     # Регистрация blueprints
     from routes import api
     app.register_blueprint(api)
     
-    # Создание таблиц БД
+    # Создание таблиц БД (PostgreSQL)
     with app.app_context():
         db.create_all()
     

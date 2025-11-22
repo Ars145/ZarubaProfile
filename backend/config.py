@@ -15,6 +15,10 @@ class Config:
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     
+    # MongoDB (SquadJS statistics)
+    MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
+    MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'SquadJS')
+    
     # Uploads
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
     UPLOAD_FOLDER = 'static/uploads'

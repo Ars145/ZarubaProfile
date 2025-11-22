@@ -4,6 +4,6 @@ from flask import Blueprint
 api = Blueprint('api', __name__, url_prefix='/api')
 
 # Импортируем маршруты
-from . import clans
+from . import clans, stats
 
 __all__ = ['api']

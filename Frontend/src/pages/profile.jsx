@@ -17,6 +17,7 @@ import { useState, useRef, useEffect } from "react";
 
 // Squad Stats Components
 import { useSquadStats } from "@/hooks/useSquadStats";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Generated Assets
 import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
@@ -162,6 +163,109 @@ const parseGameDuration = (durationStr) => {
   if (hoursMatch) totalHours += parseInt(hoursMatch[1]);
   
   return totalHours;
+};
+
+const DiscordCard = () => {
+  const { user, linkDiscord, unlinkDiscord } = useAuth();
+  const [isLinking, setIsLinking] = useState(false);
+  
+  const isLinked = user?.discordId && user?.discordUsername;
+  
+  const handleLinkDiscord = async () => {
+    setIsLinking(true);
+    try {
+      await linkDiscord();
+    } catch (error) {
+      console.error('Failed to link Discord:', error);
+    } finally {
+      setIsLinking(false);
+    }
+  };
+  
+  const handleUnlinkDiscord = async () => {
+    if (confirm('Вы уверены, что хотите отвязать Discord аккаунт?')) {
+      try {
+        await unlinkDiscord();
+      } catch (error) {
+        console.error('Failed to unlink Discord:', error);
+      }
+    }
+  };
+  
+  return (
+    <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.6 }}>
+      <Card className="bg-gradient-to-br from-[#5865F2] via-[#5865F2] to-[#4752C4] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-all duration-500 cursor-pointer transform hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3109/636e0a6918e57475a843f59f_layer_1.svg')] opacity-10 bg-repeat" />
+        <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/15 transition-colors duration-500" />
+        
+        <CardHeader className="relative z-10 pb-2">
+          <CardTitle className="flex items-center gap-3 text-white font-display text-xl">
+            <svg className="w-8 h-8 drop-shadow-lg" viewBox="0 0 127.14 96.36" fill="white">
+              <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+            </svg>
+            Discord аккаунт
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent className="relative z-10 space-y-4">
+          {isLinked ? (
+            <>
+              <div className="flex items-center justify-between p-3 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 group-hover:bg-black/30 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar className="w-12 h-12 border-2 border-white/20 shadow-lg">
+                      <AvatarFallback className="bg-[#5865F2] text-white font-bold">
+                        {user.discordUsername?.slice(0, 2).toUpperCase() || 'DC'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 bg-[#5865F2] rounded-full p-1 border-2 border-white/10 shadow-md">
+                      <CheckCircle2 className="w-3 h-3 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold text-white">{user.discordUsername}</span>
+                    <span className="text-[10px] text-white/80 uppercase tracking-wider font-bold flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-yellow-300 fill-yellow-300" />
+                      Подтверждено
+                    </span>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white/50 hover:text-white hover:bg-white/10 rounded-full"
+                  onClick={handleUnlinkDiscord}
+                  data-testid="button-unlink-discord"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="p-4 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 text-center">
+              <p className="text-white/80 text-sm mb-4">Discord аккаунт не привязан</p>
+            </div>
+          )}
+          
+          <Button 
+            className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11 group-hover:scale-[1.02] transition-transform gap-2"
+            onClick={handleLinkDiscord}
+            disabled={isLinking}
+            data-testid="button-link-discord"
+          >
+            {isLinking ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 127.14 96.36" fill="currentColor">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+              </svg>
+            )}
+            {isLinked ? 'ОБНОВИТЬ ПРИВЯЗКУ' : 'ПРИВЯЗАТЬ АККАУНТ'}
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
 };
 
 export default function ProfilePage() {
@@ -812,53 +916,7 @@ export default function ProfilePage() {
           </motion.div>
 
           {/* Discord Integration Card */}
-          <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.6 }}>
-            <Card className="bg-gradient-to-br from-[#5865F2] via-[#5865F2] to-[#4752C4] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-all duration-500 cursor-pointer transform hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3109/636e0a6918e57475a843f59f_layer_1.svg')] opacity-10 bg-repeat" />
-              <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/15 transition-colors duration-500" />
-              
-              <CardHeader className="relative z-10 pb-2">
-                <CardTitle className="flex items-center gap-3 text-white font-display text-xl">
-                  <svg className="w-8 h-8 drop-shadow-lg" viewBox="0 0 127.14 96.36" fill="white">
-                    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                  </svg>
-                  Discord Связь
-                </CardTitle>
-              </CardHeader>
-              
-              <CardContent className="relative z-10 space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 group-hover:bg-black/30 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Avatar className="w-12 h-12 border-2 border-white/20 shadow-lg">
-                        <AvatarImage src="https://github.com/shadcn.png" />
-                        <AvatarFallback>DS</AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-1 -right-1 bg-[#5865F2] rounded-full p-1 border-2 border-white/10 shadow-md">
-                        <CheckCircle2 className="w-3 h-3 text-white" />
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-white">TacticalViper#9999</span>
-                      <span className="text-[10px] text-white/80 uppercase tracking-wider font-bold flex items-center gap-1">
-                        <Zap className="w-3 h-3 text-yellow-300 fill-yellow-300" />
-                        Подтверждено
-                      </span>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" className="text-white/50 hover:text-white hover:bg-white/10 rounded-full">
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                <Button className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11 group-hover:scale-[1.02] transition-transform gap-2">
-                  <svg className="w-5 h-5" viewBox="0 0 127.14 96.36" fill="currentColor">
-                    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                  </svg>
-                  ОБНОВИТЬ ПРИВЯЗКУ
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <DiscordCard />
         </div>
 
         {/* Right Column - Clan Management */}

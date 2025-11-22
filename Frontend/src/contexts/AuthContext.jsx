@@ -130,7 +130,7 @@ export function AuthProvider({ children }) {
     if (!accessToken) return;
 
     try {
-      const returnUrl = `${window.location.origin}/settings`;
+      const returnUrl = `${window.location.origin}/profile`;
       const response = await fetch(`${API_URL}/api/auth/discord/link?return_url=${encodeURIComponent(returnUrl)}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -146,12 +146,33 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const unlinkDiscord = async () => {
+    const accessToken = localStorage.getItem('access_token');
+    if (!accessToken) return;
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/discord/unlink`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      if (response.ok) {
+        await checkAuth();
+      }
+    } catch (error) {
+      console.error('Discord unlink failed:', error);
+    }
+  };
+
   const value = {
     user,
     loading,
     loginWithSteam,
     logout,
     linkDiscord,
+    unlinkDiscord,
     handleCallback,
     isAuthenticated: !!user
   };

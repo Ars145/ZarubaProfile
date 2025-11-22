@@ -238,6 +238,22 @@ def discord_callback():
         return redirect(f'{return_url}?error=discord_request_failed')
 
 
+@bp.route('/discord/unlink', methods=['POST'])
+@require_auth
+def discord_unlink():
+    """Отвязать Discord аккаунт"""
+    player = request.current_player
+    
+    player.discord_id = None
+    player.discord_username = None
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Discord аккаунт успешно отвязан'
+    })
+
+
 @bp.route('/refresh', methods=['POST'])
 def refresh():
     """Обновить access токен и ротировать refresh токен"""

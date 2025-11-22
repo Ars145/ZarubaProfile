@@ -20,14 +20,6 @@ import { useSquadStats } from "@/hooks/useSquadStats";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-// Generated Assets
-import alphaBanner from "@assets/generated_images/dark_tactical_gaming_clan_banner_with_alpha_squad_theme.png";
-import deltaBanner from "@assets/generated_images/blue_tactical_gaming_clan_banner_with_delta_force_theme.png";
-import eliteBanner from "@assets/generated_images/yellow_tactical_gaming_clan_banner_with_elite_theme.png";
-import wolfLogo from "@assets/generated_images/tactical_wolf_logo_for_clan.png";
-import eagleLogo from "@assets/generated_images/tactical_eagle_logo_for_clan.png";
-import skullLogo from "@assets/generated_images/tactical_skull_logo_for_clan.png";
-
 // --- Animation Components ---
 
 const GlitchText = ({ text, className }) => {
@@ -506,51 +498,6 @@ export default function ProfilePage() {
     return parts.length > 0 ? parts.join(", ") : "Открыто для всех";
   };
 
-  const clans = [
-    { 
-      id: "alpha", 
-      name: "Отряд Альфа", 
-      tag: "ALPHA", 
-      members: 5, 
-      req: "100ч+, KD > 1.0",
-      description: "Элитный отряд для опытных игроков. Только командная игра.",
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      borderColor: "border-primary/30",
-      glow: "shadow-primary/20",
-      banner: alphaBanner,
-      logo: wolfLogo
-    },
-    { 
-      id: "df", 
-      name: "Delta Force", 
-      tag: "DF", 
-      members: 12, 
-      req: "50ч+, Микрофон",
-      description: "Тактический отряд специального назначения.",
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      borderColor: "border-blue-500/30",
-      glow: "shadow-blue-500/20",
-      banner: deltaBanner,
-      logo: eagleLogo
-    },
-    { 
-      id: "ze", 
-      name: "Zaruba Elite", 
-      tag: "ZE", 
-      members: 24, 
-      req: "500ч+, KD > 2.0",
-      description: "Только для ветеранов сервера.",
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10",
-      borderColor: "border-yellow-500/30",
-      glow: "shadow-yellow-500/20",
-      banner: eliteBanner,
-      logo: skullLogo
-    }
-  ];
-
   const achievements = [
     { name: "Ветеран", icon: Medal, color: "text-yellow-500", desc: "500+ часов" },
     { name: "Снайпер", icon: Crosshair, color: "text-primary", desc: "1000 хедшотов" },
@@ -896,84 +843,98 @@ export default function ProfilePage() {
         <div className="lg:col-span-6 space-y-6">
           
           {/* Squad Stats Card */}
-          {squadStats && (
-            <motion.div variants={container} initial="hidden" animate="show">
-              <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-primary/10 backdrop-blur-md overflow-hidden relative group hover:border-primary/30 hover:shadow-[0_0_20px_rgba(255,102,0,0.15)] transition-all duration-500">
-                <CardHeader className="pb-3 relative z-10">
-                  <CardTitle className="text-lg font-display flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-primary" />
-                    Боевая Статистика
-                  </CardTitle>
-                </CardHeader>
-                  
-                <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      {/* Rank and Progress */}
-                      {squadStats.rank && squadStats.rank.current && (
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-primary/30 bg-zinc-800/50 flex items-center justify-center shrink-0">
-                            {squadStats.rank.current.iconUrl ? (
-                              <img src={squadStats.rank.current.iconUrl} alt="Rank" className="w-full h-full object-contain" />
-                            ) : (
-                              <Star className="w-6 h-6 text-primary" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between text-xs mb-1">
-                              <span className="text-muted-foreground">Ранг</span>
-                              <span className="text-primary font-bold">{squadStats.rank.progress.toFixed(1)}%</span>
-                            </div>
-                            <Progress value={squadStats.rank.progress} className="h-2" />
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Main Stats Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
-                          <Crosshair className="w-4 h-4 text-primary mx-auto mb-1" />
-                          <div className="text-xs text-muted-foreground">K/D</div>
-                          <div className="text-sm font-bold text-primary">{squadStats.kd?.toFixed(2)}</div>
-                        </div>
-                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
-                          <Trophy className="w-4 h-4 text-yellow-400 mx-auto mb-1" />
-                          <div className="text-xs text-muted-foreground">Винрейт</div>
-                          <div className="text-sm font-bold text-yellow-400">{squadStats.winrate?.toFixed(0)}%</div>
-                        </div>
-                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
-                          <Target className="w-4 h-4 text-red-400 mx-auto mb-1" />
-                          <div className="text-xs text-muted-foreground">Убийств</div>
-                          <div className="text-sm font-bold text-red-400">{squadStats.kills}</div>
-                        </div>
-                        <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
-                          <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
-                          <div className="text-xs text-muted-foreground">Время</div>
-                          <div className="text-sm font-bold text-blue-400">{squadStats.playtime}</div>
-                        </div>
-                      </div>
-
-                      {/* Top Weapon & Role */}
-                      {squadStats.topWeapon && (
-                        <div className="flex gap-2">
-                          <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
-                            <div className="text-[10px] text-muted-foreground mb-1">🔫 Оружие</div>
-                            <div className="text-sm font-bold truncate">{squadStats.topWeapon.name}</div>
-                            <div className="text-xs text-primary">{squadStats.topWeapon.kills} убийств</div>
-                          </div>
-                          {squadStats.topRole && (
-                            <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
-                              <div className="text-[10px] text-muted-foreground mb-1">🎖️ Роль</div>
-                              <div className="text-sm font-bold truncate">{squadStats.topRole.name}</div>
-                              <div className="text-xs text-primary">{squadStats.topRole.time}</div>
-                            </div>
+          <motion.div variants={container} initial="hidden" animate="show">
+            <Card className="bg-gradient-to-br from-zinc-900/50 via-zinc-900/40 to-black/50 border-primary/10 backdrop-blur-md overflow-hidden relative group hover:border-primary/30 hover:shadow-[0_0_20px_rgba(255,102,0,0.15)] transition-all duration-500">
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-lg font-display flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-primary" />
+                  Боевая Статистика
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="pt-0">
+                {statsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : statsError ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <AlertCircle className="w-8 h-8 mx-auto mb-2" />
+                    <p className="text-sm">Не удалось загрузить статистику</p>
+                  </div>
+                ) : squadStats ? (
+                  <div className="space-y-4">
+                    {/* Rank and Progress */}
+                    {squadStats.rank && squadStats.rank.current && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-primary/30 bg-zinc-800/50 flex items-center justify-center shrink-0">
+                          {squadStats.rank.current.iconUrl ? (
+                            <img src={squadStats.rank.current.iconUrl} alt="Rank" className="w-full h-full object-contain" />
+                          ) : (
+                            <Star className="w-6 h-6 text-primary" />
                           )}
                         </div>
-                      )}
+                        <div className="flex-1">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-muted-foreground">Ранг</span>
+                            <span className="text-primary font-bold">{squadStats.rank.progress.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={squadStats.rank.progress} className="h-2" />
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Main Stats Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                        <Crosshair className="w-4 h-4 text-primary mx-auto mb-1" />
+                        <div className="text-xs text-muted-foreground">K/D</div>
+                        <div className="text-sm font-bold text-primary">{squadStats.kd?.toFixed(2)}</div>
+                      </div>
+                      <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                        <Trophy className="w-4 h-4 text-yellow-400 mx-auto mb-1" />
+                        <div className="text-xs text-muted-foreground">Винрейт</div>
+                        <div className="text-sm font-bold text-yellow-400">{squadStats.winrate?.toFixed(0)}%</div>
+                      </div>
+                      <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                        <Target className="w-4 h-4 text-red-400 mx-auto mb-1" />
+                        <div className="text-xs text-muted-foreground">Убийств</div>
+                        <div className="text-sm font-bold text-red-400">{squadStats.kills}</div>
+                      </div>
+                      <div className="text-center p-2 bg-zinc-800/50 rounded-lg">
+                        <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
+                        <div className="text-xs text-muted-foreground">Время</div>
+                        <div className="text-sm font-bold text-blue-400">{squadStats.playtime}</div>
+                      </div>
                     </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+
+                    {/* Top Weapon & Role */}
+                    {squadStats.topWeapon && (
+                      <div className="flex gap-2">
+                        <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
+                          <div className="text-[10px] text-muted-foreground mb-1">🔫 Оружие</div>
+                          <div className="text-sm font-bold truncate">{squadStats.topWeapon.name}</div>
+                          <div className="text-xs text-primary">{squadStats.topWeapon.kills} убийств</div>
+                        </div>
+                        {squadStats.topRole && (
+                          <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
+                            <div className="text-[10px] text-muted-foreground mb-1">🎖️ Роль</div>
+                            <div className="text-sm font-bold truncate">{squadStats.topRole.name}</div>
+                            <div className="text-xs text-primary">{squadStats.topRole.time}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Нет данных о статистике</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
           
           {/* Achievements Section - Compact Horizontal */}
           <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.4 }}>

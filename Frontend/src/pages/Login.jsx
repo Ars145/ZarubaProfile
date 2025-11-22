@@ -3,7 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Gamepad2 } from 'lucide-react';
+import { Loader2, Gamepad2, Shield, Users, Trophy } from 'lucide-react';
+import zarubaLogo from '@assets/zaruba_logo_1763633752495.png';
 
 export default function Login() {
   const { loginWithSteam, isAuthenticated, loading } = useAuth();
@@ -17,32 +18,57 @@ export default function Login() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-accent/5 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto w-16 h-16 rounded-md bg-primary/10 flex items-center justify-center">
-            <svg className="w-10 h-10 text-primary" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
-            </svg>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/10 p-4 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
+      {/* Grid Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.02]" 
+           style={{ 
+             backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
+             backgroundSize: '60px 60px'
+           }} 
+      />
+
+      <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl">
+        <CardHeader className="space-y-4 text-center pb-6">
+          {/* Logo */}
+          <div className="mx-auto relative">
+            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+            <img 
+              src={zarubaLogo} 
+              alt="ZARUBA" 
+              className="w-32 h-32 object-contain mx-auto relative z-10 drop-shadow-lg"
+            />
           </div>
-          <CardTitle className="text-3xl font-bold">ZARUBA</CardTitle>
-          <CardDescription className="text-base">
-            Добро пожаловать в игровое сообщество Squad
-          </CardDescription>
+          
+          <div className="space-y-2">
+            <CardTitle className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+              ZARUBA
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
+              Добро пожаловать в личный кабинет игрока
+            </CardDescription>
+          </div>
         </CardHeader>
+
         <CardContent className="space-y-6">
+          {/* Steam Login Button */}
           <div className="space-y-4">
             <Button
               data-testid="button-steam-login"
               onClick={loginWithSteam}
-              className="w-full h-12 text-base gap-3"
+              className="w-full h-14 text-base gap-3 shadow-lg hover:shadow-xl transition-all"
               size="lg"
             >
               <Gamepad2 className="w-5 h-5" />
@@ -51,33 +77,65 @@ export default function Login() {
             
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
+                <div className="w-full border-t border-border/50"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
+                <span className="bg-card px-3 text-muted-foreground font-medium">
                   Безопасная авторизация
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Features */}
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-center text-foreground">
+              После авторизации вы получите доступ к:
+            </p>
             
-            <div className="space-y-2 text-sm text-muted-foreground text-center">
-              <p>После авторизации вы получите доступ к:</p>
-              <ul className="space-y-1">
-                <li>• Профилю игрока со статистикой</li>
-                <li>• Созданию и вступлению в кланы</li>
-                <li>• Системе рангов и достижений</li>
-              </ul>
+            <div className="grid gap-3">
+              <div className="flex items-start gap-3 p-3 rounded-md bg-primary/5 border border-primary/10">
+                <Shield className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Профилю игрока</p>
+                  <p className="text-xs text-muted-foreground">Статистика, достижения и прогресс</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 p-3 rounded-md bg-accent/5 border border-accent/10">
+                <Users className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Системе кланов</p>
+                  <p className="text-xs text-muted-foreground">Создание и вступление в кланы</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3 p-3 rounded-md bg-primary/5 border border-primary/10">
+                <Trophy className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Рейтинговой системе</p>
+                  <p className="text-xs text-muted-foreground">Отслеживание рангов и позиций</p>
+                </div>
+              </div>
             </div>
           </div>
           
-          <div className="pt-4 border-t border-border">
-            <p className="text-xs text-center text-muted-foreground">
-              Нажимая "Войти через Steam", вы будете перенаправлены на страницу авторизации Steam.
-              Мы не храним ваш пароль Steam.
+          {/* Security Notice */}
+          <div className="pt-4 border-t border-border/50">
+            <p className="text-xs text-center text-muted-foreground leading-relaxed">
+              Нажимая "Войти через Steam", вы будете перенаправлены на официальную страницу авторизации Steam. 
+              <span className="block mt-1 text-primary/80">Мы не храним ваш пароль Steam.</span>
             </p>
           </div>
         </CardContent>
       </Card>
+
+      {/* Footer */}
+      <div className="fixed bottom-4 left-0 right-0 text-center z-10">
+        <p className="text-xs text-muted-foreground/60">
+          ZARUBA Gaming Community • Squad Server
+        </p>
+      </div>
     </div>
   );
 }

@@ -3,12 +3,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Shield, Users, Trophy } from 'lucide-react';
+import { Loader2, Gamepad2, Shield, Users, Trophy } from 'lucide-react';
 import zarubaLogo from '@assets/zaruba_logo_1763633752495.png';
-import discordLogo from '@assets/image_1763634265865.png';
 
 export default function Login() {
-  const { loginWithDiscord, isAuthenticated, loading } = useAuth();
+  const { loginWithSteam, isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -55,16 +54,16 @@ export default function Login() {
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Discord Login Button */}
+          {/* Steam Login Button */}
           <div className="space-y-4">
             <Button
-              data-testid="button-discord-login"
-              onClick={loginWithDiscord}
-              className="w-full h-16 text-lg gap-4 font-bold tracking-wide bg-[#5865F2] hover:bg-[#4752C4] text-white border-0"
+              data-testid="button-steam-login"
+              onClick={loginWithSteam}
+              className="steam-button w-full h-16 text-lg gap-4 font-bold tracking-wide"
               size="lg"
             >
-              <img src={discordLogo} alt="Discord" className="w-6 h-6" />
-              Войти через Discord
+              <Gamepad2 className="w-6 h-6" />
+              Войти через Steam
             </Button>
           </div>
 
@@ -107,7 +106,7 @@ export default function Login() {
           <div className="pt-6 border-t border-border/30">
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/80">
               <Shield className="w-3.5 h-3.5" />
-              <span>Безопасная авторизация через Discord OAuth 2.0</span>
+              <span>Безопасная авторизация через Steam OpenID</span>
             </div>
           </div>
         </CardContent>

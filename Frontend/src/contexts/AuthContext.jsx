@@ -81,17 +81,17 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loginWithDiscord = async () => {
+  const loginWithSteam = async () => {
     try {
       const returnUrl = `${window.location.origin}/auth/callback`;
-      const response = await fetch(`${API_URL}/api/auth/discord/login?return_url=${encodeURIComponent(returnUrl)}`);
+      const response = await fetch(`${API_URL}/api/auth/steam/login?return_url=${encodeURIComponent(returnUrl)}`);
       const data = await response.json();
       
       if (data.success && data.authUrl) {
         window.location.href = data.authUrl;
       }
     } catch (error) {
-      console.error('Discord login failed:', error);
+      console.error('Steam login failed:', error);
     }
   };
 
@@ -173,7 +173,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     loading,
-    loginWithDiscord,
+    loginWithSteam,
     logout,
     linkDiscord,
     unlinkDiscord,

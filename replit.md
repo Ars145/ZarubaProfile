@@ -12,6 +12,30 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (November 22, 2025)
 
+**Steam & Discord Authentication Integration:**
+- ✅ Implemented complete Steam OpenID authentication
+  - GET /api/auth/steam/login - initiates Steam login flow
+  - GET /api/auth/steam/callback - validates OpenID response
+  - Fetches player data (username, avatar) from Steam API on first login
+  - Stores avatar_url, updates last_login on every authentication
+  - JWT-based session management with access + refresh tokens
+- ✅ Added Discord OAuth2 linking system
+  - GET /api/auth/discord/link - initiates Discord OAuth with state token
+  - GET /api/auth/discord/callback - validates state, exchanges code for user data
+  - Securely stores discord_id and discord_username in player table
+  - State token validation prevents CSRF attacks
+- ✅ Created Profile.jsx page
+  - Displays Steam profile (username, avatar, Steam ID)
+  - Shows Discord connection status with link/unlink functionality
+  - Toast notifications for success/error states
+  - data-testid attributes for testing
+- ✅ Extended Player model with authentication fields
+  - avatar_url, discord_username, created_at, last_login columns
+  - JWT token generation and validation in AuthService
+- ✅ Fixed Vite proxy configuration
+  - All /api requests proxied from frontend (port 5000) to backend (port 8000)
+  - Relative API URLs for seamless development
+
 **FloatingLines Animated Background:**
 - ✅ Created FloatingLines component (Frontend/src/components/FloatingLines.jsx)
   - Three.js WebGL implementation with GLSL fragment shaders

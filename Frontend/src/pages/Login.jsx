@@ -5,10 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Gamepad2, Shield, Users, Trophy } from 'lucide-react';
 import zarubaLogo from '@assets/zaruba_logo_1763633752495.png';
+import Prism from '@/components/Prism';
 
 export default function Login() {
   const { loginWithSteam, isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
+  
+  const hasWebGL = (() => {
+    try {
+      const canvas = document.createElement('canvas');
+      return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+    } catch (e) {
+      return false;
+    }
+  })();
 
   useEffect(() => {
     if (isAuthenticated && !loading) {
@@ -26,19 +36,30 @@ export default function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/10 p-4 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      </div>
+      {/* Prism Background */}
+      {hasWebGL && (
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <Prism
+            animationType="rotate"
+            timeScale={0.2}
+            height={3.7}
+            baseWidth={5.5}
+            scale={3.2}
+            hueShift={-0.64}
+            colorFrequency={0.8}
+            noise={0}
+            glow={0.9}
+          />
+        </div>
+      )}
 
-      {/* Grid Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.02]" 
-           style={{ 
-             backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
-             backgroundSize: '60px 60px'
-           }} 
-      />
+      {/* Fallback Background Effects */}
+      {!hasWebGL && (
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+      )}
 
       <Card className="w-full max-w-md relative z-10 border-border/50 shadow-2xl">
         <CardHeader className="space-y-4 text-center pb-6">

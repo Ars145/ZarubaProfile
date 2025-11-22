@@ -78,3 +78,8 @@ outputType = "console"
 [agent]
 mockupState = "FULLSTACK"
 expertMode = true
+
+[userenv]
+
+[userenv.shared]
+SECRET_KEY = "EG7NlGRZZzJdyGO2_2fL4TdllEjIWx1fJsvxGIeU8-8"

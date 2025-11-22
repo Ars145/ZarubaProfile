@@ -10,6 +10,8 @@ import NotFound from "@/pages/not-found";
 import ProfilePage from "@/pages/profile";
 import Login from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
+import ClansPage from "@/pages/clans";
+import ClanDetailPage from "@/pages/clan-detail";
 
 function Router() {
   return (
@@ -23,6 +25,8 @@ function Router() {
             <Switch>
               <Route path="/" component={ProfilePage} />
               <Route path="/profile" component={ProfilePage} />
+              <Route path="/clans" component={ClansPage} />
+              <Route path="/clans/:id" component={ClanDetailPage} />
               <Route component={NotFound} />
             </Switch>
           </Layout>

@@ -15,6 +15,17 @@ class Config:
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     
+    # SQLAlchemy Engine Options
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,  # Проверяет соединение перед использованием
+        'pool_recycle': 300,    # Переиспользует соединения каждые 5 минут
+        'pool_size': 10,        # Размер пула
+        'max_overflow': 20,     # Максимальное количество дополнительных соединений
+        'connect_args': {
+            'connect_timeout': 10
+        }
+    }
+    
     # MongoDB (SquadJS statistics)
     MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/')
     MONGO_DB_NAME = os.getenv('MONGO_DB_NAME', 'SquadJS')

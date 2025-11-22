@@ -33,6 +33,12 @@ export function useSquadStats(steamId) {
         throw new Error('Failed to fetch stats');
       }
       const data = await response.json();
+      
+      // Логируем если есть warning (MongoDB недоступен)
+      if (data.warning) {
+        console.warn('Stats warning:', data.warning);
+      }
+      
       return data.stats;
     },
     enabled: !!steamId,

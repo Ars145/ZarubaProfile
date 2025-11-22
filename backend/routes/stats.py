@@ -9,6 +9,25 @@ from services.stats_service import (
     categorize_weapons,
     calculate_kd_ratio
 )
+import pymongo.errors
+
+
+def get_empty_stats(steam_id):
+    """Возвращает пустую статистику для игрока"""
+    return {
+        'steamId': steam_id,
+        'playerName': 'Unknown',
+        'kills': 0,
+        'deaths': 0,
+        'kd': 0.0,
+        'revives': 0,
+        'teamkills': 0,
+        'matches': 0,
+        'wins': 0,
+        'winRate': 0.0,
+        'playtime': '0м',
+        'playtimeMinutes': 0
+    }
 
 
 @api.route('/stats/<steam_id>', methods=['GET'])
@@ -19,10 +38,11 @@ def get_player_stats(steam_id):
         user = collection.find_one({'_id': steam_id})
         
         if not user:
+            # Возвращаем пустую статистику вместо 404
             return jsonify({
-                'success': False,
-                'error': 'Игрок не найден в базе данных'
-            }), 404
+                'success': True,
+                'stats': get_empty_stats(steam_id)
+            }), 200
         
         # Безопасное извлечение числовых полей (могут быть объектами или отсутствовать)
         def safe_int(value, default=0):
@@ -116,16 +136,20 @@ def get_player_stats(steam_id):
             'stats': stats
         }), 200
         
-    except RuntimeError as e:
+    except (RuntimeError, pymongo.errors.PyMongoError) as e:
+        # MongoDB недоступен - возвращаем пустую статистику (graceful degradation)
         return jsonify({
-            'success': False,
-            'error': 'MongoDB not configured'
-        }), 503
+            'success': True,
+            'stats': get_empty_stats(steam_id),
+            'warning': 'Statistics service temporarily unavailable'
+        }), 200
     except Exception as e:
+        # Неизвестная ошибка - также возвращаем пустую статистику
         return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+            'success': True,
+            'stats': get_empty_stats(steam_id),
+            'warning': 'Error loading statistics'
+        }), 200
 
 
 @api.route('/stats/search/<player_name>', methods=['GET'])

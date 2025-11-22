@@ -9,7 +9,9 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
   - Profile page updated with proper auth checks and loading/error states for statistics
   - Created clan pages (list, detail) with real API integration
 - **Navigation**: Added header with navigation menu (Profile, Clans) and user dropdown
-- **Backend Improvements**: Added PostgreSQL connection pool settings (pool_pre_ping, pool_recycle) to handle SSL connection stability
+- **Backend Improvements**: 
+  - Added PostgreSQL connection pool settings (pool_pre_ping, pool_recycle) to handle SSL connection stability
+  - **FIXED: 503 errors** - Stats API now returns HTTP 200 with empty stats when MongoDB unavailable (graceful degradation)
 - **Mock Data Cleanup**: 
   - Removed mockSquadStats.js and all mock data dependencies
   - Removed hardcoded fake clans array from profile.jsx

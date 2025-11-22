@@ -14,20 +14,20 @@ Preferred communication style: Simple, everyday language.
 
 **FloatingLines Animated Background:**
 - ✅ Created FloatingLines component (Frontend/src/components/FloatingLines.jsx)
-  - CSS-based animations instead of Three.js (better Replit compatibility)
-  - Three wave layers with independent animation speeds
-  - SVG-based wavy line rendering with gradients
-  - Configurable line count, distance, colors, and animation
-  - Interactive hover pause and parallax effects supported
+  - Three.js WebGL implementation with GLSL fragment shaders
+  - Interactive wave rendering with mouse tracking
+  - Gradient support with custom color stops
+  - Parallax effect based on mouse movement
+  - Bend effect when hovering (bendRadius: 15, bendStrength: 11.5)
 - ✅ Integrated FloatingLines into Login page
-  - Added to page background with 40% opacity
-  - Three waves: orange (top), orange (middle), cyan (bottom)
+  - Added to page background with 70% opacity (darker)
+  - Configuration: 14 lines, distance 70, interactive mode enabled
+  - Three wave layers with gradient colors (orange → orange → cyan)
   - Enhances visual appeal of authentication interface
-  - Smooth wave motion with cubic bezier paths
-- ✅ Added FloatingLines.css with animations
-  - @keyframes wave-motion for continuous scrolling
-  - Responsive adjustments for mobile screens
-  - Performance-optimized animations
+  - WebGL detection with graceful degradation (no crash without WebGL)
+- ✅ Added FloatingLines.css
+  - Container styles for full-screen rendering
+  - Supports mixBlendMode customization
 
 **MongoDB Integration & Statistics Migration:**
 - ✅ Ported Discord bot statistics logic (JavaScript → Python)

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   calcVehicleTime,
   calcVehicleKills,
@@ -11,18 +12,32 @@ import {
   getDetailedRoles,
   calcAvgKillsPerMatch
 } from '@/lib/statsCalculations';
-import { mockSquadStatsData, mockRanksConfig, getPlayerStatsBySteamId } from '@/data/mockSquadStats';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 /**
  * Хук для работы со статистикой Squad
  * @param {string} steamId - Steam ID игрока
  * @returns {Object} - обработанная статистика
  */
-export function useSquadStats(steamId = 'STEAM_0:1:12345678') {
+export function useSquadStats(steamId) {
+  // Загружаем реальные данные из API
+  const { data: playerData, isLoading, error } = useQuery({
+    queryKey: ['/api/stats', steamId],
+    queryFn: async () => {
+      if (!steamId) return null;
+      const response = await fetch(`${API_URL}/api/stats/${steamId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats');
+      }
+      const data = await response.json();
+      return data.stats;
+    },
+    enabled: !!steamId,
+    staleTime: 5 * 60 * 1000, // Кэш на 5 минут
+  });
+
   const processedStats = useMemo(() => {
-    // Получаем данные игрока
-    const playerData = getPlayerStatsBySteamId(steamId) || mockSquadStatsData;
-    
     if (!playerData) {
       return null;
     }
@@ -38,8 +53,9 @@ export function useSquadStats(steamId = 'STEAM_0:1:12345678') {
     const topRole = getTopRole(playerData.roles);
     const topWeapon = getTopWeapon(playerData.weapons);
     
-    // Ранги
-    const rank = getCurrentRank(playerData, mockRanksConfig);
+    // Ранги (получаем конфиг из данных или используем дефолтный)
+    const ranksConfig = playerData.ranksConfig || null;
+    const rank = ranksConfig ? getCurrentRank(playerData, ranksConfig) : null;
     
     // Детальная статистика
     const detailedWeapons = getDetailedWeapons(playerData.weapons);
@@ -94,16 +110,20 @@ export function useSquadStats(steamId = 'STEAM_0:1:12345678') {
       rawWeapons: playerData.weapons,
       rawPossess: playerData.possess
     };
-  }, [steamId]);
+  }, [playerData]);
   
-  return processedStats;
+  return {
+    stats: processedStats,
+    isLoading,
+    error
+  };
 }
 
 /**
  * Хук для получения топ N оружий
  */
 export function useTopWeapons(steamId, limit = 5) {
-  const stats = useSquadStats(steamId);
+  const { stats } = useSquadStats(steamId);
   
   return useMemo(() => {
     if (!stats || !stats.detailedWeapons) return [];
@@ -118,7 +138,7 @@ export function useTopWeapons(steamId, limit = 5) {
  * Хук для получения топ N ролей
  */
 export function useTopRoles(steamId, limit = 5) {
-  const stats = useSquadStats(steamId);
+  const { stats } = useSquadStats(steamId);
   
   return useMemo(() => {
     if (!stats || !stats.detailedRoles) return [];

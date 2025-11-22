@@ -320,7 +320,7 @@ const DiscordCard = () => {
 };
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
   const [isVip, setIsVip] = useState(false);
@@ -336,9 +336,31 @@ export default function ProfilePage() {
     }
   }, [user]);
   
+  // Показываем загрузку если нет пользователя
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Требуется авторизация</CardTitle>
+            <CardDescription>Пожалуйста, войдите через Steam для доступа к профилю</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+  
   // Squad Stats Integration - используем Steam ID из user если доступен
-  const steamId = user?.steamId || 'STEAM_0:1:12345678';
-  const squadStats = useSquadStats(steamId);
+  const steamId = user?.steamId;
+  const { stats: squadStats, isLoading: statsLoading, error: statsError } = useSquadStats(steamId);
   
   // Owner specific state
   const [ownerTab, setOwnerTab] = useState("squad");

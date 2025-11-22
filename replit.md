@@ -12,6 +12,29 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (November 22, 2025)
 
+**Discord Integration (November 22, 2025):**
+- ✅ Implemented complete Discord OAuth2 integration
+  - Backend endpoints: `/api/auth/discord/link`, `/api/auth/discord/callback`, `/api/auth/discord/unlink`
+  - Frontend: DiscordCard component with dynamic state (linked/unlinked)
+  - AuthContext functions: `linkDiscord()`, `unlinkDiscord()`
+  - Toast notifications for success/error states
+  - URL parameter handling after OAuth redirect
+- ✅ Database schema updated
+  - Added `discord_id` and `discord_username` columns to players table
+  - Player serialization uses camelCase (`discordId`, `discordUsername`)
+- ✅ Security implementation
+  - JWT-based authentication (access + refresh tokens)
+  - State parameter validation in OAuth flow
+  - CSRF protection via Authorization headers (not cookies)
+- ✅ Environment configuration
+  - DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET in Replit Secrets
+  - OAuth redirect URL configured for Replit domain
+- ✅ UI/UX improvements
+  - Dynamic button text: "Привязать аккаунт" / "Обновить привязку"
+  - Card title: "Discord аккаунт"
+  - Confirmation dialog for unlink action
+  - Visual feedback with loading states
+
 **FloatingLines Animated Background:**
 - ✅ Created FloatingLines component (Frontend/src/components/FloatingLines.jsx)
   - Three.js WebGL implementation with GLSL fragment shaders

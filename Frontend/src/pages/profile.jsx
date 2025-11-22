@@ -219,9 +219,26 @@ const DiscordCard = () => {
   const handleUnlinkDiscord = async () => {
     if (confirm('Вы уверены, что хотите отвязать Discord аккаунт?')) {
       try {
-        await unlinkDiscord();
+        const success = await unlinkDiscord();
+        if (success) {
+          toast({
+            title: "Discord аккаунт отвязан",
+            description: "Ваш Discord аккаунт успешно отвязан от профиля",
+          });
+        } else {
+          toast({
+            title: "Ошибка",
+            description: "Не удалось отвязать Discord аккаунт",
+            variant: "destructive"
+          });
+        }
       } catch (error) {
         console.error('Failed to unlink Discord:', error);
+        toast({
+          title: "Ошибка",
+          description: "Произошла ошибка при отвязке Discord",
+          variant: "destructive"
+        });
       }
     }
   };

@@ -154,15 +154,19 @@ export function AuthProvider({ children }) {
       const response = await fetch(`${API_URL}/api/auth/discord/unlink`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         }
       });
       
       if (response.ok) {
         await checkAuth();
+        return true;
       }
+      return false;
     } catch (error) {
       console.error('Discord unlink failed:', error);
+      return false;
     }
   };
 

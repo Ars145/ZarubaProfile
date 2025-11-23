@@ -28,7 +28,19 @@ export async function apiRequest(
   });
 
   await throwIfResNotOk(res);
-  return res;
+  const responseData = await res.json();
+  
+  // Автоматически распаковываем {success, ...} формат
+  if (responseData && typeof responseData === 'object' && responseData.success === true) {
+    const { success, ...rest } = responseData;
+    const keys = Object.keys(rest);
+    if (keys.length === 1) {
+      return rest[keys[0]];
+    }
+    return rest;
+  }
+  
+  return responseData;
 }
 
 export const getQueryFn =
@@ -52,7 +64,22 @@ export const getQueryFn =
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const data = await res.json();
+    
+    // Автоматически распаковываем {success, ...} формат
+    // Если есть success: true, возвращаем остальные поля
+    if (data && typeof data === 'object' && data.success === true) {
+      // Удаляем success из результата и возвращаем остальное
+      const { success, ...rest } = data;
+      // Если остался только один ключ (например {clan: {...}}), возвращаем его значение
+      const keys = Object.keys(rest);
+      if (keys.length === 1) {
+        return rest[keys[0]];
+      }
+      return rest;
+    }
+    
+    return data;
   };
 
 export const queryClient = new QueryClient({

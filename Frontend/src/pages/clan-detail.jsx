@@ -20,15 +20,14 @@ export default function ClanDetailPage() {
     enabled: !!id,
   });
 
-  const { data: members } = useQuery({
+  const { data: members = [] } = useQuery({
     queryKey: ['/api/clans', id, 'members'],
     enabled: !!id,
   });
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/clans/${id}/join`);
-      return response.json();
+      return await apiRequest('POST', `/api/clans/${id}/join`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/clans', id] });
@@ -49,10 +48,9 @@ export default function ClanDetailPage() {
 
   const applyMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/clans/${id}/apply`, { 
+      return await apiRequest('POST', `/api/clans/${id}/apply`, { 
         message: 'Хочу вступить в ваш клан!' 
       });
-      return response.json();
     },
     onSuccess: () => {
       toast({

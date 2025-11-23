@@ -1202,3 +1202,147 @@ def admin_assign_owner(clan_id):
             'success': False,
             'error': str(e)
         }), 500
+
+
+@api.route('/admin/clans', methods=['GET'])
+@require_auth
+def admin_get_all_clans():
+    """Получить все кланы с детальной информацией (только для админов)"""
+    # Проверка прав админа
+    admin_steam_ids = current_app.config.get('ADMIN_STEAM_IDS', [])
+    if request.current_player.steam_id not in admin_steam_ids:
+        return jsonify({
+            'success': False,
+            'error': 'Недостаточно прав. Только админы могут просматривать все кланы.'
+        }), 403
+    
+    try:
+        clans = Clan.query.order_by(Clan.created_at.desc()).all()
+        return jsonify({
+            'success': True,
+            'clans': [clan.to_dict(include_members=True) for clan in clans]
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@api.route('/admin/clans/<clan_id>', methods=['PUT'])
+@require_auth
+def admin_update_clan(clan_id):
+    """Обновить клан (только для админов)"""
+    # Проверка прав админа
+    admin_steam_ids = current_app.config.get('ADMIN_STEAM_IDS', [])
+    if request.current_player.steam_id not in admin_steam_ids:
+        return jsonify({
+            'success': False,
+            'error': 'Недостаточно прав. Только админы могут редактировать кланы.'
+        }), 403
+    
+    try:
+        clan = Clan.query.get(clan_id)
+        if not clan:
+            return jsonify({
+                'success': False,
+                'error': 'Клан не найден'
+            }), 404
+        
+        data = request.get_json(silent=True)
+        if not data or not isinstance(data, dict):
+            return jsonify({
+                'success': False,
+                'error': 'Невалидный JSON или отсутствует тело запроса'
+            }), 400
+        
+        # Обновляем поля клана
+        if 'name' in data:
+            clan.name = data['name']
+        if 'tag' in data:
+            clan.tag = data['tag']
+        if 'description' in data:
+            clan.description = data['description']
+        if 'theme' in data:
+            if data['theme'] not in ['orange', 'blue', 'yellow']:
+                return jsonify({
+                    'success': False,
+                    'error': 'Недопустимое значение theme'
+                }), 400
+            clan.theme = data['theme']
+        if 'bannerUrl' in data:
+            clan.banner_url = data['bannerUrl']
+        if 'logoUrl' in data:
+            clan.logo_url = data['logoUrl']
+        if 'level' in data:
+            clan.level = int(data['level'])
+        if 'winrate' in data:
+            clan.winrate = float(data['winrate'])
+        if 'maxMembers' in data:
+            clan.max_members = int(data['maxMembers'])
+        if 'requirements' in data:
+            clan.requirements = data['requirements']
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Клан обновлен',
+            'clan': clan.to_dict()
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@api.route('/admin/clans/<clan_id>', methods=['DELETE'])
+@require_auth
+def admin_delete_clan(clan_id):
+    """Удалить клан (только для админов)"""
+    # Проверка прав админа
+    admin_steam_ids = current_app.config.get('ADMIN_STEAM_IDS', [])
+    if request.current_player.steam_id not in admin_steam_ids:
+        return jsonify({
+            'success': False,
+            'error': 'Недостаточно прав. Только админы могут удалять кланы.'
+        }), 403
+    
+    try:
+        clan = Clan.query.get(clan_id)
+        if not clan:
+            return jsonify({
+                'success': False,
+                'error': 'Клан не найден'
+            }), 404
+        
+        # Удаляем всех участников клана
+        ClanMember.query.filter_by(clan_id=clan_id).delete()
+        
+        # Удаляем все заявки в клан
+        ClanApplication.query.filter_by(clan_id=clan_id).delete()
+        
+        # Удаляем все приглашения в клан
+        ClanInvitation.query.filter_by(clan_id=clan_id).delete()
+        
+        # Обновляем current_clan_id у всех игроков
+        Player.query.filter_by(current_clan_id=clan_id).update({'current_clan_id': None})
+        
+        # Удаляем сам клан
+        db.session.delete(clan)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Клан удален'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

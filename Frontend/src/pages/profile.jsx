@@ -316,6 +316,7 @@ const DiscordCard = () => {
 
 export default function ProfilePage() {
   const { user, logout, isAdmin, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState(null);
   // Загружаем список кланов из API для гостевых пользователей

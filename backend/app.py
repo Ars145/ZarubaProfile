@@ -23,9 +23,9 @@ def create_app(config_name=None):
              "supports_credentials": True
          }})
     
-    # Инициализация MongoDB
-    from services.mongo_service import init_mongo
-    init_mongo(app)
+    # Инициализация MongoDB - ОТКЛЮЧЕНО (используем только PostgreSQL)
+    # from services.mongo_service import init_mongo
+    # init_mongo(app)
     
     # Регистрация blueprints
     from routes import api

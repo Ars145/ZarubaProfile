@@ -392,12 +392,16 @@ export default function ProfilePage() {
   
   // DEBUG: Логирование данных
   useEffect(() => {
+    console.log('[CLAN DEBUG] ================');
     console.log('[CLAN DEBUG] User:', user);
     console.log('[CLAN DEBUG] currentClanId:', currentClanId);
+    console.log('[CLAN DEBUG] Queries enabled:', !!currentClanId);
     console.log('[CLAN DEBUG] clanData:', clanData);
     console.log('[CLAN DEBUG] clanMembersResponse:', clanMembersResponse);
     console.log('[CLAN DEBUG] clanLoading:', clanLoading, 'membersLoading:', membersLoading);
-  }, [user, currentClanId, clanData, clanMembersResponse, clanLoading, membersLoading]);
+    console.log('[CLAN DEBUG] squadMembers length:', squadMembers.length);
+    console.log('[CLAN DEBUG] ================');
+  }, [user, currentClanId, clanData, clanMembersResponse, clanLoading, membersLoading, squadMembers]);
   
   // Преобразуем данные участников из API в нужный формат
   const squadMembers = clanMembersResponse?.members?.map(member => ({
@@ -1552,7 +1556,7 @@ export default function ProfilePage() {
                               
                               <div className="relative z-10 mb-8">
                                 <h3 className="text-3xl font-display font-black text-white mb-1 tracking-tight">
-                                  {clanData?.clan?.name || 'Загрузка...'}
+                                  {!currentClanId ? 'Нет клана' : clanLoading ? 'Загрузка...' : (clanData?.clan?.name || 'Ошибка загрузки')}
                                 </h3>
                                 <p className="text-xs text-primary font-bold tracking-[0.2em] uppercase">
                                   {clanData?.clan?.description || 'Клан'}

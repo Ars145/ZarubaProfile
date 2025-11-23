@@ -7,14 +7,21 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 
 ### Critical Bug Fixes - Authentication & API
 
-**1. Fixed CORS credentials support** in backend/app.py
-- Problem: CORS didn't support credentials, causing 401 errors on POST requests
-- Frontend sends `credentials: 'include'` but backend didn't accept them
-- Error: "401: Требуется авторизация" when creating clans
-- **Fixed**: Added `supports_credentials: True` to CORS configuration
-- Now backend properly accepts cookies with authentication tokens
+**1. Fixed missing Authorization header** in Frontend/src/lib/queryClient.js
+- **Root Cause**: Backend expects JWT tokens in `Authorization: Bearer <token>` header
+- Frontend stores tokens in localStorage but wasn't sending them in requests
+- Error: "401: Требуется авторизация" on all protected endpoints (POST /api/clans)
+- **Fixed**: 
+  - `apiRequest()` now reads access_token from localStorage and adds Authorization header
+  - `getQueryFn()` now reads access_token from localStorage for GET requests
+- Authentication flow: Steam login → tokens in URL → saved to localStorage → sent in Authorization header
 
-**2. Fixed apiRequest signature mismatch** in admin-panel.jsx
+**2. Fixed CORS credentials support** in backend/app.py
+- Added `supports_credentials: True` to CORS configuration
+- Added explicit `allow_headers: ["Content-Type"]` and methods list
+- Enables cookies and custom headers in cross-origin requests
+
+**3. Fixed apiRequest signature mismatch** in admin-panel.jsx
 - Problem: apiRequest expects (method, url, data) but was called with (url, {method, body})
 - Error: "'/api/clans' is not a valid HTTP method"
 - Fixed handleCreateClan: now uses `apiRequest('POST', '/api/clans', payload)`

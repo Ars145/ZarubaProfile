@@ -12,9 +12,17 @@ export async function apiRequest(
   url,
   data,
 ) {
+  const headers = data ? { "Content-Type": "application/json" } : {};
+  
+  // Добавляем Authorization токен из localStorage
+  const accessToken = localStorage.getItem('access_token');
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+  
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -26,7 +34,16 @@ export async function apiRequest(
 export const getQueryFn =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const headers = {};
+    
+    // Добавляем Authorization токен из localStorage
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+    
     const res = await fetch(queryKey.join("/"), {
+      headers,
       credentials: "include",
     });
 

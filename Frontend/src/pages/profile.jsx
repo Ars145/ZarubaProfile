@@ -20,6 +20,7 @@ import { useState, useRef, useEffect } from "react";
 import { useSquadStats } from "@/hooks/useSquadStats";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 // --- Animation Components ---
 
@@ -374,12 +375,69 @@ export default function ProfilePage() {
   });
   const [clanTheme, setClanTheme] = useState("orange"); // orange, blue, yellow
 
-  // Mock data for squad members with roles
-  const [squadMembers, setSquadMembers] = useState([
-    { id: 1, name: 'TacticalViper', role: 'Офицер', status: 'В ИГРЕ', statusColor: 'text-blue-400', roleColor: 'text-orange-400 border-orange-400/20 bg-orange-400/10', avatar: 'TV', stats: { games: 178, hours: '6д 20ч', sl: '4д 7ч', driver: '2ч', pilot: '0', cmd: '21ч', likes: 82, tk: 39, winrate: 49, kills: 282, deaths: 908, kd: 0.31, wins: 88, avgKills: 1, vehicleKills: 9, knifeKills: 0 } },
-    { id: 2, name: 'SniperWolf', role: 'Боец', status: 'НЕ В СЕТИ', statusColor: 'text-zinc-500', roleColor: 'text-muted-foreground border-white/10 bg-white/5', avatar: 'SW', stats: { games: 450, hours: '12д 5ч', sl: '1д 2ч', driver: '10ч', pilot: '50ч', cmd: '0ч', likes: 150, tk: 12, winrate: 55, kills: 1205, deaths: 800, kd: 1.5, wins: 247, avgKills: 3, vehicleKills: 45, knifeKills: 12 } },
-    { id: 3, name: 'MedicMain', role: 'Рекрут', status: 'В СЕТИ', statusColor: 'text-emerald-500', roleColor: 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5', avatar: 'MM', stats: { games: 42, hours: '1д 8ч', sl: '0ч', driver: '5ч', pilot: '0ч', cmd: '0ч', likes: 24, tk: 2, winrate: 42, kills: 89, deaths: 150, kd: 0.59, wins: 18, avgKills: 2, vehicleKills: 0, knifeKills: 1 } }
-  ]);
+  // Получаем ID клана пользователя
+  const currentClanId = user?.currentClanId;
+  
+  // Загружаем информацию о клане
+  const { data: clanData, isLoading: clanLoading } = useQuery({
+    queryKey: ['/api/clans', currentClanId],
+    enabled: !!currentClanId,
+  });
+  
+  // Загружаем участников клана
+  const { data: clanMembersResponse, isLoading: membersLoading } = useQuery({
+    queryKey: ['/api/clans', currentClanId, 'members'],
+    enabled: !!currentClanId,
+  });
+  
+  // Преобразуем данные участников из API в нужный формат
+  const squadMembers = clanMembersResponse?.members?.map(member => ({
+    id: member.id,
+    name: member.player?.username || 'Unknown',
+    role: member.role === 'owner' ? 'Лидер' : member.role === 'officer' ? 'Офицер' : member.role === 'member' ? 'Боец' : 'Рекрут',
+    status: 'НЕ В СЕТИ', // TODO: Добавить реальный статус онлайн
+    statusColor: 'text-zinc-500',
+    roleColor: member.role === 'owner' ? 'text-primary border-primary/20 bg-primary/10' : 
+               member.role === 'officer' ? 'text-orange-400 border-orange-400/20 bg-orange-400/10' : 
+               'text-muted-foreground border-white/10 bg-white/5',
+    avatar: member.player?.username?.substring(0, 2).toUpperCase() || 'UN',
+    stats: { 
+      games: 0, 
+      hours: '0д 0ч', 
+      sl: '0ч', 
+      driver: '0ч', 
+      pilot: '0ч', 
+      cmd: '0ч', 
+      likes: 0, 
+      tk: 0, 
+      winrate: 0, 
+      kills: 0, 
+      deaths: 0, 
+      kd: 0, 
+      wins: 0, 
+      avgKills: 0, 
+      vehicleKills: 0, 
+      knifeKills: 0 
+    } // TODO: Получить реальную статистику
+  })) || [];
+  
+  // Определяем роль пользователя в клане
+  useEffect(() => {
+    if (clanMembersResponse?.members && user) {
+      const myMembership = clanMembersResponse.members.find(m => m.player?.id === user.id);
+      if (myMembership) {
+        if (myMembership.role === 'owner') {
+          setUserRole('owner');
+        } else {
+          setUserRole('member');
+        }
+      } else {
+        setUserRole('guest');
+      }
+    } else if (!currentClanId) {
+      setUserRole('guest');
+    }
+  }, [clanMembersResponse, user, currentClanId]);
 
   // Mock applications with full stats
   const [applications, setApplications] = useState([
@@ -413,38 +471,18 @@ export default function ProfilePage() {
   ]);
 
   const handleRoleChange = (memberId, newRole) => {
-    setSquadMembers(prev => prev.map(member => {
-      if (member.id === memberId) {
-        let roleColor = '';
-        if (newRole === 'Офицер') roleColor = 'text-orange-400 border-orange-400/20 bg-orange-400/10';
-        else if (newRole === 'Боец') roleColor = 'text-muted-foreground border-white/10 bg-white/5';
-        else roleColor = 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5'; // Recruit
-        
-        return { ...member, role: newRole, roleColor };
-      }
-      return member;
-    }));
+    // TODO: Implement API call to change member role
+    console.log('Change role for member', memberId, 'to', newRole);
   };
 
   const handleRejectApp = (id) => {
     setApplications(prev => prev.filter(app => app.id !== id));
+    // TODO: Implement API call to reject application
   };
 
   const handleAcceptApp = (id) => {
-    const app = applications.find(a => a.id === id);
-    if (app) {
-        setSquadMembers(prev => [...prev, {
-            id: Date.now(),
-            name: app.name,
-            role: 'Рекрут',
-            status: 'НЕ В СЕТИ',
-            statusColor: 'text-zinc-500',
-            roleColor: 'text-emerald-500/70 border-emerald-500/20 bg-emerald-500/5',
-            avatar: app.avatar,
-            stats: app.stats
-        }]);
-        setApplications(prev => prev.filter(a => a.id !== id));
-    }
+    setApplications(prev => prev.filter(app => app.id !== id));
+    // TODO: Implement API call to accept application
   };
 
   const getSortedMembers = () => {
@@ -1560,46 +1598,55 @@ export default function ProfilePage() {
                           </div>
 
                           <div className="space-y-3">
-                              {/* Commander */}
-                              <motion.div 
-                                whileHover={{ scale: 1.01 }}
-                                className="flex items-center justify-between p-4 bg-zinc-900/80 border border-primary/30 rounded-xl group hover:bg-zinc-800 hover:border-primary/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.2)] relative overflow-hidden cursor-pointer"
-                              >
-                                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(255,102,0,0.5)]" />
-                                  <div className="flex items-center gap-5 pl-2">
-                                      <div className="relative">
-                                          <Avatar className="h-14 w-14 border-2 border-primary shadow-[0_0_15px_rgba(255,102,0,0.3)]">
-                                              <AvatarFallback className="bg-primary text-black font-bold">CX</AvatarFallback>
-                                          </Avatar>
-                                          <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-1.5 border border-yellow-500/30 shadow-lg">
-                                              <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                          </div>
-                                      </div>
-                                      <div>
-                                          <div className="flex items-center gap-2">
-                                              <h4 className="font-bold text-white text-xl group-hover:text-primary transition-colors">CommanderX</h4>
-                                              <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-yellow-500/50 text-yellow-500 bg-yellow-500/10 shadow-[0_0_5px_rgba(234,179,8,0.2)]">VIP</Badge>
-                                          </div>
-                                          <div className="flex items-center gap-3 text-xs mt-1">
-                                              <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 rounded-sm px-1.5 py-0.5 uppercase font-bold tracking-wider">Лидер</Badge>
-                                              <span className="w-1 h-1 rounded-full bg-zinc-700" />
-                                              <span className="text-emerald-500 font-medium flex items-center gap-1">
-                                                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                 В СЕТИ
-                                              </span>
-                                          </div>
-                                      </div>
-                                  </div>
-                                  {userRole === "owner" && (
-                                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Button size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-white hover:bg-white/5"><Settings className="w-5 h-5" /></Button>
-                                    </div>
-                                  )}
-                              </motion.div>
-
-                              {/* Members */}
+                              {/* Members including owner */}
                               <motion.div variants={container} initial="hidden" animate="show" className="space-y-3">
-                                {getSortedMembers().map((member, i) => (
+                                {getSortedMembers().map((member, i) => {
+                                  const isOwner = member.role === 'Лидер';
+                                  
+                                  if (isOwner) {
+                                    // Render owner with special styling
+                                    return (
+                                      <motion.div 
+                                        key={member.id}
+                                        whileHover={{ scale: 1.01 }}
+                                        className="flex items-center justify-between p-4 bg-zinc-900/80 border border-primary/30 rounded-xl group hover:bg-zinc-800 hover:border-primary/50 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.2)] relative overflow-hidden cursor-pointer"
+                                      >
+                                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(255,102,0,0.5)]" />
+                                          <div className="flex items-center gap-5 pl-2">
+                                              <div className="relative">
+                                                  <Avatar className="h-14 w-14 border-2 border-primary shadow-[0_0_15px_rgba(255,102,0,0.3)]">
+                                                      <AvatarFallback className="bg-primary text-black font-bold">{member.avatar}</AvatarFallback>
+                                                  </Avatar>
+                                                  <div className="absolute -top-2 -right-2 bg-zinc-900 rounded-full p-1.5 border border-yellow-500/30 shadow-lg">
+                                                      <Crown className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                                  </div>
+                                              </div>
+                                              <div>
+                                                  <div className="flex items-center gap-2">
+                                                      <h4 className="font-bold text-white text-xl group-hover:text-primary transition-colors">{member.name}</h4>
+                                                      <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-yellow-500/50 text-yellow-500 bg-yellow-500/10 shadow-[0_0_5px_rgba(234,179,8,0.2)]">VIP</Badge>
+                                                  </div>
+                                                  <div className="flex items-center gap-3 text-xs mt-1">
+                                                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 rounded-sm px-1.5 py-0.5 uppercase font-bold tracking-wider">Лидер</Badge>
+                                                      <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                                                      <span className={`${member.statusColor} font-medium flex items-center gap-1`}>
+                                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                         {member.status}
+                                                      </span>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                          {userRole === "owner" && (
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Button size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-white hover:bg-white/5"><Settings className="w-5 h-5" /></Button>
+                                            </div>
+                                          )}
+                                      </motion.div>
+                                    );
+                                  }
+                                  
+                                  // Render regular members
+                                  return (
                                     <Dialog key={member.id} open={selectedMemberStats?.id === member.id} onOpenChange={(open) => !open && setSelectedMemberStats(null)}>
                                       <DialogTrigger asChild>
                                         <motion.div 
@@ -1663,7 +1710,8 @@ export default function ProfilePage() {
                                         </motion.div>
                                       </DialogTrigger>
                                     </Dialog>
-                                ))}
+                                  );
+                                })}
                               </motion.div>
                               
                               {userRole === "owner" && (

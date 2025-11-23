@@ -15,7 +15,13 @@ def create_app(config_name=None):
     
     # Инициализация расширений
     db.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, 
+         resources={r"/api/*": {
+             "origins": "*",
+             "allow_headers": ["Content-Type"],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+             "supports_credentials": True
+         }})
     
     # Инициализация MongoDB
     from services.mongo_service import init_mongo

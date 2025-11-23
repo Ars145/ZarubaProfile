@@ -23,7 +23,7 @@ class ClanMember(db.Model):
     clan = db.relationship('Clan', back_populates='members')
     player = db.relationship('Player', back_populates='memberships')
     
-    def to_dict(self, include_online_status=True):
+    def to_dict(self, include_online_status=True, use_steam_api=False):
         return {
             'id': str(self.id),
             'clanId': str(self.clan_id),
@@ -31,7 +31,10 @@ class ClanMember(db.Model):
             'role': self.role,
             'statsSnapshot': self.stats_snapshot or {},
             'joinedAt': self.joined_at.isoformat() if self.joined_at else None,
-            'player': self.player.to_dict(include_online_status=include_online_status) if self.player else None
+            'player': self.player.to_dict(
+                include_online_status=include_online_status,
+                use_steam_api=use_steam_api
+            ) if self.player else None
         }
     
     def __repr__(self):

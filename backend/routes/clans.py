@@ -238,7 +238,7 @@ def delete_clan(clan_id):
 
 @api.route('/clans/<clan_id>/members', methods=['GET'])
 def get_clan_members(clan_id):
-    """Получить список участников клана"""
+    """Получить список участников клана с реальными онлайн статусами из Steam API"""
     try:
         clan = Clan.query.get(clan_id)
         if not clan:
@@ -249,10 +249,40 @@ def get_clan_members(clan_id):
         
         members = ClanMember.query.filter_by(clan_id=clan_id).all()
         
-        return jsonify({
-            'success': True,
-            'members': [member.to_dict() for member in members]
-        }), 200
+        # Получаем онлайн статусы через Steam API (batch запрос эффективнее)
+        try:
+            from services.steam_service import steam_service
+            
+            # Собираем все Steam ID
+            steam_ids = [m.player.steam_id for m in members if m.player and m.player.steam_id]
+            
+            # Получаем статусы одним запросом (до 100 игроков за раз)
+            statuses = steam_service.get_online_statuses(steam_ids) if steam_ids else {}
+            
+            # Формируем ответ с использованием полученных статусов
+            members_data = []
+            for member in members:
+                member_dict = member.to_dict(include_online_status=False)
+                
+                # Добавляем онлайн статус из Steam API
+                if member.player and member.player.steam_id in statuses:
+                    if 'player' in member_dict and member_dict['player']:
+                        member_dict['player']['onlineStatus'] = statuses[member.player.steam_id]
+                
+                members_data.append(member_dict)
+            
+            return jsonify({
+                'success': True,
+                'members': members_data
+            }), 200
+            
+        except Exception as steam_error:
+            # Fallback на last_login если Steam API недоступен
+            print(f"[STEAM API ERROR] Используем fallback на last_login: {steam_error}")
+            return jsonify({
+                'success': True,
+                'members': [member.to_dict(include_online_status=True, use_steam_api=False) for member in members]
+            }), 200
         
     except Exception as e:
         return jsonify({

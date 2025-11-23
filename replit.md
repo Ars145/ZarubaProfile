@@ -5,6 +5,27 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 
 ## Recent Changes (Nov 23, 2025)
 
+### File Upload & Settings Fix ✅
+
+**1. Fixed File Upload Endpoints**
+- **Problem**: Frontend called `/api/uploads/clan-banners` and `/api/uploads/clan-logos` (plural)
+- **Solution**: Backend provides `/api/uploads/clan-banner` and `/api/uploads/clan-logo` (singular)
+- **Fixed in**: Frontend/src/pages/profile.jsx (lines 602, 630)
+- **Improved response handling**: Now checks `data.bannerUrl || data.url || data.path` for flexibility
+
+**2. Fixed Settings Save Mutation**
+- **Problem**: updateClanMutation used snake_case field names (`banner_url`, `logo_url`)
+- **Backend expects**: camelCase field names (`bannerUrl`, `logoUrl`)
+- **Fixed in**: Frontend/src/pages/profile.jsx updateClanMutation (lines 535-536)
+- **Result**: Clan settings (theme, banner, logo, Discord link, requirements) now save correctly
+
+**3. Security Verification**
+- All upload endpoints protected with `@require_auth` decorator
+- Ownership verification: Only clan owners can upload banner/logo
+- `uploadFileWithAuth` correctly passes `clanId` via FormData for backend validation
+
+---
+
 ### Admin Panel Improvements - Steam ID Support ✅
 
 **1. Steam ID Integration in Admin Panel**

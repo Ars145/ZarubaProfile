@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.dialects.postgresql import UUID
 from . import db
 
@@ -22,8 +22,27 @@ class Player(db.Model):
     memberships = db.relationship('ClanMember', back_populates='player', cascade='all, delete-orphan')
     applications = db.relationship('ClanApplication', back_populates='player', cascade='all, delete-orphan')
     
-    def to_dict(self):
-        return {
+    def get_online_status(self):
+        """Определяет онлайн статус игрока на основе last_login
+        - В СЕТИ: заходил менее 15 минут назад
+        - В ИГРЕ: заходил менее 1 часа назад
+        - НЕ В СЕТИ: заходил более 1 часа назад или никогда
+        """
+        if not self.last_login:
+            return 'НЕ В СЕТИ'
+        
+        now = datetime.utcnow()
+        time_diff = now - self.last_login
+        
+        if time_diff < timedelta(minutes=15):
+            return 'В СЕТИ'
+        elif time_diff < timedelta(hours=1):
+            return 'В ИГРЕ'
+        else:
+            return 'НЕ В СЕТИ'
+    
+    def to_dict(self, include_online_status=False):
+        result = {
             'id': str(self.id),
             'steamId': self.steam_id,
             'username': self.username,
@@ -34,6 +53,11 @@ class Player(db.Model):
             'createdAt': self.created_at.isoformat() if self.created_at else None,
             'lastLogin': self.last_login.isoformat() if self.last_login else None
         }
+        
+        if include_online_status:
+            result['onlineStatus'] = self.get_online_status()
+        
+        return result
     
     def __repr__(self):
         return f'<Player {self.username} ({self.steam_id})>'

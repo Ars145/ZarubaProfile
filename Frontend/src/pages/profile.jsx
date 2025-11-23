@@ -392,35 +392,42 @@ export default function ProfilePage() {
   
   // Преобразуем данные участников из API в нужный формат
   // queryClient автоматически распаковывает {success: true, members: [...]} в просто массив
-  const squadMembers = clanMembersResponse?.map(member => ({
-    id: member.id,
-    name: member.player?.username || 'Unknown',
-    role: member.role === 'owner' ? 'Лидер' : member.role === 'officer' ? 'Офицер' : member.role === 'member' ? 'Боец' : 'Рекрут',
-    status: 'НЕ В СЕТИ', // TODO: Добавить реальный статус онлайн
-    statusColor: 'text-zinc-500',
-    roleColor: member.role === 'owner' ? 'text-primary border-primary/20 bg-primary/10' : 
-               member.role === 'officer' ? 'text-orange-400 border-orange-400/20 bg-orange-400/10' : 
-               'text-muted-foreground border-white/10 bg-white/5',
-    avatar: member.player?.username?.substring(0, 2).toUpperCase() || 'UN',
-    stats: { 
-      games: 0, 
-      hours: '0д 0ч', 
-      sl: '0ч', 
-      driver: '0ч', 
-      pilot: '0ч', 
-      cmd: '0ч', 
-      likes: 0, 
-      tk: 0, 
-      winrate: 0, 
-      kills: 0, 
-      deaths: 0, 
-      kd: 0, 
-      wins: 0, 
-      avgKills: 0, 
-      vehicleKills: 0, 
-      knifeKills: 0 
-    } // TODO: Получить реальную статистику
-  })) || [];
+  const squadMembers = clanMembersResponse?.map(member => {
+    const onlineStatus = member.player?.onlineStatus || 'НЕ В СЕТИ';
+    const statusColor = onlineStatus === 'В СЕТИ' ? 'text-emerald-500' : 
+                       onlineStatus === 'В ИГРЕ' ? 'text-yellow-500' : 
+                       'text-zinc-500';
+    
+    return {
+      id: member.id,
+      name: member.player?.username || 'Unknown',
+      role: member.role === 'owner' ? 'Лидер' : member.role === 'officer' ? 'Офицер' : member.role === 'member' ? 'Боец' : 'Рекрут',
+      status: onlineStatus,
+      statusColor: statusColor,
+      roleColor: member.role === 'owner' ? 'text-primary border-primary/20 bg-primary/10' : 
+                 member.role === 'officer' ? 'text-orange-400 border-orange-400/20 bg-orange-400/10' : 
+                 'text-muted-foreground border-white/10 bg-white/5',
+      avatar: member.player?.username?.substring(0, 2).toUpperCase() || 'UN',
+      stats: { 
+        games: 0, 
+        hours: '0д 0ч', 
+        sl: '0ч', 
+        driver: '0ч', 
+        pilot: '0ч', 
+        cmd: '0ч', 
+        likes: 0, 
+        tk: 0, 
+        winrate: 0, 
+        kills: 0, 
+        deaths: 0, 
+        kd: 0, 
+        wins: 0, 
+        avgKills: 0, 
+        vehicleKills: 0, 
+        knifeKills: 0 
+      } // TODO: Получить реальную статистику
+    };
+  }) || [];
   
   // DEBUG: Логирование данных
   useEffect(() => {

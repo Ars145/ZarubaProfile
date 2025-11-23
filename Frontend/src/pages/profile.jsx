@@ -391,7 +391,8 @@ export default function ProfilePage() {
   });
   
   // Преобразуем данные участников из API в нужный формат
-  const squadMembers = clanMembersResponse?.members?.map(member => ({
+  // queryClient автоматически распаковывает {success: true, members: [...]} в просто массив
+  const squadMembers = clanMembersResponse?.map(member => ({
     id: member.id,
     name: member.player?.username || 'Unknown',
     role: member.role === 'owner' ? 'Лидер' : member.role === 'officer' ? 'Офицер' : member.role === 'member' ? 'Боец' : 'Рекрут',
@@ -436,8 +437,8 @@ export default function ProfilePage() {
   
   // Определяем роль пользователя в клане
   useEffect(() => {
-    if (clanMembersResponse?.members && user) {
-      const myMembership = clanMembersResponse.members.find(m => m.player?.id === user.id);
+    if (clanMembersResponse && user) {
+      const myMembership = clanMembersResponse.find(m => m.player?.id === user.id);
       if (myMembership) {
         if (myMembership.role === 'owner') {
           setUserRole('owner');

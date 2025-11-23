@@ -42,47 +42,11 @@ export function Layout({ children }) {
       {/* Header Navigation */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-6">
-            <Link href="/">
-              <span className="text-xl font-bold text-primary hover-elevate px-3 py-2 rounded-md cursor-pointer" data-testid="link-home">
-                ZARUBA
-              </span>
-            </Link>
-            <nav className="hidden md:flex items-center gap-2">
-              <Link href="/profile">
-                <Button 
-                  variant={isActive('/profile') ? 'secondary' : 'ghost'} 
-                  className="gap-2"
-                  data-testid="link-profile"
-                >
-                  <User className="w-4 h-4" />
-                  Профиль
-                </Button>
-              </Link>
-              <Link href="/clans">
-                <Button 
-                  variant={isActive('/clans') ? 'secondary' : 'ghost'}
-                  className="gap-2"
-                  data-testid="link-clans"
-                >
-                  <Users className="w-4 h-4" />
-                  Кланы
-                </Button>
-              </Link>
-              {isAdmin && (
-                <Link href="/admin">
-                  <Button 
-                    variant={isActive('/admin') ? 'secondary' : 'ghost'}
-                    className="gap-2"
-                    data-testid="link-admin"
-                  >
-                    <Shield className="w-4 h-4" />
-                    Админ
-                  </Button>
-                </Link>
-              )}
-            </nav>
-          </div>
+          <Link href="/">
+            <span className="text-xl font-bold text-primary hover-elevate px-3 py-2 rounded-md cursor-pointer" data-testid="link-home">
+              ZARUBA
+            </span>
+          </Link>
 
           <div className="flex items-center gap-3">
             {user && (
@@ -103,6 +67,20 @@ export function Layout({ children }) {
                       Профиль
                     </DropdownMenuItem>
                   </Link>
+                  <Link href="/clans">
+                    <DropdownMenuItem data-testid="menu-clans">
+                      <Users className="w-4 h-4 mr-2" />
+                      Кланы
+                    </DropdownMenuItem>
+                  </Link>
+                  {isAdmin && (
+                    <Link href="/admin">
+                      <DropdownMenuItem data-testid="menu-admin">
+                        <Shield className="w-4 h-4 mr-2" />
+                        Админ
+                      </DropdownMenuItem>
+                    </Link>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} data-testid="menu-logout">
                     <LogOut className="w-4 h-4 mr-2" />

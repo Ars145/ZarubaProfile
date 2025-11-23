@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Users, Crown } from 'lucide-react';
+import { Shield, Users, Crown, Edit, Trash2 } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 
@@ -31,9 +32,24 @@ export default function AdminPanel() {
     steamId: ''
   });
   
-  // Загрузка списка кланов
+  // Состояние для редактирования клана
+  const [editingClan, setEditingClan] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    tag: '',
+    description: '',
+    theme: 'orange',
+    bannerUrl: '',
+    logoUrl: '',
+    level: 0,
+    winrate: 0,
+    maxMembers: 50,
+    requirements: {}
+  });
+  
+  // Загрузка списка кланов с детальной информацией для админов
   const { data: clans = [] } = useQuery({
-    queryKey: ['/api/clans'],
+    queryKey: ['/api/admin/clans'],
     enabled: !loading && isAdmin
   });
   
@@ -78,6 +94,7 @@ export default function AdminPanel() {
       });
       
       // Обновить список кланов
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/clans'] });
       queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
     } catch (error) {
       toast({
@@ -117,11 +134,94 @@ export default function AdminPanel() {
       });
       
       // Обновить данные
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/clans'] });
       queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
     } catch (error) {
       toast({
         title: 'Ошибка',
         description: error.message || 'Не удалось назначить владельца',
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const openEditDialog = (clan) => {
+    setEditingClan(clan);
+    setEditForm({
+      name: clan.name || '',
+      tag: clan.tag || '',
+      description: clan.description || '',
+      theme: clan.theme || 'orange',
+      bannerUrl: clan.bannerUrl || '',
+      logoUrl: clan.logoUrl || '',
+      level: clan.level || 0,
+      winrate: clan.winrate || 0,
+      maxMembers: clan.maxMembers || 50,
+      requirements: clan.requirements || {}
+    });
+  };
+  
+  const handleEditClan = async (e) => {
+    e.preventDefault();
+    
+    if (!editingClan) return;
+    
+    try {
+      const payload = {
+        name: editForm.name,
+        tag: editForm.tag,
+        description: editForm.description,
+        theme: editForm.theme,
+        bannerUrl: editForm.bannerUrl,
+        logoUrl: editForm.logoUrl,
+        level: parseInt(editForm.level),
+        winrate: parseFloat(editForm.winrate),
+        maxMembers: parseInt(editForm.maxMembers),
+        requirements: editForm.requirements
+      };
+      
+      const updatedClan = await apiRequest('PUT', `/api/admin/clans/${editingClan.id}`, payload);
+      
+      toast({
+        title: 'Клан обновлен',
+        description: `Клан "${updatedClan.name}" успешно обновлен`
+      });
+      
+      // Закрыть диалог
+      setEditingClan(null);
+      
+      // Обновить список кланов
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/clans'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: error.message || 'Не удалось обновить клан',
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const handleDeleteClan = async (clanId, clanName) => {
+    if (!confirm(`Вы уверены что хотите удалить клан "${clanName}"? Это действие необратимо.`)) {
+      return;
+    }
+    
+    try {
+      await apiRequest('DELETE', `/api/admin/clans/${clanId}`);
+      
+      toast({
+        title: 'Клан удален',
+        description: `Клан "${clanName}" успешно удален`
+      });
+      
+      // Обновить список кланов
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/clans'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: error.message || 'Не удалось удалить клан',
         variant: 'destructive'
       });
     }
@@ -314,18 +414,33 @@ export default function AdminPanel() {
                   <div
                     key={clan.id}
                     data-testid={`card-clan-${clan.id}`}
-                    className="flex items-center justify-between p-3 rounded-md border"
+                    className="flex items-center justify-between p-3 rounded-md border gap-4"
                   >
-                    <div>
-                      <div className="font-semibold">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold truncate">
                         [{clan.tag}] {clan.name}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        ID: {clan.id}
+                        ID: {clan.id} | Участников: {clan.memberCount || 0} / {clan.maxMembers || 50}
                       </div>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      Участников: {clan.memberCount || 0}
+                    <div className="flex gap-2 flex-shrink-0">
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        data-testid={`button-edit-clan-${clan.id}`}
+                        onClick={() => openEditDialog(clan)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        data-testid={`button-delete-clan-${clan.id}`}
+                        onClick={() => handleDeleteClan(clan.id, clan.name)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -334,6 +449,155 @@ export default function AdminPanel() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Edit Clan Dialog */}
+      <Dialog open={!!editingClan} onOpenChange={(open) => !open && setEditingClan(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Редактировать Клан</DialogTitle>
+            <DialogDescription>
+              Измените параметры клана {editingClan?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleEditClan} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Название *</Label>
+                <Input
+                  id="edit-name"
+                  data-testid="input-edit-name"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-tag">Тег *</Label>
+                <Input
+                  id="edit-tag"
+                  data-testid="input-edit-tag"
+                  value={editForm.tag}
+                  onChange={(e) => setEditForm({ ...editForm, tag: e.target.value.toUpperCase() })}
+                  maxLength={10}
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Описание</Label>
+              <Textarea
+                id="edit-description"
+                data-testid="textarea-edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-theme">Тема</Label>
+                <Select
+                  value={editForm.theme}
+                  onValueChange={(value) => setEditForm({ ...editForm, theme: value })}
+                >
+                  <SelectTrigger id="edit-theme" data-testid="select-edit-theme">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="orange">Оранжевая</SelectItem>
+                    <SelectItem value="blue">Синяя</SelectItem>
+                    <SelectItem value="yellow">Желтая</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-level">Уровень</Label>
+                <Input
+                  id="edit-level"
+                  data-testid="input-edit-level"
+                  type="number"
+                  value={editForm.level}
+                  onChange={(e) => setEditForm({ ...editForm, level: e.target.value })}
+                  min="0"
+                  max="100"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-winrate">Процент побед</Label>
+                <Input
+                  id="edit-winrate"
+                  data-testid="input-edit-winrate"
+                  type="number"
+                  step="0.1"
+                  value={editForm.winrate}
+                  onChange={(e) => setEditForm({ ...editForm, winrate: e.target.value })}
+                  min="0"
+                  max="100"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-maxmembers">Макс. участников</Label>
+                <Input
+                  id="edit-maxmembers"
+                  data-testid="input-edit-maxmembers"
+                  type="number"
+                  value={editForm.maxMembers}
+                  onChange={(e) => setEditForm({ ...editForm, maxMembers: e.target.value })}
+                  min="1"
+                  max="100"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-banner">URL Баннера</Label>
+                <Input
+                  id="edit-banner"
+                  data-testid="input-edit-banner"
+                  value={editForm.bannerUrl}
+                  onChange={(e) => setEditForm({ ...editForm, bannerUrl: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-logo">URL Логотипа</Label>
+                <Input
+                  id="edit-logo"
+                  data-testid="input-edit-logo"
+                  value={editForm.logoUrl}
+                  onChange={(e) => setEditForm({ ...editForm, logoUrl: e.target.value })}
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+            
+            <DialogFooter className="gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                data-testid="button-cancel-edit"
+                onClick={() => setEditingClan(null)}
+              >
+                Отмена
+              </Button>
+              <Button type="submit" data-testid="button-save-edit">
+                Сохранить
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

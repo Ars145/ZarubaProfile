@@ -1333,7 +1333,7 @@ export default function ProfilePage() {
                                 >
                                    {/* Clan Banner Image */}
                                    <div className="h-32 relative">
-                                      <img src={clan.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                      <img src={clan.bannerUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                       <div className={`absolute inset-0 ${selectedClan === clan.id ? "bg-black/20" : "bg-black/60 group-hover:bg-black/40"} transition-colors duration-300`} />
                                       
                                       {/* Clan Logo - Positioned absolutely but rendered visually on top */}
@@ -1344,7 +1344,7 @@ export default function ProfilePage() {
                                             transition={{ delay: 0.2 }}
                                             className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clanColors.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}
                                         >
-                                           <img src={clan.logo} className="w-full h-full object-cover" />
+                                           <img src={clan.logoUrl} className="w-full h-full object-cover" />
                                         </motion.div>
                                       </div>
                                    </div>

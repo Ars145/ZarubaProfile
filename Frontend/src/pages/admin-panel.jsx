@@ -13,7 +13,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 
 export default function AdminPanel() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, user } = useAuth();
   const { toast } = useToast();
   
   // Состояние для формы создания клана
@@ -32,12 +32,10 @@ export default function AdminPanel() {
   });
   
   // Загрузка списка кланов
-  const { data: clansData } = useQuery({
+  const { data: clans = [] } = useQuery({
     queryKey: ['/api/clans'],
     enabled: !loading && isAdmin
   });
-  
-  const clans = clansData?.clans || [];
   
   if (loading) {
     return (
@@ -63,27 +61,24 @@ export default function AdminPanel() {
         ownerId: clanForm.ownerId || undefined
       };
       
-      const res = await apiRequest('POST', '/api/clans', payload);
-      const response = await res.json();
+      const clan = await apiRequest('POST', '/api/clans', payload);
       
-      if (response.success) {
-        toast({
-          title: 'Клан создан',
-          description: `Клан "${response.clan.name}" успешно создан`
-        });
-        
-        // Очистить форму
-        setClanForm({
-          name: '',
-          tag: '',
-          description: '',
-          theme: 'orange',
-          ownerId: ''
-        });
-        
-        // Обновить список кланов
-        queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
-      }
+      toast({
+        title: 'Клан создан',
+        description: `Клан "${clan.name}" успешно создан`
+      });
+      
+      // Очистить форму
+      setClanForm({
+        name: '',
+        tag: '',
+        description: '',
+        theme: 'orange',
+        ownerId: ''
+      });
+      
+      // Обновить список кланов
+      queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
     } catch (error) {
       toast({
         title: 'Ошибка',
@@ -106,26 +101,23 @@ export default function AdminPanel() {
     }
     
     try {
-      const res = await apiRequest('POST', `/api/admin/clans/${ownerForm.clanId}/assign-owner`, {
+      const result = await apiRequest('POST', `/api/admin/clans/${ownerForm.clanId}/assign-owner`, {
         playerId: ownerForm.playerId
       });
-      const response = await res.json();
       
-      if (response.success) {
-        toast({
-          title: 'Владелец назначен',
-          description: response.message
-        });
-        
-        // Очистить форму
-        setOwnerForm({
-          clanId: '',
-          playerId: ''
-        });
-        
-        // Обновить данные
-        queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
-      }
+      toast({
+        title: 'Владелец назначен',
+        description: result.message || 'Владелец успешно назначен'
+      });
+      
+      // Очистить форму
+      setOwnerForm({
+        clanId: '',
+        playerId: ''
+      });
+      
+      // Обновить данные
+      queryClient.invalidateQueries({ queryKey: ['/api/clans'] });
     } catch (error) {
       toast({
         title: 'Ошибка',
@@ -215,13 +207,23 @@ export default function AdminPanel() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="clan-owner-id">ID Владельца (опционально)</Label>
-                  <Input
-                    id="clan-owner-id"
-                    data-testid="input-clan-owner-id"
-                    value={clanForm.ownerId}
-                    onChange={(e) => setClanForm({ ...clanForm, ownerId: e.target.value })}
-                    placeholder="UUID игрока"
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="clan-owner-id"
+                      data-testid="input-clan-owner-id"
+                      value={clanForm.ownerId}
+                      onChange={(e) => setClanForm({ ...clanForm, ownerId: e.target.value })}
+                      placeholder="UUID игрока"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      data-testid="button-set-self-owner"
+                      onClick={() => setClanForm({ ...clanForm, ownerId: user?.id || '' })}
+                    >
+                      Я
+                    </Button>
+                  </div>
                 </div>
               </div>
               
@@ -266,14 +268,24 @@ export default function AdminPanel() {
               
               <div className="space-y-2">
                 <Label htmlFor="assign-player-id">ID Игрока *</Label>
-                <Input
-                  id="assign-player-id"
-                  data-testid="input-assign-player-id"
-                  value={ownerForm.playerId}
-                  onChange={(e) => setOwnerForm({ ...ownerForm, playerId: e.target.value })}
-                  placeholder="UUID игрока"
-                  required
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="assign-player-id"
+                    data-testid="input-assign-player-id"
+                    value={ownerForm.playerId}
+                    onChange={(e) => setOwnerForm({ ...ownerForm, playerId: e.target.value })}
+                    placeholder="UUID игрока"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    data-testid="button-set-self-player"
+                    onClick={() => setOwnerForm({ ...ownerForm, playerId: user?.id || '' })}
+                  >
+                    Я
+                  </Button>
+                </div>
               </div>
               
               <Button type="submit" data-testid="button-assign-owner" className="w-full">

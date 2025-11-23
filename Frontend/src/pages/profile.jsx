@@ -529,8 +529,8 @@ export default function ProfilePage() {
     mutationFn: async (updates) => {
       return await apiRequest('PUT', `/api/clans/${currentClanId}`, {
         theme: updates.theme,
-        banner_url: updates.bannerUrl,
-        logo_url: updates.logoUrl,
+        bannerUrl: updates.bannerUrl,
+        logoUrl: updates.logoUrl,
         requirements: {
           microphone: updates.requirements.microphone,
           ageRestriction: updates.requirements.ageRestriction,

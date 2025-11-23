@@ -596,8 +596,8 @@ export default function ProfilePage() {
     
     setUploadingBanner(true);
     try {
-      const data = await uploadFileWithAuth('/api/uploads/clan-banners', file);
-      const uploadedUrl = data.url || data.path;
+      const data = await uploadFileWithAuth('/api/uploads/clan-banner', file);
+      const uploadedUrl = data.bannerUrl || data.url || data.path;
       
       setClanBanner(uploadedUrl);
       toast({
@@ -624,8 +624,8 @@ export default function ProfilePage() {
     
     setUploadingLogo(true);
     try {
-      const data = await uploadFileWithAuth('/api/uploads/clan-logos', file);
-      const uploadedUrl = data.url || data.path;
+      const data = await uploadFileWithAuth('/api/uploads/clan-logo', file);
+      const uploadedUrl = data.logoUrl || data.url || data.path;
       
       setClanLogo(uploadedUrl);
       toast({

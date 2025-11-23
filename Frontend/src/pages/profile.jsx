@@ -390,19 +390,6 @@ export default function ProfilePage() {
     enabled: !!currentClanId,
   });
   
-  // DEBUG: Логирование данных
-  useEffect(() => {
-    console.log('[CLAN DEBUG] ================');
-    console.log('[CLAN DEBUG] User:', user);
-    console.log('[CLAN DEBUG] currentClanId:', currentClanId);
-    console.log('[CLAN DEBUG] Queries enabled:', !!currentClanId);
-    console.log('[CLAN DEBUG] clanData:', clanData);
-    console.log('[CLAN DEBUG] clanMembersResponse:', clanMembersResponse);
-    console.log('[CLAN DEBUG] clanLoading:', clanLoading, 'membersLoading:', membersLoading);
-    console.log('[CLAN DEBUG] squadMembers length:', squadMembers.length);
-    console.log('[CLAN DEBUG] ================');
-  }, [user, currentClanId, clanData, clanMembersResponse, clanLoading, membersLoading, squadMembers]);
-  
   // Преобразуем данные участников из API в нужный формат
   const squadMembers = clanMembersResponse?.members?.map(member => ({
     id: member.id,
@@ -433,6 +420,19 @@ export default function ProfilePage() {
       knifeKills: 0 
     } // TODO: Получить реальную статистику
   })) || [];
+  
+  // DEBUG: Логирование данных
+  useEffect(() => {
+    console.log('[CLAN DEBUG] ================');
+    console.log('[CLAN DEBUG] User:', user);
+    console.log('[CLAN DEBUG] currentClanId:', currentClanId);
+    console.log('[CLAN DEBUG] Queries enabled:', !!currentClanId);
+    console.log('[CLAN DEBUG] clanData:', clanData);
+    console.log('[CLAN DEBUG] clanMembersResponse:', clanMembersResponse);
+    console.log('[CLAN DEBUG] clanLoading:', clanLoading, 'membersLoading:', membersLoading);
+    console.log('[CLAN DEBUG] squadMembers length:', squadMembers.length);
+    console.log('[CLAN DEBUG] ================');
+  }, [user, currentClanId, clanData, clanMembersResponse, clanLoading, membersLoading, squadMembers]);
   
   // Определяем роль пользователя в клане
   useEffect(() => {

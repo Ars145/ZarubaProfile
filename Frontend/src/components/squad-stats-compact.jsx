@@ -43,12 +43,12 @@ export function SquadStatsCompact({ stats }) {
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-muted-foreground">Ранг</span>
-                  <span className="text-primary font-bold">{stats.rank.progress.toFixed(1)}%</span>
+                  <span className="text-primary font-bold">{(stats.rank.progress || 0).toFixed(1)}%</span>
                 </div>
-                <Progress value={stats.rank.progress} className="h-2" />
+                <Progress value={stats.rank.progress || 0} className="h-2" />
                 <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-                  <span>{stats.rank.current.score.toLocaleString()}</span>
-                  {stats.rank.next && <span>{stats.rank.next.needScore.toLocaleString()}</span>}
+                  <span>{(stats.rank.current.score || 0).toLocaleString()}</span>
+                  {stats.rank.next && <span>{(stats.rank.next.needScore || 0).toLocaleString()}</span>}
                 </div>
               </div>
             </div>
@@ -114,8 +114,8 @@ export function SquadStatsCompact({ stats }) {
           {/* Roles Tab */}
           <TabsContent value="roles" className="space-y-2 mt-4">
             {stats.detailedRoles && stats.detailedRoles.slice(0, 6).map((role, idx) => {
-              const percentage = stats.topRole && stats.topRole.timeMinutes > 0 
-                ? (role.timeMinutes / stats.topRole.timeMinutes) * 100 
+              const percentage = stats.topRole?.timeMinutes > 0 
+                ? ((role.timeMinutes || 0) / stats.topRole.timeMinutes) * 100 
                 : 0;
               
               return (
@@ -123,9 +123,9 @@ export function SquadStatsCompact({ stats }) {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       {idx === 0 && <Star className="w-3 h-3 text-primary" />}
-                      <span className={idx === 0 ? 'font-bold text-primary' : ''}>{role.name}</span>
+                      <span className={idx === 0 ? 'font-bold text-primary' : ''}>{role.name || 'Unknown'}</span>
                     </div>
-                    <span className="text-xs font-bold">{role.time}</span>
+                    <span className="text-xs font-bold">{role.time || '0м'}</span>
                   </div>
                   <Progress value={percentage} className="h-1.5" />
                 </div>

@@ -877,9 +877,9 @@ export default function ProfilePage() {
                         <div className="flex-1">
                           <div className="flex justify-between text-xs mb-1">
                             <span className="text-muted-foreground">Ранг</span>
-                            <span className="text-primary font-bold">{squadStats.rank.progress.toFixed(1)}%</span>
+                            <span className="text-primary font-bold">{(squadStats.rank.progress || 0).toFixed(1)}%</span>
                           </div>
-                          <Progress value={squadStats.rank.progress} className="h-2" />
+                          <Progress value={squadStats.rank.progress || 0} className="h-2" />
                         </div>
                       </div>
                     )}
@@ -909,18 +909,20 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Top Weapon & Role */}
-                    {squadStats.topWeapon && (
+                    {(squadStats.topWeapon || squadStats.topRole) && (
                       <div className="flex gap-2">
-                        <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
-                          <div className="text-[10px] text-muted-foreground mb-1">🔫 Оружие</div>
-                          <div className="text-sm font-bold truncate">{squadStats.topWeapon.name}</div>
-                          <div className="text-xs text-primary">{squadStats.topWeapon.kills} убийств</div>
-                        </div>
+                        {squadStats.topWeapon && (
+                          <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
+                            <div className="text-[10px] text-muted-foreground mb-1">🔫 Оружие</div>
+                            <div className="text-sm font-bold truncate">{squadStats.topWeapon.name || 'Unknown'}</div>
+                            <div className="text-xs text-primary">{squadStats.topWeapon.kills || 0} убийств</div>
+                          </div>
+                        )}
                         {squadStats.topRole && (
                           <div className="flex-1 p-2 bg-zinc-800/30 rounded-lg">
                             <div className="text-[10px] text-muted-foreground mb-1">🎖️ Роль</div>
-                            <div className="text-sm font-bold truncate">{squadStats.topRole.name}</div>
-                            <div className="text-xs text-primary">{squadStats.topRole.time}</div>
+                            <div className="text-sm font-bold truncate">{squadStats.topRole.name || 'Unknown'}</div>
+                            <div className="text-xs text-primary">{squadStats.topRole.time || '0м'}</div>
                           </div>
                         )}
                       </div>

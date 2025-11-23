@@ -17,6 +17,8 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
   - Added early return with minimal stats object when MongoDB data unavailable
   - All nested field access now uses optional chaining (?.) and fallback values
   - Fixed field name mismatches (playerData._id vs steamId, death vs deaths, etc.)
+  - **FIXED: All components** - squad-stats-compact.jsx and profile.jsx now safely handle missing nested stats
+  - All rank.progress, topWeapon, topRole accesses protected with optional chaining and fallbacks
 - **Mock Data Cleanup**: 
   - Removed mockSquadStats.js and all mock data dependencies
   - Removed hardcoded fake clans array from profile.jsx

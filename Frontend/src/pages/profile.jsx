@@ -360,8 +360,8 @@ export default function ProfilePage() {
   const [sortBy, setSortBy] = useState("default");
   
   // Clan Assets State (Owner Settings)
-  const [clanBanner, setClanBanner] = useState(alphaBanner);
-  const [clanLogo, setClanLogo] = useState(wolfLogo);
+  const [clanBanner, setClanBanner] = useState(null);
+  const [clanLogo, setClanLogo] = useState(null);
   const [discordLink, setDiscordLink] = useState("https://discord.gg/clan-alpha");
   
   // Clan Requirements & Theme Settings

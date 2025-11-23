@@ -5,6 +5,18 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 
 ## Recent Changes (Nov 23, 2025)
 
+### Critical Bug Fix - API Request Method Error
+- **Fixed apiRequest signature mismatch** in admin-panel.jsx
+  - Problem: apiRequest expects (method, url, data) but was called with (url, {method, body})
+  - Error: "'/api/clans' is not a valid HTTP method"
+  - Fixed handleCreateClan: now uses `apiRequest('POST', '/api/clans', payload)`
+  - Fixed handleAssignOwner: now uses `apiRequest('POST', url, {playerId})`
+  - Both functions now properly parse JSON response with `await res.json()`
+
+---
+
+## Previous Changes (Nov 23, 2025)
+
 ### ADMIN Role Implementation
 - **Admin Role System**: Захардкожены три Steam ID администраторов в backend/config.py (ADMIN_STEAM_IDS)
   - `76561199104736343` (Админ 1)

@@ -63,10 +63,8 @@ export default function AdminPanel() {
         ownerId: clanForm.ownerId || undefined
       };
       
-      const response = await apiRequest('/api/clans', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
+      const res = await apiRequest('POST', '/api/clans', payload);
+      const response = await res.json();
       
       if (response.success) {
         toast({
@@ -108,12 +106,10 @@ export default function AdminPanel() {
     }
     
     try {
-      const response = await apiRequest(`/api/admin/clans/${ownerForm.clanId}/assign-owner`, {
-        method: 'POST',
-        body: JSON.stringify({
-          playerId: ownerForm.playerId
-        })
+      const res = await apiRequest('POST', `/api/admin/clans/${ownerForm.clanId}/assign-owner`, {
+        playerId: ownerForm.playerId
       });
+      const response = await res.json();
       
       if (response.success) {
         toast({

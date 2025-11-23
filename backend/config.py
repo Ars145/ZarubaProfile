@@ -39,6 +39,12 @@ class Config:
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB
     UPLOAD_FOLDER = 'static/uploads'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+    
+    # Admin Steam IDs (захардкожены)
+    ADMIN_STEAM_IDS = [
+        '76561199104736343',  # Админ 1
+        '76561198046223350'   # Админ 2
+    ]
 
 
 class DevelopmentConfig(Config):

@@ -297,7 +297,13 @@ def logout():
 @require_auth
 def get_current_user():
     """Получить текущего пользователя"""
+    player_dict = request.current_player.to_dict()
+    
+    # Проверка является ли пользователь админом
+    admin_steam_ids = current_app.config.get('ADMIN_STEAM_IDS', [])
+    player_dict['isAdmin'] = request.current_player.steam_id in admin_steam_ids
+    
     return jsonify({
         'success': True,
-        'player': request.current_player.to_dict()
+        'player': player_dict
     })

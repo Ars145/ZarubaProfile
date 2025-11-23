@@ -15,6 +15,9 @@ class Clan(db.Model):
     banner_url = db.Column(db.Text, nullable=True)
     logo_url = db.Column(db.Text, nullable=True)
     requirements = db.Column(JSONB, nullable=True, default=dict)
+    level = db.Column(db.Integer, nullable=False, default=1)
+    winrate = db.Column(db.Float, nullable=False, default=0.0)
+    max_members = db.Column(db.Integer, nullable=False, default=50)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
     # Relationships
@@ -34,6 +37,9 @@ class Clan(db.Model):
             'bannerUrl': self.banner_url,
             'logoUrl': self.logo_url,
             'requirements': self.requirements or {},
+            'level': self.level,
+            'winrate': self.winrate,
+            'maxMembers': self.max_members,
             'createdAt': self.created_at.isoformat() if self.created_at else None,
             'memberCount': len(self.members),
             'isRecruiting': self.requirements.get('isOpen', True) if self.requirements else True,

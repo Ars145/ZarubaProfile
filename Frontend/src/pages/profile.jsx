@@ -1610,7 +1610,7 @@ export default function ProfilePage() {
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                                 <span className="text-xs font-mono bg-zinc-800 px-3 py-1.5 rounded border border-white/5 text-muted-foreground font-bold">
-                                  {squadMembers.length} / {clanData?.clan?.max_members || 50}
+                                  {squadMembers.length} / {clanData?.clan?.maxMembers || 50}
                                 </span>
                               </div>
                           </div>

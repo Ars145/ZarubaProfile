@@ -4,6 +4,25 @@
 ZARUBA is a tactical gaming community platform for Squad server players, offering player profiles, clan management, and detailed game statistics. It integrates a React frontend with existing Squad server infrastructure (MongoDB statistics) and a Discord bot ecosystem. The platform aims to enhance player engagement by providing statistics, clan functionality, and a ranking system based on in-game performance.
 
 ## Recent Changes (Nov 23, 2025)
+
+### ADMIN Role Implementation
+- **Admin Role System**: Захардкожены два Steam ID администраторов в backend/config.py (ADMIN_STEAM_IDS)
+- **Backend Admin Checks**: 
+  - /api/auth/me теперь возвращает поле isAdmin (проверяется на бэкенде по Steam ID)
+  - /api/clans POST требует авторизацию и проверяет права админа
+  - Новый endpoint /api/admin/clans/<clan_id>/assign-owner для назначения владельцев кланов админами
+  - Поддержка назначения owner при создании клана (параметр ownerId)
+- **Frontend Admin Panel**:
+  - Создана страница Admin Panel (/admin) с двумя основными функциями
+  - Форма создания клана с опциональным назначением owner
+  - Форма назначения владельца существующему клану
+  - Список всех кланов в системе
+  - Навигационная кнопка "Админ" видна только для администраторов
+  - Redirect на главную для не-админов при попытке доступа к /admin
+
+---
+
+## Previous Changes
 - **Frontend-API Integration**: Connected frontend to real backend APIs, removed all mock data
   - useSquadStats hook refactored to use TanStack Query with /api/stats/:steamId endpoint with credentials
   - Profile page updated with proper auth checks and loading/error states for statistics

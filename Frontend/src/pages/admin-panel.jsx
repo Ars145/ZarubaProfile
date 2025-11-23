@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'wouter';
+import { Redirect } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,7 +48,7 @@ export default function AdminPanel() {
   }
   
   if (!isAdmin) {
-    return <Navigate to="/" />;
+    return <Redirect to="/" />;
   }
   
   const handleCreateClan = async (e) => {

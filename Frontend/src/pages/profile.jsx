@@ -390,6 +390,15 @@ export default function ProfilePage() {
     enabled: !!currentClanId,
   });
   
+  // DEBUG: Логирование данных
+  useEffect(() => {
+    console.log('[CLAN DEBUG] User:', user);
+    console.log('[CLAN DEBUG] currentClanId:', currentClanId);
+    console.log('[CLAN DEBUG] clanData:', clanData);
+    console.log('[CLAN DEBUG] clanMembersResponse:', clanMembersResponse);
+    console.log('[CLAN DEBUG] clanLoading:', clanLoading, 'membersLoading:', membersLoading);
+  }, [user, currentClanId, clanData, clanMembersResponse, clanLoading, membersLoading]);
+  
   // Преобразуем данные участников из API в нужный формат
   const squadMembers = clanMembersResponse?.members?.map(member => ({
     id: member.id,

@@ -3,6 +3,12 @@ import { useLocation } from 'wouter';
 
 const AuthContext = createContext(null);
 
+// Константы Steam ID админов (захардкожены)
+const ADMIN_STEAM_IDS = [
+  '76561198890001608', // Админ 1
+  '76561198890001609'  // Админ 2 (замените на реальный Steam ID)
+];
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -170,6 +176,9 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Проверка является ли пользователь админом
+  const isAdmin = user?.steamId && ADMIN_STEAM_IDS.includes(user.steamId);
+
   const value = {
     user,
     loading,
@@ -178,7 +187,8 @@ export function AuthProvider({ children }) {
     linkDiscord,
     unlinkDiscord,
     handleCallback,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    isAdmin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

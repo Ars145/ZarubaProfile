@@ -1528,28 +1528,44 @@ export default function ProfilePage() {
                               {/* Clan Logo & Banner in Stats Card */}
                               <div className="flex items-start justify-between mb-8 relative z-10">
                                   <div className="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                                      <img src={clanLogo} className="w-full h-full object-cover" />
+                                      {clanData?.clan?.logo_url ? (
+                                        <img src={clanData.clan.logo_url} className="w-full h-full object-cover" alt="Clan Logo" />
+                                      ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-primary text-2xl font-bold">
+                                          {clanData?.clan?.tag || '?'}
+                                        </div>
+                                      )}
                                   </div>
-                                  <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">LVL 5</Badge>
+                                  <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">
+                                    LVL {clanData?.clan?.level || 1}
+                                  </Badge>
                               </div>
                               
                               <div className="relative z-10 mb-8">
-                                <h3 className="text-3xl font-display font-black text-white mb-1 tracking-tight">ОТРЯД АЛЬФА</h3>
-                                <p className="text-xs text-primary font-bold tracking-[0.2em] uppercase">Элитный Клан</p>
+                                <h3 className="text-3xl font-display font-black text-white mb-1 tracking-tight">
+                                  {clanData?.clan?.name || 'Загрузка...'}
+                                </h3>
+                                <p className="text-xs text-primary font-bold tracking-[0.2em] uppercase">
+                                  {clanData?.clan?.description || 'Клан'}
+                                </p>
                               </div>
                               
                               <div className="space-y-2 relative z-10">
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><Users className="w-4 h-4 text-zinc-500"/> Всего бойцов</span>
-                                      <span className="font-mono font-bold text-white">5</span>
+                                      <span className="font-mono font-bold text-white">{squadMembers.length}</span>
                                   </div>
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"/> В строю</span>
-                                      <span className="font-mono font-bold text-emerald-500">3</span>
+                                      <span className="font-mono font-bold text-emerald-500">
+                                        {squadMembers.filter(m => m.status === 'В СЕТИ' || m.status === 'В ИГРЕ').length}
+                                      </span>
                                   </div>
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><Trophy className="w-4 h-4 text-yellow-500"/> Винрейт</span>
-                                      <span className="font-mono font-bold text-yellow-500">68%</span>
+                                      <span className="font-mono font-bold text-yellow-500">
+                                        {clanData?.clan?.winrate ? `${Math.round(clanData.clan.winrate)}%` : 'N/A'}
+                                      </span>
                                   </div>
                               </div>
                           </div>
@@ -1593,7 +1609,9 @@ export default function ProfilePage() {
                                     <DropdownMenuItem onClick={() => setSortBy("kills")} className="text-white hover:bg-white/10 cursor-pointer text-xs">Убийства</DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
-                                <span className="text-xs font-mono bg-zinc-800 px-3 py-1.5 rounded border border-white/5 text-muted-foreground font-bold">5 / 50</span>
+                                <span className="text-xs font-mono bg-zinc-800 px-3 py-1.5 rounded border border-white/5 text-muted-foreground font-bold">
+                                  {squadMembers.length} / {clanData?.clan?.max_members || 50}
+                                </span>
                               </div>
                           </div>
 

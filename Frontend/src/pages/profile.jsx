@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useAnimation } from "framer-motion";
 import { Trophy, Target, Clock, Shield, Swords, Users, ChevronRight, CheckCircle2, AlertCircle, Crosshair, Skull, X, Crown, Star, User, Trash2, Plus, Settings, LogOut, Search, Zap, Medal, ChevronDown, UserPlus, UserMinus, MessageSquare, Edit, Camera, Play, Plane, Car, ThumbsUp, ThumbsDown, Percent, Swords as Gun, Check, XCircle, ArrowUpDown, ListFilter, Image as ImageIcon, Link as LinkIcon, Radar, Activity, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -312,7 +313,7 @@ const DiscordCard = () => {
 };
 
 export default function ProfilePage() {
-  const { user, logout, loading: authLoading } = useAuth();
+  const { user, logout, isAdmin, loading: authLoading } = useAuth();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
   const clans = []; // TODO: Load from API
@@ -824,6 +825,20 @@ export default function ProfilePage() {
                  </DialogFooter>
                </DialogContent>
              </Dialog>
+             
+             {isAdmin && (
+               <Link href="/admin">
+                 <Button 
+                   variant="outline" 
+                   size="sm" 
+                   className="flex-1 md:flex-none h-9 border-white/10 hover:border-primary/20 hover:bg-primary/5 text-white bg-zinc-900/50 backdrop-blur-sm text-xs"
+                   data-testid="button-admin"
+                 >
+                   <Shield className="w-4 h-4 md:mr-2" />
+                   <span className="hidden md:inline">Админ</span>
+                 </Button>
+               </Link>
+             )}
              
              <Button 
                variant="ghost" 

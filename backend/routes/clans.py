@@ -80,8 +80,8 @@ def create_clan():
                 'error': 'Недопустимое значение theme. Разрешены: orange, blue, yellow'
             }), 400
         
-        # Получаем owner_id (опционально)
-        owner_id = data.get('ownerId')
+        # Получаем owner_steam_id (опционально)
+        owner_steam_id = data.get('ownerSteamId')
         
         # Создание клана
         clan = Clan(
@@ -98,13 +98,13 @@ def create_clan():
         db.session.flush()  # Получаем clan.id до commit
         
         # Если указан owner, создаем связь ClanMember
-        if owner_id:
-            player = Player.query.get(owner_id)
+        if owner_steam_id:
+            player = Player.query.filter_by(steam_id=owner_steam_id).first()
             if not player:
                 db.session.rollback()
                 return jsonify({
                     'success': False,
-                    'error': 'Игрок не найден'
+                    'error': 'Игрок с таким Steam ID не найден'
                 }), 404
             
             # Проверяем что игрок не в другом клане
@@ -1097,13 +1097,13 @@ def admin_assign_owner(clan_id):
     try:
         data = request.get_json(silent=True)
         
-        if not data or 'playerId' not in data:
+        if not data or 'steamId' not in data:
             return jsonify({
                 'success': False,
-                'error': 'playerId обязателен'
+                'error': 'steamId обязателен'
             }), 400
         
-        player_id = data['playerId']
+        steam_id = data['steamId']
         
         # Проверка существования клана
         clan = Clan.query.get(clan_id)
@@ -1113,12 +1113,12 @@ def admin_assign_owner(clan_id):
                 'error': 'Клан не найден'
             }), 404
         
-        # Проверка существования игрока
-        player = Player.query.get(player_id)
+        # Проверка существования игрока по Steam ID
+        player = Player.query.filter_by(steam_id=steam_id).first()
         if not player:
             return jsonify({
                 'success': False,
-                'error': 'Игрок не найден'
+                'error': 'Игрок с таким Steam ID не найден'
             }), 404
         
         # Проверка что игрок не в другом клане
@@ -1131,7 +1131,7 @@ def admin_assign_owner(clan_id):
         # Найти текущее членство или создать новое
         member = ClanMember.query.filter_by(
             clan_id=clan_id,
-            player_id=player_id
+            player_id=player.id
         ).first()
         
         if member:
@@ -1141,7 +1141,7 @@ def admin_assign_owner(clan_id):
             # Создать новое членство
             member = ClanMember(
                 clan_id=clan_id,
-                player_id=player_id,
+                player_id=player.id,
                 role='owner'
             )
             db.session.add(member)
@@ -1153,7 +1153,7 @@ def admin_assign_owner(clan_id):
         other_owners = ClanMember.query.filter_by(
             clan_id=clan_id,
             role='owner'
-        ).filter(ClanMember.player_id != player_id).all()
+        ).filter(ClanMember.player_id != player.id).all()
         
         for current_owner in other_owners:
             current_owner.role = 'member'

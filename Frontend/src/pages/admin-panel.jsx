@@ -22,13 +22,13 @@ export default function AdminPanel() {
     tag: '',
     description: '',
     theme: 'orange',
-    ownerId: ''
+    ownerSteamId: ''
   });
   
   // Состояние для формы назначения owner
   const [ownerForm, setOwnerForm] = useState({
     clanId: '',
-    playerId: ''
+    steamId: ''
   });
   
   // Загрузка списка кланов
@@ -58,7 +58,7 @@ export default function AdminPanel() {
         tag: clanForm.tag,
         description: clanForm.description || undefined,
         theme: clanForm.theme,
-        ownerId: clanForm.ownerId || undefined
+        ownerSteamId: clanForm.ownerSteamId || undefined
       };
       
       const clan = await apiRequest('POST', '/api/clans', payload);
@@ -74,7 +74,7 @@ export default function AdminPanel() {
         tag: '',
         description: '',
         theme: 'orange',
-        ownerId: ''
+        ownerSteamId: ''
       });
       
       // Обновить список кланов
@@ -91,10 +91,10 @@ export default function AdminPanel() {
   const handleAssignOwner = async (e) => {
     e.preventDefault();
     
-    if (!ownerForm.clanId || !ownerForm.playerId) {
+    if (!ownerForm.clanId || !ownerForm.steamId) {
       toast({
         title: 'Ошибка',
-        description: 'Выберите клан и укажите ID игрока',
+        description: 'Выберите клан и укажите Steam ID игрока',
         variant: 'destructive'
       });
       return;
@@ -102,7 +102,7 @@ export default function AdminPanel() {
     
     try {
       const result = await apiRequest('POST', `/api/admin/clans/${ownerForm.clanId}/assign-owner`, {
-        playerId: ownerForm.playerId
+        steamId: ownerForm.steamId
       });
       
       toast({
@@ -113,7 +113,7 @@ export default function AdminPanel() {
       // Очистить форму
       setOwnerForm({
         clanId: '',
-        playerId: ''
+        steamId: ''
       });
       
       // Обновить данные
@@ -206,20 +206,20 @@ export default function AdminPanel() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="clan-owner-id">ID Владельца (опционально)</Label>
+                  <Label htmlFor="clan-owner-steamid">Steam ID Владельца (опционально)</Label>
                   <div className="flex gap-2">
                     <Input
-                      id="clan-owner-id"
-                      data-testid="input-clan-owner-id"
-                      value={clanForm.ownerId}
-                      onChange={(e) => setClanForm({ ...clanForm, ownerId: e.target.value })}
-                      placeholder="UUID игрока"
+                      id="clan-owner-steamid"
+                      data-testid="input-clan-owner-steamid"
+                      value={clanForm.ownerSteamId}
+                      onChange={(e) => setClanForm({ ...clanForm, ownerSteamId: e.target.value })}
+                      placeholder="76561198XXXXXXXXX"
                     />
                     <Button
                       type="button"
                       variant="outline"
                       data-testid="button-set-self-owner"
-                      onClick={() => setClanForm({ ...clanForm, ownerId: user?.id || '' })}
+                      onClick={() => setClanForm({ ...clanForm, ownerSteamId: user?.steamId || '' })}
                     >
                       Я
                     </Button>
@@ -267,21 +267,21 @@ export default function AdminPanel() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="assign-player-id">ID Игрока *</Label>
+                <Label htmlFor="assign-steamid">Steam ID Игрока *</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="assign-player-id"
-                    data-testid="input-assign-player-id"
-                    value={ownerForm.playerId}
-                    onChange={(e) => setOwnerForm({ ...ownerForm, playerId: e.target.value })}
-                    placeholder="UUID игрока"
+                    id="assign-steamid"
+                    data-testid="input-assign-steamid"
+                    value={ownerForm.steamId}
+                    onChange={(e) => setOwnerForm({ ...ownerForm, steamId: e.target.value })}
+                    placeholder="76561198XXXXXXXXX"
                     required
                   />
                   <Button
                     type="button"
                     variant="outline"
                     data-testid="button-set-self-player"
-                    onClick={() => setOwnerForm({ ...ownerForm, playerId: user?.id || '' })}
+                    onClick={() => setOwnerForm({ ...ownerForm, steamId: user?.steamId || '' })}
                   >
                     Я
                   </Button>

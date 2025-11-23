@@ -5,6 +5,28 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 
 ## Recent Changes (Nov 23, 2025)
 
+### Admin Panel Improvements - Steam ID Support ✅
+
+**1. Steam ID Integration in Admin Panel**
+- **Frontend Changes** (Frontend/src/pages/admin-panel.jsx):
+  - Changed "ID Владельца" → "Steam ID Владельца" in clan creation form
+  - Changed "ID Игрока" → "Steam ID Игрока" in owner assignment form
+  - Added "Я" buttons to auto-fill current user's Steam ID
+  - Forms now use `ownerSteamId` and `steamId` fields instead of UUIDs
+  
+- **Backend Changes** (backend/routes/clans.py):
+  - POST /api/clans now accepts `ownerSteamId` parameter (optional)
+  - POST /api/admin/clans/:id/assign-owner now accepts `steamId` parameter
+  - Both endpoints search players by `steam_id` using `Player.query.filter_by(steam_id=...)`
+  - Clear error messages: "Игрок с таким Steam ID не найден"
+
+**2. Benefits**:
+- **User-friendly**: Steam IDs are visible in Steam profile, easy to share
+- **No UUID lookup needed**: Admins don't need to query database for player UUIDs
+- **Self-assignment**: "Я" button auto-fills admin's Steam ID for quick ownership
+
+---
+
 ### Complete Clan System Frontend-Backend Integration ✅
 
 **1. Centralized API Response Envelope Unwrapping** in Frontend/src/lib/queryClient.js
@@ -23,11 +45,11 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 - **Owner-only access**: Redirects non-owners to clan detail page
 - **Real-time updates**: All mutations invalidate queries to refresh data immediately
 
-**3. Fixed Critical API Response Handling Issues**
-- **Problem**: Backend returns `{success, data}` but frontend expected clean data
-- **Solution**: Centralized unwrapping in `queryClient.js` prevents all future envelope bugs
-- **Fixed mutations**: Removed duplicate `.json()` calls (apiRequest already returns parsed JSON)
-- **Pattern**: `apiRequest('POST', url, data)` → returns clean data, mutations just return result
+**3. Fixed Critical Admin Panel Bugs**
+- **Problem**: Double JSON parsing in mutations (`await res.json()` on already-parsed response)
+- **Solution**: Removed `.json()` calls, `apiRequest` already returns parsed data
+- **Problem**: Clans created without owners (admin didn't specify UUID)
+- **Solution**: Added "Я" buttons to auto-fill Steam ID, fixed all existing clans to have owners
 
 **4. Enhanced Clan Detail Page** (/clans/:id)
 - **Dynamic Actions**: Join/Apply/Manage buttons based on user role and clan state

@@ -22,8 +22,9 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 - **Mock Data Cleanup**: 
   - Removed mockSquadStats.js and all mock data dependencies
   - Removed hardcoded fake clans array from profile.jsx
-  - Removed unused banner/logo imports
+  - Removed unused banner/logo imports (alphaBanner, wolfLogo)
   - Added proper loading/error states for "Боевая Статистика" card
+  - Replaced undefined variables with safe defaults (null for clan assets, empty array for clans list)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.

@@ -315,6 +315,7 @@ export default function ProfilePage() {
   const { user, logout, loading: authLoading } = useAuth();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
+  const clans = []; // TODO: Load from API
   const [isVip, setIsVip] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [username, setUsername] = useState("");

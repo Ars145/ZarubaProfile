@@ -5,28 +5,41 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 
 ## Recent Changes (Nov 23, 2025)
 
-### Critical Bug Fixes - Authentication & API
+### Complete Clan System Frontend-Backend Integration ✅
 
-**1. Fixed missing Authorization header** in Frontend/src/lib/queryClient.js
-- **Root Cause**: Backend expects JWT tokens in `Authorization: Bearer <token>` header
-- Frontend stores tokens in localStorage but wasn't sending them in requests
-- Error: "401: Требуется авторизация" on all protected endpoints (POST /api/clans)
-- **Fixed**: 
-  - `apiRequest()` now reads access_token from localStorage and adds Authorization header
-  - `getQueryFn()` now reads access_token from localStorage for GET requests
-- Authentication flow: Steam login → tokens in URL → saved to localStorage → sent in Authorization header
+**1. Centralized API Response Envelope Unwrapping** in Frontend/src/lib/queryClient.js
+- **Architecture**: Backend returns `{success: true, clan/clans/members/...}`, frontend automatically unwraps to clean data
+- **Implementation**:
+  - `getQueryFn()` automatically strips `{success, ...}` wrapper and returns clean payload
+  - `apiRequest()` also unwraps responses for mutations
+  - All pages now receive clean data without manual fallback logic (`clan?.clan || clan` → just `clan`)
+- **Benefits**: Consistent data handling, no duplicate unwrapping code, prevents `{success, data}` access bugs
 
-**2. Fixed CORS credentials support** in backend/app.py
-- Added `supports_credentials: True` to CORS configuration
-- Added explicit `allow_headers: ["Content-Type"]` and methods list
-- Enables cookies and custom headers in cross-origin requests
+**2. Complete Clan Management Page** (/clans/:id/manage)
+- **Three-tab interface**: Applications (заявки) / Members (участники) / Invitations (приглашения)
+- **Applications Tab**: View all pending applications with approve/reject actions
+- **Members Tab**: View all clan members, kick members, display owner badge
+- **Invitations Tab**: Create/send invitations to players, view all sent invitations, cancel invitations
+- **Owner-only access**: Redirects non-owners to clan detail page
+- **Real-time updates**: All mutations invalidate queries to refresh data immediately
 
-**3. Fixed apiRequest signature mismatch** in admin-panel.jsx
-- Problem: apiRequest expects (method, url, data) but was called with (url, {method, body})
-- Error: "'/api/clans' is not a valid HTTP method"
-- Fixed handleCreateClan: now uses `apiRequest('POST', '/api/clans', payload)`
-- Fixed handleAssignOwner: now uses `apiRequest('POST', url, {playerId})`
-- Both functions now properly parse JSON response with `await res.json()`
+**3. Fixed Critical API Response Handling Issues**
+- **Problem**: Backend returns `{success, data}` but frontend expected clean data
+- **Solution**: Centralized unwrapping in `queryClient.js` prevents all future envelope bugs
+- **Fixed mutations**: Removed duplicate `.json()` calls (apiRequest already returns parsed JSON)
+- **Pattern**: `apiRequest('POST', url, data)` → returns clean data, mutations just return result
+
+**4. Enhanced Clan Detail Page** (/clans/:id)
+- **Dynamic Actions**: Join/Apply/Manage buttons based on user role and clan state
+- **Member List**: Display all clan members with roles (owner badge)
+- **Recruiting Status**: Visual indicator for open/closed recruitment
+- **Owner View**: "Управление кланом" button for clan owners
+- **Applicant View**: "Подать заявку" or "Вступить" based on clan settings
+
+**5. Authentication & Authorization**
+- **Fixed missing Authorization header**: All requests now include `Bearer <token>` from localStorage
+- **CORS credentials**: Backend supports `credentials: include` for cross-origin requests
+- **Token flow**: Steam login → URL params → localStorage → Authorization headers → backend validation
 
 ---
 

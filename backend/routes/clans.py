@@ -148,8 +148,9 @@ def create_clan():
 
 
 @api.route('/clans/<clan_id>', methods=['PUT'])
+@require_auth
 def update_clan(clan_id):
-    """Обновить информацию о клане"""
+    """Обновить информацию о клане (только для владельца клана)"""
     try:
         clan = Clan.query.get(clan_id)
         if not clan:
@@ -157,6 +158,19 @@ def update_clan(clan_id):
                 'success': False,
                 'error': 'Клан не найден'
             }), 404
+        
+        # Проверка что пользователь является владельцем клана
+        membership = ClanMember.query.filter_by(
+            clan_id=clan_id,
+            player_id=request.current_player.id,
+            role='owner'
+        ).first()
+        
+        if not membership:
+            return jsonify({
+                'success': False,
+                'error': 'Только владелец клана может редактировать его данные'
+            }), 403
         
         data = request.get_json(silent=True)
         
@@ -210,8 +224,9 @@ def update_clan(clan_id):
 
 
 @api.route('/clans/<clan_id>', methods=['DELETE'])
+@require_auth
 def delete_clan(clan_id):
-    """Удалить клан"""
+    """Удалить клан (только для владельца клана)"""
     try:
         clan = Clan.query.get(clan_id)
         if not clan:
@@ -219,6 +234,19 @@ def delete_clan(clan_id):
                 'success': False,
                 'error': 'Клан не найден'
             }), 404
+        
+        # Проверка что пользователь является владельцем клана
+        membership = ClanMember.query.filter_by(
+            clan_id=clan_id,
+            player_id=request.current_player.id,
+            role='owner'
+        ).first()
+        
+        if not membership:
+            return jsonify({
+                'success': False,
+                'error': 'Только владелец клана может удалить его'
+            }), 403
         
         db.session.delete(clan)
         db.session.commit()

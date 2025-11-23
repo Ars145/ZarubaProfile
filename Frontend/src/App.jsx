@@ -21,15 +21,27 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/auth/callback" component={AuthCallback} />
       
+      {/* Публичные страницы - доступны всем (включая GUEST) */}
+      <Route path="/clans">
+        <Layout>
+          <ClansPage />
+        </Layout>
+      </Route>
+      
+      <Route path="/clans/:id">
+        <Layout>
+          <ClanDetailPage />
+        </Layout>
+      </Route>
+      
+      {/* Защищенные страницы - требуют авторизации */}
       <Route>
         <ProtectedRoute>
           <Layout>
             <Switch>
               <Route path="/" component={ProfilePage} />
               <Route path="/profile" component={ProfilePage} />
-              <Route path="/clans" component={ClansPage} />
               <Route path="/clans/:id/manage" component={ClanManagePage} />
-              <Route path="/clans/:id" component={ClanDetailPage} />
               <Route path="/admin" component={AdminPanel} />
               <Route component={NotFound} />
             </Switch>

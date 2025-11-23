@@ -12,6 +12,7 @@ import Login from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
 import ClansPage from "@/pages/clans";
 import ClanDetailPage from "@/pages/clan-detail";
+import AdminPanel from "@/pages/admin-panel";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
               <Route path="/profile" component={ProfilePage} />
               <Route path="/clans" component={ClansPage} />
               <Route path="/clans/:id" component={ClanDetailPage} />
+              <Route path="/admin" component={AdminPanel} />
               <Route component={NotFound} />
             </Switch>
           </Layout>

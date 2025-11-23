@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from sqlalchemy.exc import IntegrityError
 from . import api
 from models import db, Clan, ClanMember, ClanApplication, ClanInvitation, Player
@@ -44,8 +44,17 @@ def get_clan(clan_id):
 
 
 @api.route('/clans', methods=['POST'])
+@require_auth
 def create_clan():
-    """Создать новый клан"""
+    """Создать новый клан (только для админов)"""
+    # Проверка прав админа
+    admin_steam_ids = current_app.config.get('ADMIN_STEAM_IDS', [])
+    if request.current_player.steam_id not in admin_steam_ids:
+        return jsonify({
+            'success': False,
+            'error': 'Недостаточно прав. Только админы могут создавать кланы.'
+        }), 403
+    
     try:
         data = request.get_json(silent=True)
         
@@ -71,6 +80,9 @@ def create_clan():
                 'error': 'Недопустимое значение theme. Разрешены: orange, blue, yellow'
             }), 400
         
+        # Получаем owner_id (опционально)
+        owner_id = data.get('ownerId')
+        
         # Создание клана
         clan = Clan(
             name=data['name'],
@@ -83,6 +95,37 @@ def create_clan():
         )
         
         db.session.add(clan)
+        db.session.flush()  # Получаем clan.id до commit
+        
+        # Если указан owner, создаем связь ClanMember
+        if owner_id:
+            player = Player.query.get(owner_id)
+            if not player:
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'error': 'Игрок не найден'
+                }), 404
+            
+            # Проверяем что игрок не в другом клане
+            if player.current_clan_id:
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'error': 'Игрок уже состоит в другом клане'
+                }), 409
+            
+            # Создаем членство с ролью owner
+            member = ClanMember(
+                clan_id=clan.id,
+                player_id=player.id,
+                role='owner'
+            )
+            db.session.add(member)
+            
+            # Обновляем current_clan_id игрока
+            player.current_clan_id = clan.id
+        
         db.session.commit()
         
         return jsonify({
@@ -1027,6 +1070,100 @@ def cancel_invitation(invitation_id):
         return jsonify({
             'success': True,
             'message': 'Приглашение отменено'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+# ===== АДМИНСКИЕ ENDPOINTS =====
+
+@api.route('/admin/clans/<clan_id>/assign-owner', methods=['POST'])
+@require_auth
+def admin_assign_owner(clan_id):
+    """Назначить owner клана (только для админов)"""
+    # Проверка прав админа
+    admin_steam_ids = current_app.config.get('ADMIN_STEAM_IDS', [])
+    if request.current_player.steam_id not in admin_steam_ids:
+        return jsonify({
+            'success': False,
+            'error': 'Недостаточно прав. Только админы могут назначать владельцев кланов.'
+        }), 403
+    
+    try:
+        data = request.get_json(silent=True)
+        
+        if not data or 'playerId' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'playerId обязателен'
+            }), 400
+        
+        player_id = data['playerId']
+        
+        # Проверка существования клана
+        clan = Clan.query.get(clan_id)
+        if not clan:
+            return jsonify({
+                'success': False,
+                'error': 'Клан не найден'
+            }), 404
+        
+        # Проверка существования игрока
+        player = Player.query.get(player_id)
+        if not player:
+            return jsonify({
+                'success': False,
+                'error': 'Игрок не найден'
+            }), 404
+        
+        # Проверка что игрок не в другом клане
+        if player.current_clan_id and player.current_clan_id != clan_id:
+            return jsonify({
+                'success': False,
+                'error': 'Игрок уже состоит в другом клане'
+            }), 409
+        
+        # Найти текущее членство или создать новое
+        member = ClanMember.query.filter_by(
+            clan_id=clan_id,
+            player_id=player_id
+        ).first()
+        
+        if member:
+            # Обновить существующее членство
+            member.role = 'owner'
+        else:
+            # Создать новое членство
+            member = ClanMember(
+                clan_id=clan_id,
+                player_id=player_id,
+                role='owner'
+            )
+            db.session.add(member)
+            
+            # Обновить current_clan_id игрока
+            player.current_clan_id = clan_id
+        
+        # Понизить всех остальных владельцев до member
+        other_owners = ClanMember.query.filter_by(
+            clan_id=clan_id,
+            role='owner'
+        ).filter(ClanMember.player_id != player_id).all()
+        
+        for current_owner in other_owners:
+            current_owner.role = 'member'
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Владелец клана назначен',
+            'member': member.to_dict()
         }), 200
         
     except Exception as e:

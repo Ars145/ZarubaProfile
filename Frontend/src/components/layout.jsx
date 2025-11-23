@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, Users, LogOut } from "lucide-react";
+import { User, Users, LogOut, Shield } from "lucide-react";
 import BackgroundParticles from "@/components/background-particles";
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
 
 export function Layout({ children }) {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
 
   const isActive = (path) => {
     if (path === '/') return location === '/';
@@ -69,6 +69,18 @@ export function Layout({ children }) {
                   Кланы
                 </Button>
               </Link>
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button 
+                    variant={isActive('/admin') ? 'secondary' : 'ghost'}
+                    className="gap-2"
+                    data-testid="link-admin"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Админ
+                  </Button>
+                </Link>
+              )}
             </nav>
           </div>
 

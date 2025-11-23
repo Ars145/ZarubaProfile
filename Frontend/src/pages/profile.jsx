@@ -566,11 +566,25 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append('file', file);
     
+    // Add clanId for backend ownership validation
+    if (currentClanId) {
+      formData.append('clanId', currentClanId);
+    }
+    
+    // Get access token from localStorage (same as apiRequest)
+    const token = localStorage.getItem('access_token');
+    
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     try {
       const response = await fetch(endpoint, {
         method: 'POST',
+        headers,
         body: formData,
-        credentials: 'include', // Include auth cookies
+        credentials: 'include',
       });
       
       // Parse response body once

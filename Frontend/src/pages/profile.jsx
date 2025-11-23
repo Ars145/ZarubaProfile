@@ -14,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 
 // Squad Stats Components
 import { useSquadStats } from "@/hooks/useSquadStats";
@@ -317,7 +317,7 @@ const DiscordCard = () => {
 export default function ProfilePage() {
   const { user, logout, isAdmin, loading: authLoading } = useAuth();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
-  const [selectedClan, setSelectedClan] = useState("alpha");
+  const [selectedClan, setSelectedClan] = useState(null);
   // Загружаем список кланов из API для гостевых пользователей
   const { data: clansData = [] } = useQuery({
     queryKey: ['/api/clans'],
@@ -326,6 +326,22 @@ export default function ProfilePage() {
   });
   
   const clans = clansData;
+  
+  // Мемоизированное состояние Discord кнопки для GUEST view
+  const selectedClanData = useMemo(() => 
+    clans?.find(c => c.id === selectedClan), 
+    [clans, selectedClan]
+  );
+  const discordUrl = selectedClanData?.requirements?.discordLink?.trim();
+  const hasDiscordLink = Boolean(discordUrl);
+  
+  // Инициализируем selectedClan первым кланом когда данные загрузятся
+  useEffect(() => {
+    if (!selectedClan && clans && clans.length > 0) {
+      setSelectedClan(clans[0].id);
+    }
+  }, [clans, selectedClan]);
+  
   const [isVip, setIsVip] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [username, setUsername] = useState("");
@@ -539,6 +555,95 @@ export default function ProfilePage() {
       });
     }
   });
+  
+  // Загрузка изображений на сервер через authenticated fetch
+  // Note: Cannot use apiRequest because it JSON-serializes body, which breaks FormData
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  
+  const uploadFileWithAuth = async (endpoint, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include', // Include auth cookies
+      });
+      
+      // Parse response body once
+      const responseData = await response.json().catch(() => ({}));
+      
+      if (!response.ok) {
+        // Mirror apiRequest error handling
+        const errorMessage = responseData.error || responseData.message || `Upload failed with status ${response.status}`;
+        throw new Error(errorMessage);
+      }
+      
+      return responseData;
+    } catch (error) {
+      // Re-throw with better context
+      if (error.message) throw error;
+      throw new Error('Network error during file upload');
+    }
+  };
+  
+  const handleUploadBanner = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingBanner(true);
+    try {
+      const data = await uploadFileWithAuth('/api/uploads/clan-banners', file);
+      const uploadedUrl = data.url || data.path;
+      
+      setClanBanner(uploadedUrl);
+      toast({
+        title: "Баннер загружен",
+        description: "Не забудьте сохранить изменения",
+      });
+    } catch (error) {
+      console.error('Banner upload error:', error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка загрузки",
+        description: error.message || "Не удалось загрузить баннер",
+      });
+    } finally {
+      setUploadingBanner(false);
+      // Reset input value to allow re-uploading same file
+      event.target.value = '';
+    }
+  };
+  
+  const handleUploadLogo = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingLogo(true);
+    try {
+      const data = await uploadFileWithAuth('/api/uploads/clan-logos', file);
+      const uploadedUrl = data.url || data.path;
+      
+      setClanLogo(uploadedUrl);
+      toast({
+        title: "Логотип загружен",
+        description: "Не забудьте сохранить изменения",
+      });
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка загрузки",
+        description: error.message || "Не удалось загрузить логотип",
+      });
+    } finally {
+      setUploadingLogo(false);
+      // Reset input value to allow re-uploading same file
+      event.target.value = '';
+    }
+  };
   
   const handleSaveSettings = () => {
     updateClanMutation.mutate({
@@ -1297,7 +1402,22 @@ export default function ProfilePage() {
                              </div>
                              
                              {/* Discord Join Button for Guests */}
-                             <Button className="w-full bg-[#5865F2] hover:bg-[#5865F2]/90 text-white font-bold font-display tracking-wide shadow-lg h-12 gap-2 hover:scale-[1.02] transition-transform">
+                             <Button 
+                               className="w-full bg-[#5865F2] hover:bg-[#5865F2]/90 text-white font-bold font-display tracking-wide shadow-lg h-12 gap-2 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                               onClick={() => {
+                                 if (hasDiscordLink) {
+                                   window.open(discordUrl, '_blank', 'noopener,noreferrer');
+                                 } else {
+                                   toast({
+                                     variant: "destructive",
+                                     title: "Ошибка",
+                                     description: "Ссылка на Discord не настроена для этого клана",
+                                   });
+                                 }
+                               }}
+                               disabled={!hasDiscordLink}
+                               data-testid="button-join-discord"
+                             >
                                 <svg className="w-5 h-5" viewBox="0 0 127.14 96.36" fill="white">
                                   <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
                                 </svg>
@@ -1353,27 +1473,82 @@ export default function ProfilePage() {
                             {/* Banner Upload */}
                             <div className="space-y-3">
                                <Label className="text-xs uppercase font-bold text-muted-foreground">Баннер Отряда</Label>
-                               <div className="relative h-40 rounded-xl overflow-hidden border border-white/10 group cursor-pointer">
-                                  <img src={clanBanner} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                               <input
+                                 type="file"
+                                 id="banner-upload"
+                                 accept="image/*"
+                                 onChange={handleUploadBanner}
+                                 className="hidden"
+                                 disabled={uploadingBanner}
+                               />
+                               <label 
+                                 htmlFor="banner-upload" 
+                                 className="relative h-40 rounded-xl overflow-hidden border border-white/10 group cursor-pointer block"
+                               >
+                                  {clanBanner ? (
+                                    <img src={clanBanner} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Clan banner" />
+                                  ) : (
+                                    <div className="w-full h-full bg-zinc-900/50 flex items-center justify-center">
+                                      <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                                    </div>
+                                  )}
                                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                     <Camera className="w-8 h-8 text-white" />
+                                     {uploadingBanner ? (
+                                       <Loader2 className="w-8 h-8 text-white animate-spin" />
+                                     ) : (
+                                       <Camera className="w-8 h-8 text-white" />
+                                     )}
                                   </div>
-                               </div>
+                               </label>
                                <p className="text-[10px] text-muted-foreground">Рекомендуемый размер: 1920x1080px (16:9)</p>
                             </div>
 
                             {/* Logo Upload */}
                             <div className="space-y-3">
                                <Label className="text-xs uppercase font-bold text-muted-foreground">Логотип Отряда</Label>
+                               <input
+                                 type="file"
+                                 id="logo-upload"
+                                 accept="image/*"
+                                 onChange={handleUploadLogo}
+                                 className="hidden"
+                                 disabled={uploadingLogo}
+                               />
                                <div className="flex items-center gap-4">
-                                  <div className="w-24 h-24 rounded-xl border border-white/10 overflow-hidden group cursor-pointer relative">
-                                     <img src={clanLogo} className="w-full h-full object-cover" />
+                                  <label htmlFor="logo-upload" className="w-24 h-24 rounded-xl border border-white/10 overflow-hidden group cursor-pointer relative block">
+                                     {clanLogo ? (
+                                       <img src={clanLogo} className="w-full h-full object-cover" alt="Clan logo" />
+                                     ) : (
+                                       <div className="w-full h-full bg-zinc-900/50 flex items-center justify-center">
+                                         <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                                       </div>
+                                     )}
                                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Camera className="w-6 h-6 text-white" />
+                                        {uploadingLogo ? (
+                                          <Loader2 className="w-6 h-6 text-white animate-spin" />
+                                        ) : (
+                                          <Camera className="w-6 h-6 text-white" />
+                                        )}
                                      </div>
-                                  </div>
+                                  </label>
                                   <div className="flex-1">
-                                     <Button variant="outline" size="sm" className="w-full border-white/10 mb-2">Загрузить</Button>
+                                     <Button 
+                                       variant="outline" 
+                                       size="sm" 
+                                       className="w-full border-white/10 mb-2"
+                                       onClick={() => document.getElementById('logo-upload').click()}
+                                       disabled={uploadingLogo}
+                                       data-testid="button-upload-logo"
+                                     >
+                                       {uploadingLogo ? (
+                                         <>
+                                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                           Загрузка...
+                                         </>
+                                       ) : (
+                                         'Загрузить'
+                                       )}
+                                     </Button>
                                      <p className="text-[10px] text-muted-foreground">Квадратное изображение, мин. 512x512px</p>
                                   </div>
                                </div>

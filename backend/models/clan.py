@@ -22,6 +22,9 @@ class Clan(db.Model):
     applications = db.relationship('ClanApplication', back_populates='clan', cascade='all, delete-orphan')
     
     def to_dict(self, include_members=False):
+        # Найти владельца клана
+        owner = next((m for m in self.members if m.role == 'owner'), None)
+        
         data = {
             'id': str(self.id),
             'name': self.name,
@@ -32,7 +35,9 @@ class Clan(db.Model):
             'logoUrl': self.logo_url,
             'requirements': self.requirements or {},
             'createdAt': self.created_at.isoformat() if self.created_at else None,
-            'memberCount': len(self.members)
+            'memberCount': len(self.members),
+            'isRecruiting': self.requirements.get('isOpen', True) if self.requirements else True,
+            'ownerId': str(owner.player_id) if owner else None
         }
         
         if include_members:

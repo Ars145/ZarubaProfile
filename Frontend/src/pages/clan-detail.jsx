@@ -49,7 +49,7 @@ export default function ClanDetailPage() {
 
   const applyMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', `/api/clans/${id}/applications`, { 
+      const response = await apiRequest('POST', `/api/clans/${id}/apply`, { 
         message: 'Хочу вступить в ваш клан!' 
       });
       return response.json();

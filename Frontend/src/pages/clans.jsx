@@ -13,11 +13,12 @@ const API_URL = import.meta.env.VITE_API_URL || '';
 export default function ClansPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: clans, isLoading, error } = useQuery({
+  const { data: response, isLoading, error } = useQuery({
     queryKey: ['/api/clans'],
     staleTime: 2 * 60 * 1000,
   });
 
+  const clans = response?.clans || response;
   const filteredClans = clans?.filter(clan => 
     clan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     clan.tag.toLowerCase().includes(searchQuery.toLowerCase())

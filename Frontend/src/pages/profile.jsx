@@ -1541,32 +1541,32 @@ export default function ProfilePage() {
                               {/* Clan Logo & Banner in Stats Card */}
                               <div className="flex items-start justify-between mb-8 relative z-10">
                                   <div className="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                                      {clanData?.clan?.logo_url ? (
-                                        <img src={clanData.clan.logo_url} className="w-full h-full object-cover" alt="Clan Logo" />
+                                      {clanData?.logoUrl ? (
+                                        <img src={clanData.logoUrl} className="w-full h-full object-cover" alt="Clan Logo" />
                                       ) : (
                                         <div className="w-full h-full flex items-center justify-center text-primary text-2xl font-bold">
-                                          {clanData?.clan?.tag || '?'}
+                                          {clanData?.tag || '?'}
                                         </div>
                                       )}
                                   </div>
                                   <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">
-                                    LVL {clanData?.clan?.level || 1}
+                                    LVL {clanData?.level || 1}
                                   </Badge>
                               </div>
                               
                               <div className="relative z-10 mb-8">
                                 <h3 className="text-3xl font-display font-black text-white mb-1 tracking-tight">
-                                  {!currentClanId ? 'Нет клана' : clanLoading ? 'Загрузка...' : (clanData?.clan?.name || 'Ошибка загрузки')}
+                                  {!currentClanId ? 'Нет клана' : clanLoading ? 'Загрузка...' : (clanData?.name || 'Ошибка загрузки')}
                                 </h3>
                                 <p className="text-xs text-primary font-bold tracking-[0.2em] uppercase">
-                                  {clanData?.clan?.description || 'Клан'}
+                                  {clanData?.description || 'Клан'}
                                 </p>
                               </div>
                               
                               <div className="space-y-2 relative z-10">
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><Users className="w-4 h-4 text-zinc-500"/> Всего бойцов</span>
-                                      <span className="font-mono font-bold text-white">{squadMembers.length}</span>
+                                      <span className="font-mono font-bold text-white">{squadMembers.length} / {clanData?.maxMembers || 50}</span>
                                   </div>
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"/> В строю</span>
@@ -1577,7 +1577,7 @@ export default function ProfilePage() {
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><Trophy className="w-4 h-4 text-yellow-500"/> Винрейт</span>
                                       <span className="font-mono font-bold text-yellow-500">
-                                        {clanData?.clan?.winrate ? `${Math.round(clanData.clan.winrate)}%` : 'N/A'}
+                                        {clanData?.winrate ? `${Math.round(clanData.winrate)}%` : 'N/A'}
                                       </span>
                                   </div>
                               </div>

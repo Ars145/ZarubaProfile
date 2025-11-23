@@ -20,7 +20,8 @@ import { useState, useRef, useEffect } from "react";
 import { useSquadStats } from "@/hooks/useSquadStats";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 
 // --- Animation Components ---
 
@@ -369,18 +370,18 @@ export default function ProfilePage() {
   const [selectedMemberStats, setSelectedMemberStats] = useState(null);
   const [sortBy, setSortBy] = useState("default");
   
-  // Clan Assets State (Owner Settings)
+  // Clan Assets State (Owner Settings) - будут инициализированы из clanData
   const [clanBanner, setClanBanner] = useState(null);
   const [clanLogo, setClanLogo] = useState(null);
-  const [discordLink, setDiscordLink] = useState("https://discord.gg/clan-alpha");
+  const [discordLink, setDiscordLink] = useState("");
   
-  // Clan Requirements & Theme Settings
+  // Clan Requirements & Theme Settings - будут инициализированы из clanData
   const [clanRequirements, setClanRequirements] = useState({
-    microphone: true,
-    ageRestriction: true,
+    microphone: false,
+    ageRestriction: false,
     customRequirement: ""
   });
-  const [clanTheme, setClanTheme] = useState("orange"); // orange, blue, yellow
+  const [clanTheme, setClanTheme] = useState("orange");
 
   // Получаем ID клана пользователя
   const currentClanId = user?.currentClanId;
@@ -466,37 +467,30 @@ export default function ProfilePage() {
       setUserRole('guest');
     }
   }, [clanMembersResponse, user, currentClanId]);
+  
+  // Инициализируем настройки клана из данных API
+  useEffect(() => {
+    if (clanData) {
+      setClanBanner(clanData.bannerUrl);
+      setClanLogo(clanData.logoUrl);
+      setClanTheme(clanData.theme || 'orange');
+      
+      // Парсим requirements из JSON
+      const reqs = clanData.requirements || {};
+      setClanRequirements({
+        microphone: reqs.microphone || false,
+        ageRestriction: reqs.ageRestriction || false,
+        customRequirement: reqs.customRequirement || ""
+      });
+      
+      // Discord link (пока нет в схеме, будет добавлено позже)
+      setDiscordLink(reqs.discordLink || "");
+    }
+  }, [clanData]);
 
-  // Mock applications with full stats
-  const [applications, setApplications] = useState([
-    { 
-      id: 101, 
-      name: "Rookie_One", 
-      role: "Кандидат",
-      avatar: "R1",
-      message: "Хочу в крутой клан, играю каждый день!", 
-      time: "2ч назад",
-      stats: { games: 50, hours: '5д 0ч', sl: '0ч', driver: '10ч', pilot: '0ч', cmd: '0ч', likes: 5, tk: 0, winrate: 45, kills: 150, deaths: 130, kd: 1.1, wins: 22, avgKills: 3, vehicleKills: 10, knifeKills: 0 }
-    },
-    { 
-      id: 102, 
-      name: "Tank_Master", 
-      role: "Кандидат",
-      avatar: "TM",
-      message: "Ищу стак для игры на технике. Мейн мехвод.", 
-      time: "5ч назад",
-      stats: { games: 300, hours: '35д 10ч', sl: '0ч', driver: '200ч', pilot: '0ч', cmd: '0ч', likes: 100, tk: 5, winrate: 60, kills: 2400, deaths: 1000, kd: 2.4, wins: 180, avgKills: 8, vehicleKills: 1500, knifeKills: 10 }
-    },
-    { 
-      id: 103, 
-      name: "Silent_Bob", 
-      role: "Кандидат",
-      avatar: "SB",
-      message: "Возьмите пж", 
-      time: "1д назад",
-      stats: { games: 20, hours: '1д 21ч', sl: '0ч', driver: '0ч', pilot: '0ч', cmd: '0ч', likes: 2, tk: 0, winrate: 35, kills: 40, deaths: 50, kd: 0.8, wins: 7, avgKills: 2, vehicleKills: 0, knifeKills: 0 }
-    },
-  ]);
+  // Загружаем заявки на вступление (пока нет endpoint - пустой массив)
+  // TODO: Добавить API endpoint для заявок
+  const applications = [];
 
   const handleRoleChange = (memberId, newRole) => {
     // TODO: Implement API call to change member role
@@ -504,13 +498,56 @@ export default function ProfilePage() {
   };
 
   const handleRejectApp = (id) => {
-    setApplications(prev => prev.filter(app => app.id !== id));
-    // TODO: Implement API call to reject application
+    // TODO: Implement API call to reject application (endpoint не существует пока)
+    console.log('Reject application', id);
   };
 
   const handleAcceptApp = (id) => {
-    setApplications(prev => prev.filter(app => app.id !== id));
-    // TODO: Implement API call to accept application
+    // TODO: Implement API call to accept application (endpoint не существует пока)
+    console.log('Accept application', id);
+  };
+  
+  // Мутация для сохранения настроек клана
+  const updateClanMutation = useMutation({
+    mutationFn: async (updates) => {
+      return await apiRequest('PUT', `/api/clans/${currentClanId}`, {
+        theme: updates.theme,
+        banner_url: updates.bannerUrl,
+        logo_url: updates.logoUrl,
+        requirements: {
+          microphone: updates.requirements.microphone,
+          ageRestriction: updates.requirements.ageRestriction,
+          customRequirement: updates.requirements.customRequirement,
+          discordLink: updates.discordLink
+        }
+      });
+    },
+    onSuccess: () => {
+      // Инвалидируем кеш клана чтобы обновить данные
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId] });
+      toast({
+        title: "Настройки сохранены",
+        description: "Изменения успешно применены",
+      });
+      setIsSettingsOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Ошибка сохранения",
+        description: error.message || "Не удалось сохранить настройки",
+      });
+    }
+  });
+  
+  const handleSaveSettings = () => {
+    updateClanMutation.mutate({
+      theme: clanTheme,
+      bannerUrl: clanBanner,
+      logoUrl: clanLogo,
+      discordLink: discordLink,
+      requirements: clanRequirements
+    });
   };
 
   const getSortedMembers = () => {
@@ -887,7 +924,22 @@ export default function ProfilePage() {
                    </div>
                  </div>
                  <DialogFooter>
-                   <Button type="submit" className="bg-primary text-black font-bold hover:bg-primary/90" onClick={() => setIsSettingsOpen(false)}>Сохранить изменения</Button>
+                   <Button 
+                    type="submit" 
+                    className="bg-primary text-black font-bold hover:bg-primary/90" 
+                    onClick={handleSaveSettings}
+                    disabled={updateClanMutation.isPending}
+                    data-testid="button-save-settings"
+                  >
+                    {updateClanMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Сохранение...
+                      </>
+                    ) : (
+                      'Сохранить изменения'
+                    )}
+                  </Button>
                  </DialogFooter>
                </DialogContent>
              </Dialog>
@@ -1437,28 +1489,63 @@ export default function ProfilePage() {
                          <div className="grid gap-4">
                             <div className="grid gap-2">
                                <Label>Название Отряда</Label>
-                               <Input defaultValue="Отряд Альфа" className="bg-black/20 border-white/10" />
+                               <Input 
+                                 value={clanData?.name || ''} 
+                                 readOnly
+                                 className="bg-black/20 border-white/10 opacity-70 cursor-not-allowed"
+                                 data-testid="input-clan-name" 
+                               />
+                               <p className="text-xs text-muted-foreground">Название клана можно изменить только через администратора</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                <div className="grid gap-2">
                                   <Label>Тег Клана</Label>
-                                  <Input defaultValue="ALPHA" className="bg-black/20 border-white/10" />
+                                  <Input 
+                                    value={clanData?.tag || ''} 
+                                    readOnly
+                                    className="bg-black/20 border-white/10 opacity-70 cursor-not-allowed"
+                                    data-testid="input-clan-tag"
+                                  />
                                </div>
                                <div className="grid gap-2">
-                                  <Label>Требования</Label>
-                                  <Input defaultValue="100ч+, KD > 1.0" className="bg-black/20 border-white/10" />
+                                  <Label>Максимум участников</Label>
+                                  <Input 
+                                    value={clanData?.maxMembers || 0}
+                                    readOnly 
+                                    className="bg-black/20 border-white/10 opacity-70 cursor-not-allowed"
+                                    data-testid="input-clan-max-members"
+                                  />
                                </div>
                             </div>
                             <div className="grid gap-2">
                                <Label>Описание</Label>
-                               <textarea className="flex min-h-[100px] w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none" defaultValue="Элитный отряд для опытных игроков. Только командная игра." />
+                               <textarea 
+                                 value={clanData?.description || ''} 
+                                 readOnly
+                                 className="flex min-h-[100px] w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none opacity-70 cursor-not-allowed" 
+                               />
+                               <p className="text-xs text-muted-foreground">Описание клана можно изменить только через администратора</p>
                             </div>
                          </div>
                       </div>
 
                       <div className="flex justify-end gap-4">
                          <Button variant="ghost" className="text-muted-foreground hover:text-white">Отмена</Button>
-                         <Button className="bg-primary text-black font-bold hover:bg-primary/90">Сохранить изменения</Button>
+                         <Button 
+                          className="bg-primary text-black font-bold hover:bg-primary/90"
+                          onClick={handleSaveSettings}
+                          disabled={updateClanMutation.isPending}
+                          data-testid="button-save-clan-settings"
+                        >
+                          {updateClanMutation.isPending ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Сохранение...
+                            </>
+                          ) : (
+                            'Сохранить изменения'
+                          )}
+                        </Button>
                       </div>
                     </motion.div>
                   )}

@@ -6,7 +6,10 @@ ZARUBA is a tactical gaming community platform for Squad server players, offerin
 ## Recent Changes (Nov 23, 2025)
 
 ### ADMIN Role Implementation
-- **Admin Role System**: Захардкожены два Steam ID администраторов в backend/config.py (ADMIN_STEAM_IDS)
+- **Admin Role System**: Захардкожены три Steam ID администраторов в backend/config.py (ADMIN_STEAM_IDS)
+  - `76561199104736343` (Админ 1)
+  - `76561198046223350` (Админ 2)
+  - `76561198890001608` (Владелец проекта)
 - **Backend Admin Checks**: 
   - /api/auth/me теперь возвращает поле isAdmin (проверяется на бэкенде по Steam ID)
   - /api/clans POST требует авторизацию и проверяет права админа

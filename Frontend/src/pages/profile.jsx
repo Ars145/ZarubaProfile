@@ -317,7 +317,14 @@ export default function ProfilePage() {
   const { user, logout, isAdmin, loading: authLoading } = useAuth();
   const [userRole, setUserRole] = useState("guest"); // Default to guest for demo
   const [selectedClan, setSelectedClan] = useState("alpha");
-  const clans = []; // TODO: Load from API
+  // Загружаем список кланов из API для гостевых пользователей
+  const { data: clansData = [] } = useQuery({
+    queryKey: ['/api/clans'],
+    enabled: userRole === 'guest', // Загружать только для гостей
+    staleTime: 2 * 60 * 1000,
+  });
+  
+  const clans = clansData;
   const [isVip, setIsVip] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [username, setUsername] = useState("");

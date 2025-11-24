@@ -1435,27 +1435,33 @@ export default function ProfilePage() {
                 
                 {/* TABS only for Owner */}
                 {userRole === "owner" && (
-                   <div className="flex items-center gap-6 border-b border-white/5 -mb-[1px]">
+                   <div className="flex items-center gap-2 border-b border-white/5 -mb-[1px]">
                       <div 
                         onClick={() => setOwnerTab("squad")}
-                        className={`px-0 py-4 border-b-2 ${ownerTab === "squad" ? "border-primary text-primary shadow-[0_4px_15px_-3px_rgba(255,102,0,0.3)]" : "border-transparent text-muted-foreground hover:text-white"} font-display tracking-wide font-bold cursor-pointer transition-all`}
+                        className={`relative px-6 py-4 font-display tracking-wide font-bold cursor-pointer transition-all duration-300 group ${ownerTab === "squad" ? "text-primary" : "text-muted-foreground hover:text-white"}`}
                       >
-                        ОТРЯД
+                        <span className="relative z-10">ОТРЯД</span>
+                        <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-300 ${ownerTab === "squad" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-50"}`} />
+                        <div className={`absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full transition-all duration-300 shadow-[0_-2px_20px_rgba(255,102,0,0.5)] ${ownerTab === "squad" ? "opacity-100" : "opacity-0"}`} />
                       </div>
                       <div 
                         onClick={() => setOwnerTab("applications")}
-                        className={`px-0 py-4 border-b-2 ${ownerTab === "applications" ? "border-primary text-primary shadow-[0_4px_15px_-3px_rgba(255,102,0,0.3)]" : "border-transparent text-muted-foreground hover:text-white"} font-display tracking-wide font-bold cursor-pointer transition-all flex items-center gap-2`}
+                        className={`relative px-6 py-4 font-display tracking-wide font-bold cursor-pointer transition-all duration-300 flex items-center gap-2 group ${ownerTab === "applications" ? "text-primary" : "text-muted-foreground hover:text-white"}`}
                       >
-                        ЗАЯВКИ 
+                        <span className="relative z-10">ЗАЯВКИ</span>
                         {applications.length > 0 && (
-                          <Badge className="bg-primary text-black h-4 px-1 text-[10px] animate-pulse">{applications.length}</Badge>
+                          <Badge className="bg-primary text-black h-4 px-1 text-[10px] animate-pulse relative z-10">{applications.length}</Badge>
                         )}
+                        <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-300 ${ownerTab === "applications" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-50"}`} />
+                        <div className={`absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full transition-all duration-300 shadow-[0_-2px_20px_rgba(255,102,0,0.5)] ${ownerTab === "applications" ? "opacity-100" : "opacity-0"}`} />
                       </div>
                       <div 
                         onClick={() => setOwnerTab("settings")}
-                        className={`px-0 py-4 border-b-2 ${ownerTab === "settings" ? "border-primary text-primary shadow-[0_4px_15px_-3px_rgba(255,102,0,0.3)]" : "border-transparent text-muted-foreground hover:text-white"} font-display tracking-wide font-bold cursor-pointer transition-all`}
+                        className={`relative px-6 py-4 font-display tracking-wide font-bold cursor-pointer transition-all duration-300 group ${ownerTab === "settings" ? "text-primary" : "text-muted-foreground hover:text-white"}`}
                       >
-                        НАСТРОЙКИ
+                        <span className="relative z-10">НАСТРОЙКИ</span>
+                        <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent transition-all duration-300 ${ownerTab === "settings" ? "opacity-100 scale-x-100" : "opacity-0 scale-x-50"}`} />
+                        <div className={`absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-full transition-all duration-300 shadow-[0_-2px_20px_rgba(255,102,0,0.5)] ${ownerTab === "settings" ? "opacity-100" : "opacity-0"}`} />
                       </div>
                    </div>
                 )}

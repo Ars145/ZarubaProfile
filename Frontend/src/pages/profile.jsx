@@ -549,8 +549,9 @@ export default function ProfilePage() {
   
   console.log('Applications Response:', applicationsResponse);
   
-  // Преобразуем заявки в нужный формат для UI
-  const applications = (applicationsResponse?.applications || []).map(app => ({
+  // queryClient автоматически распаковывает {success: true, applications: [...]} -> [...]
+  // Поэтому applicationsResponse это УЖЕ массив заявок!
+  const applications = (applicationsResponse || []).map(app => ({
     id: app.id,
     name: app.player?.username || 'Unknown',
     avatar: app.player?.username?.substring(0, 2).toUpperCase() || 'UN',

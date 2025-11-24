@@ -528,7 +528,8 @@ export default function ProfilePage() {
   }, [clanData]);
 
   // Загружаем заявки на вступление (только для владельцев клана)
-  const isOwner = clanData?.ownerId === user?.id;
+  // ВАЖНО: user.id - это ID сессии, а user.player.id - это UUID игрока
+  const isOwner = clanData?.ownerId === user?.player?.id;
   const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
     queryKey: ['/api/clans', currentClanId, 'applications'],
     enabled: !!currentClanId && isOwner,

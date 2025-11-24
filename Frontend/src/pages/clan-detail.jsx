@@ -84,9 +84,9 @@ export default function ClanDetailPage() {
             <CardDescription>Этот клан не существует или был удален</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setLocation('/clans')} data-testid="button-back-to-clans">
+            <Button onClick={() => setLocation('/')} data-testid="button-back-to-home">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              К списку кланов
+              На главную
             </Button>
           </CardContent>
         </Card>
@@ -99,7 +99,7 @@ export default function ClanDetailPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <Button variant="ghost" onClick={() => setLocation('/clans')} data-testid="button-back">
+      <Button variant="ghost" onClick={() => setLocation('/')} data-testid="button-back">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Назад
       </Button>

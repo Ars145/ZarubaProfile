@@ -10,7 +10,6 @@ import NotFound from "@/pages/not-found";
 import ProfilePage from "@/pages/profile";
 import Login from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
-import ClansPage from "@/pages/clans";
 import ClanDetailPage from "@/pages/clan-detail";
 import ClanManagePage from "@/pages/clan-manage";
 import AdminPanel from "@/pages/admin-panel";
@@ -22,12 +21,6 @@ function Router() {
       <Route path="/auth/callback" component={AuthCallback} />
       
       {/* Публичные страницы - доступны всем (включая GUEST) */}
-      <Route path="/clans">
-        <Layout>
-          <ClansPage />
-        </Layout>
-      </Route>
-      
       <Route path="/clans/:id">
         <Layout>
           <ClanDetailPage />

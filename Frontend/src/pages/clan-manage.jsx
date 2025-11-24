@@ -161,9 +161,9 @@ export default function ClanManagePage() {
             <CardTitle>Клан не найден</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => setLocation('/clans')} data-testid="button-back-to-clans">
+            <Button onClick={() => setLocation('/')} data-testid="button-back-to-home">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              К списку кланов
+              На главную
             </Button>
           </CardContent>
         </Card>

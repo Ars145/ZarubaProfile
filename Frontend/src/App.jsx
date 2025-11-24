@@ -13,7 +13,6 @@ import AuthCallback from "@/pages/AuthCallback";
 import ClansPage from "@/pages/clans";
 import ClanDetailPage from "@/pages/clan-detail";
 import ClanManagePage from "@/pages/clan-manage";
-import JoinClanPage from "@/pages/join-clan";
 import AdminPanel from "@/pages/admin-panel";
 
 function Router() {
@@ -32,12 +31,6 @@ function Router() {
       <Route path="/clans/:id">
         <Layout>
           <ClanDetailPage />
-        </Layout>
-      </Route>
-      
-      <Route path="/join-clan">
-        <Layout>
-          <JoinClanPage />
         </Layout>
       </Route>
       

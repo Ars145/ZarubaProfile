@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, ArrowLeft, Users, Users2, UserPlus, UserMinus, Shield, CheckCircle, XCircle, Mail, Settings } from 'lucide-react';
+import { Loader2, ArrowLeft, Users, UserPlus, UserMinus, Shield, CheckCircle, XCircle, Mail } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient, apiRequest } from '@/lib/queryClient';
@@ -172,49 +172,114 @@ export default function ClanManagePage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="flex items-center gap-3 text-4xl font-display font-bold tracking-wider">
-            <Shield className="w-10 h-10 text-primary" />
-            МОЙ ОТРЯД
-          </h1>
-          <Badge variant="outline" className="border-primary/50 text-primary px-4 py-1 text-sm">
-            Владелец Клана
-          </Badge>
-        </div>
-        <p className="text-muted-foreground text-lg">
-          Управление вашим отрядом и личным составом.
-        </p>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <Button variant="ghost" onClick={() => setLocation(`/clans/${id}`)} data-testid="button-back">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Назад к клану
+        </Button>
       </div>
 
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={clan.logoUrl} />
+              <AvatarFallback className="text-xl">{clan.tag}</AvatarFallback>
+            </Avatar>
+            <div>
+              <CardTitle className="text-2xl">Управление кланом [{clan.tag}]</CardTitle>
+              <CardDescription>{clan.name}</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
       <Tabs defaultValue="applications" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 h-auto">
-          <TabsTrigger 
-            value="squad" 
-            data-testid="tab-squad"
-            className="font-display tracking-wider py-3"
-          >
-            ОТРЯД
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="applications" data-testid="tab-applications">
+            Заявки ({applications?.length || 0})
           </TabsTrigger>
-          <TabsTrigger 
-            value="applications" 
-            data-testid="tab-applications"
-            className="font-display tracking-wider py-3"
-          >
-            ЗАЯВКИ
+          <TabsTrigger value="members" data-testid="tab-members">
+            Участники ({members?.length || 0})
           </TabsTrigger>
-          <TabsTrigger 
-            value="settings" 
-            data-testid="tab-settings"
-            className="font-display tracking-wider py-3"
-          >
-            НАСТРОЙКИ
+          <TabsTrigger value="invitations" data-testid="tab-invitations">
+            Приглашения ({invitations?.length || 0})
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="squad" className="space-y-4">
+        <TabsContent value="applications" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                Заявки на вступление
+              </CardTitle>
+              <CardDescription>
+                Рассмотрите заявки игроков, желающих вступить в клан
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!applications || applications.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">Нет заявок</p>
+              ) : (
+                <div className="space-y-3">
+                  {applications.map((app) => (
+                    <div 
+                      key={app.id} 
+                      className="p-4 rounded-md bg-card border"
+                      data-testid={`application-${app.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3 flex-1">
+                          <Avatar>
+                            <AvatarImage src={app.player?.avatarUrl} />
+                            <AvatarFallback>
+                              {app.player?.username?.[0]?.toUpperCase() || 'P'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium">{app.player?.username || 'Unknown'}</p>
+                            {app.message && (
+                              <p className="text-sm text-muted-foreground mt-1">{app.message}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(app.createdAt).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => approveApplicationMutation.mutate(app.id)}
+                            disabled={approveApplicationMutation.isPending}
+                            data-testid={`button-approve-${app.id}`}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Принять
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => rejectApplicationMutation.mutate(app.id)}
+                            disabled={rejectApplicationMutation.isPending}
+                            data-testid={`button-reject-${app.id}`}
+                          >
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Отклонить
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="members" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -277,107 +342,109 @@ export default function ClanManagePage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="applications" className="space-y-4">
+        <TabsContent value="invitations" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
-                <CardTitle className="flex items-center gap-2 font-display tracking-wider">
-                  <Users2 className="w-5 h-5" />
-                  ЗАЯВКИ НА ВСТУПЛЕНИЕ
-                </CardTitle>
-                <Badge variant="secondary" className="text-sm">
-                  ВСЕГО: {applications?.length || 0}
-                </Badge>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserPlus className="w-5 h-5" />
+                    Приглашения
+                  </CardTitle>
+                  <CardDescription>
+                    Пригласите игроков в свой клан
+                  </CardDescription>
+                </div>
+                <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button data-testid="button-create-invitation">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Пригласить игрока
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Пригласить игрока</DialogTitle>
+                      <DialogDescription>
+                        Введите ID игрока для отправки приглашения
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="playerId">ID игрока</Label>
+                        <Input
+                          id="playerId"
+                          placeholder="UUID игрока"
+                          value={playerIdToInvite}
+                          onChange={(e) => setPlayerIdToInvite(e.target.value)}
+                          data-testid="input-player-id"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="message">Сообщение (опционально)</Label>
+                        <Textarea
+                          id="message"
+                          placeholder="Добро пожаловать в наш клан!"
+                          value={inviteMessage}
+                          onChange={(e) => setInviteMessage(e.target.value)}
+                          data-testid="input-invitation-message"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        onClick={() => sendInviteMutation.mutate()}
+                        disabled={!playerIdToInvite || sendInviteMutation.isPending}
+                        data-testid="button-send-invitation"
+                      >
+                        {sendInviteMutation.isPending && (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        )}
+                        Отправить приглашение
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent>
-              {!applications || applications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 space-y-4">
-                  <div className="rounded-full bg-muted/40 p-6">
-                    <Users2 className="w-16 h-16 text-muted-foreground opacity-40" data-testid="icon-empty-applications" />
-                  </div>
-                  <div className="text-center space-y-2">
-                    <h3 className="text-xl font-display font-bold tracking-wider">
-                      НЕТ НОВЫХ ЗАЯВОК
-                    </h3>
-                    <p className="text-muted-foreground">
-                      В данный момент никто не подавал заявку в ваш отряд.
-                    </p>
-                  </div>
-                </div>
+              {!invitations || invitations.length === 0 ? (
+                <p className="text-center py-8 text-muted-foreground">Нет активных приглашений</p>
               ) : (
                 <div className="space-y-3">
-                  {applications.map((app) => (
+                  {invitations.map((invitation) => (
                     <div 
-                      key={app.id} 
-                      className="p-4 rounded-md bg-card border"
-                      data-testid={`application-${app.id}`}
+                      key={invitation.id} 
+                      className="flex items-center justify-between p-3 rounded-md bg-card border"
+                      data-testid={`invitation-${invitation.id}`}
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1">
-                          <Avatar>
-                            <AvatarImage src={app.player?.avatarUrl} />
-                            <AvatarFallback>
-                              {app.player?.username?.[0]?.toUpperCase() || 'P'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium">{app.player?.username || 'Unknown'}</p>
-                            {app.message && (
-                              <p className="text-sm text-muted-foreground mt-1">{app.message}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(app.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => approveApplicationMutation.mutate(app.id)}
-                            disabled={approveApplicationMutation.isPending}
-                            data-testid={`button-approve-${app.id}`}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Принять
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => rejectApplicationMutation.mutate(app.id)}
-                            disabled={rejectApplicationMutation.isPending}
-                            data-testid={`button-reject-${app.id}`}
-                          >
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Отклонить
-                          </Button>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={invitation.player?.avatarUrl} />
+                          <AvatarFallback>
+                            {invitation.player?.username?.[0]?.toUpperCase() || 'P'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{invitation.player?.username || 'Unknown'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Отправлено {new Date(invitation.createdAt).toLocaleDateString()}
+                          </p>
                         </div>
                       </div>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => cancelInvitationMutation.mutate(invitation.id)}
+                        disabled={cancelInvitationMutation.isPending}
+                        data-testid={`button-cancel-${invitation.id}`}
+                      >
+                        Отменить
+                      </Button>
                     </div>
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 font-display tracking-wider">
-                <Settings className="w-5 h-5" />
-                НАСТРОЙКИ КЛАНА
-              </CardTitle>
-              <CardDescription>
-                Настройте параметры вашего клана
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-16 text-muted-foreground">
-                <Settings className="w-16 h-16 mx-auto mb-4 opacity-40" />
-                <p>Настройки клана в разработке</p>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

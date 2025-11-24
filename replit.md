@@ -17,15 +17,19 @@ The backend is built with Flask 3.0, utilizing PostgreSQL (Neon-hosted) via SQLA
 ### Feature Specifications
 -   **Player Profiles:** Displays detailed player statistics.
 -   **Clan Management System:** A complete system with 15+ REST API endpoints covering Clan CRUD, member management (join, leave, kick, role changes), an application system (submit, view, approve/reject, withdraw), and an invitation system (create, view, accept/reject, cancel). It ensures transactional safety for ownership transfers and prevents duplicate memberships.
+    - **Auto-Rejection:** When a clan owner accepts a player's application, all other pending applications from that player are automatically rejected (Nov 2024).
+    - **Member Management:** Owner can kick members and change roles via dropdown menu. All actions require confirmation and use TanStack Query mutations with proper cache invalidation.
+    - **Leave Clan:** Players can leave their clan with confirmation. Cache invalidation strategy prevents 403/404 errors by updating auth state first.
 -   **Statistics System:** A robust calculation engine, ported from a Discord bot, processes complex statistics including vehicle time, kills, and a comprehensive ranking system. It supports 35+ vehicle types and 60+ weapon patterns, with calculations primarily client-side.
 -   **Admin Panel:** Provides functionality for creating clans, assigning owners using Steam IDs, and listing all clans. Access is restricted to predefined administrators.
 
 ### System Design Choices
 -   **Authentication & Authorization:** Discord OAuth is fully implemented for user authentication, managing sessions with JWT tokens. The `@require_auth` decorator secures endpoints, and role-based access control (Guest, Member, Owner) is enforced. Steam authentication is planned.
 -   **Data Storage:** PostgreSQL stores player, clan, member, and application data with UUID primary keys, JSONB fields, and CASCADE deletes. The `clan_applications` table uses `player_id UUID` foreign key (legacy `player_name`/`player_steam_id` fields removed Nov 2025) with UNIQUE constraint on `(clan_id, player_id)`. MongoDB is used for read-only Squad game server statistics, with graceful degradation if unavailable.
--   **API Design:** Backend APIs return an envelope (`{success: true, data: ...}`), which the frontend automatically unwraps for consistent data handling.
+-   **API Design:** Backend APIs return an envelope (`{success: true, data: ...}`), which the frontend automatically unwraps for consistent data handling. The clan members API returns membership records with `id` (membership record ID), `playerId` (player ID), and `role` (backend key: 'owner'/'member').
 -   **File Uploads:** PNG transparency is fully supported - FileService detects RGBA/LA/P image modes and preserves transparency by saving as PNG instead of JPEG. Relative URLs (`/api/static/uploads/...`) are generated for uploaded clan logos and banners, working seamlessly in development (via Vite proxy) and production. Upload endpoints are secured with authentication and ownership verification. Static file route `/api/static/uploads/<path>` properly serves nested subdirectories using absolute upload paths.
 -   **Error Handling:** The stats API returns HTTP 200 with empty stats if MongoDB is unavailable to prevent 503 errors and frontend crashes. Optional chaining and fallback values are used for safe access to potentially missing nested data.
+-   **Clan Applications:** When an owner approves an application, the backend automatically rejects all other pending applications from that same player in a single transaction, preventing players from being in multiple clans (Nov 2024).
 
 ## External Dependencies
 

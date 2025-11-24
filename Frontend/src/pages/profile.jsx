@@ -349,6 +349,27 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [applicationMessage, setApplicationMessage] = useState("");
   
+  // Mutation для отправки заявки в клан
+  const submitApplicationMutation = useMutation({
+    mutationFn: async ({ clanId, message }) => {
+      return await apiRequest('POST', `/api/clans/${clanId}/applications`, { message });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Заявка отправлена!",
+        description: "Владелец клана получит уведомление о вашей заявке",
+      });
+      setApplicationMessage("");
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Ошибка",
+        description: error.message || "Не удалось отправить заявку",
+      });
+    }
+  });
+  
   // Обновляем локальное состояние при изменении user
   useEffect(() => {
     if (user) {
@@ -1481,8 +1502,42 @@ export default function ProfilePage() {
                                </div>
                              </div>
                              <div className="flex justify-end pt-2">
-                               <MagneticButton size="lg" className={`w-full md:w-auto bg-white text-black font-black font-display tracking-wider hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:-translate-y-1 h-14 px-8 text-lg border-none`}>
-                                 ОТПРАВИТЬ ЗАЯВКУ
+                               <MagneticButton 
+                                 size="lg" 
+                                 className={`w-full md:w-auto bg-white text-black font-black font-display tracking-wider hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all hover:scale-105 hover:-translate-y-1 h-14 px-8 text-lg border-none disabled:opacity-50 disabled:cursor-not-allowed`}
+                                 onClick={() => {
+                                   if (!selectedClan) {
+                                     toast({
+                                       variant: "destructive",
+                                       title: "Выберите клан",
+                                       description: "Сначала выберите клан из списка",
+                                     });
+                                     return;
+                                   }
+                                   if (!applicationMessage.trim()) {
+                                     toast({
+                                       variant: "destructive",
+                                       title: "Заполните сопроводительное письмо",
+                                       description: "Напишите несколько слов о себе",
+                                     });
+                                     return;
+                                   }
+                                   submitApplicationMutation.mutate({
+                                     clanId: selectedClan,
+                                     message: applicationMessage
+                                   });
+                                 }}
+                                 disabled={submitApplicationMutation.isPending || !selectedClan || !applicationMessage.trim()}
+                                 data-testid="button-submit-application"
+                               >
+                                 {submitApplicationMutation.isPending ? (
+                                   <>
+                                     <Loader2 className="w-5 h-5 animate-spin inline-block mr-2" />
+                                     ОТПРАВКА...
+                                   </>
+                                 ) : (
+                                   'ОТПРАВИТЬ ЗАЯВКУ'
+                                 )}
                                </MagneticButton>
                              </div>
                           </div>

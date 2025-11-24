@@ -677,6 +677,55 @@ def get_clan_applications(clan_id):
         }), 500
 
 
+@api.route('/clans/<clan_id>/applications', methods=['POST'])
+@require_auth
+def create_clan_application(clan_id):
+    """Создать заявку на вступление в клан"""
+    try:
+        player = request.current_player
+        data = request.get_json()
+        
+        # Проверяем существование клана
+        clan = Clan.query.get(clan_id)
+        if not clan:
+            return jsonify({'success': False, 'error': 'Клан не найден'}), 404
+        
+        # Проверяем что игрок не в клане
+        if player.current_clan_id:
+            return jsonify({'success': False, 'error': 'Вы уже состоите в клане'}), 400
+        
+        # Проверяем что уже нет активной заявки в этот клан
+        existing_app = ClanApplication.query.filter_by(
+            clan_id=clan_id,
+            player_id=player.id,
+            status='pending'
+        ).first()
+        
+        if existing_app:
+            return jsonify({'success': False, 'error': 'У вас уже есть активная заявка в этот клан'}), 400
+        
+        # Создаем заявку
+        application = ClanApplication(
+            clan_id=clan_id,
+            player_id=player.id,
+            message=data.get('message', ''),
+            status='pending',
+            stats_snapshot={}  # TODO: добавить snapshot статистики игрока
+        )
+        
+        db.session.add(application)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'data': application.to_dict()
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @api.route('/applications/my', methods=['GET'])
 @require_auth
 def get_my_applications():

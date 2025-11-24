@@ -1342,9 +1342,9 @@ export default function ProfilePage() {
                                             initial={{ y: 20, opacity: 0 }}
                                             animate={{ y: 0, opacity: 1 }}
                                             transition={{ delay: 0.2 }}
-                                            className={`w-16 h-16 rounded-xl border-4 border-zinc-900 ${clanColors.bgColor} flex items-center justify-center shadow-lg overflow-hidden`}
+                                            className="w-16 h-16 rounded-xl border-4 border-zinc-900 bg-zinc-900/90 flex items-center justify-center shadow-lg overflow-hidden p-1"
                                         >
-                                           <img src={clan.logoUrl} className="w-full h-full object-cover" />
+                                           <img src={clan.logoUrl} className="w-full h-full object-contain" />
                                         </motion.div>
                                       </div>
                                    </div>
@@ -1530,11 +1530,11 @@ export default function ProfilePage() {
                                  disabled={uploadingLogo}
                                />
                                <div className="flex items-center gap-4">
-                                  <label htmlFor="logo-upload" className="w-24 h-24 rounded-xl border border-white/10 overflow-hidden group cursor-pointer relative block">
+                                  <label htmlFor="logo-upload" className="w-24 h-24 rounded-xl border border-white/10 overflow-hidden group cursor-pointer relative block bg-zinc-900/50 p-2">
                                      {clanLogo ? (
-                                       <img src={clanLogo} className="w-full h-full object-cover" alt="Clan logo" />
+                                       <img src={clanLogo} className="w-full h-full object-contain" alt="Clan logo" />
                                      ) : (
-                                       <div className="w-full h-full bg-zinc-900/50 flex items-center justify-center">
+                                       <div className="w-full h-full flex items-center justify-center">
                                          <ImageIcon className="w-8 h-8 text-muted-foreground" />
                                        </div>
                                      )}
@@ -1832,9 +1832,9 @@ export default function ProfilePage() {
                               
                               {/* Clan Logo & Banner in Stats Card */}
                               <div className="flex items-start justify-between mb-8 relative z-10">
-                                  <div className="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                                  <div className="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden group-hover:scale-105 transition-transform duration-300 p-2">
                                       {clanData?.logoUrl ? (
-                                        <img src={clanData.logoUrl} className="w-full h-full object-cover" alt="Clan Logo" />
+                                        <img src={clanData.logoUrl} className="w-full h-full object-contain" alt="Clan Logo" />
                                       ) : (
                                         <div className="w-full h-full flex items-center justify-center text-primary text-2xl font-bold">
                                           {clanData?.tag || '?'}

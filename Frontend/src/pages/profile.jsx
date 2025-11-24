@@ -2021,15 +2021,22 @@ export default function ProfilePage() {
                                 </div>
                                 
                                 <div className="flex-1 lg:mx-8 p-4 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm">
-                                  <p className="text-sm text-zinc-300 italic">"{app.message}"</p>
+                                  <p className="text-sm text-zinc-300 italic leading-relaxed">"{app.message}"</p>
                                 </div>
 
-                                <div className="flex items-center gap-3 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                  <Button onClick={() => handleAcceptApp(app.id)} className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black border border-emerald-500/20 hover:border-emerald-500 transition-all font-bold gap-2">
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 self-center" onClick={(e) => e.stopPropagation()}>
+                                  <Button 
+                                    onClick={() => handleAcceptApp(app.id)} 
+                                    className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 hover:text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300 font-semibold gap-2 shadow-lg hover:shadow-emerald-500/20 min-w-[120px]"
+                                  >
                                     <Check className="w-4 h-4" />
                                     Принять
                                   </Button>
-                                  <Button onClick={() => handleRejectApp(app.id)} variant="outline" className="border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white bg-red-500/5 hover:border-red-500 transition-all font-bold gap-2">
+                                  <Button 
+                                    onClick={() => handleRejectApp(app.id)} 
+                                    variant="outline" 
+                                    className="border-red-500/30 text-red-500 hover:bg-red-500/20 hover:text-red-400 bg-red-500/5 hover:border-red-500/60 transition-all duration-300 font-semibold gap-2 shadow-lg hover:shadow-red-500/20 min-w-[120px]"
+                                  >
                                     <X className="w-4 h-4" />
                                     Отклонить
                                   </Button>

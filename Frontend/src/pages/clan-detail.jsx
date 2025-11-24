@@ -94,7 +94,8 @@ export default function ClanDetailPage() {
     );
   }
 
-  const isOwner = user && clan.ownerId === user.id;
+  // Проверяем является ли пользователь владельцем через members с ролью owner
+  const isOwner = user && members.some(m => m.player?.id === user.id && m.role === 'owner');
   const isMember = user && user.currentClanId === clan.id;
 
   return (

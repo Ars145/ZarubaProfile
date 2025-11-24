@@ -347,6 +347,7 @@ export default function ProfilePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [applicationMessage, setApplicationMessage] = useState("");
   
   // Обновляем локальное состояние при изменении user
   useEffect(() => {
@@ -1468,11 +1469,14 @@ export default function ProfilePage() {
                                <Label className="text-xs uppercase text-muted-foreground font-bold tracking-wider pl-1">Сопроводительное письмо</Label>
                                <div className="relative">
                                  <textarea 
+                                   value={applicationMessage}
+                                   onChange={(e) => setApplicationMessage(e.target.value.slice(0, 500))}
                                    className="flex min-h-[220px] w-full rounded-2xl border border-white/10 bg-zinc-950/30 px-6 py-5 text-sm ring-offset-background placeholder:text-muted-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 resize-none hover:border-white/20 transition-all backdrop-blur-md text-white/90 leading-relaxed shadow-inner"
                                    placeholder={`Привет! Я хочу вступить в ${clans.find(c => c.id === selectedClan)?.name} потому что...`}
+                                   data-testid="textarea-application-message"
                                  />
                                  <div className="absolute bottom-4 right-4 text-[10px] text-muted-foreground font-mono">
-                                   0 / 500
+                                   {applicationMessage.length} / 500
                                  </div>
                                </div>
                              </div>

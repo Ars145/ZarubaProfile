@@ -404,16 +404,12 @@ def leave_clan(clan_id):
         
         player.current_clan_id = None
         
-        # Отклонить все pending заявки игрока в этот клан
+        # Удалить ВСЕ заявки игрока в этот клан (любого статуса)
         # Это предотвращает конфликт UNIQUE constraint при повторной подаче заявки
-        pending_applications = ClanApplication.query.filter_by(
+        ClanApplication.query.filter_by(
             clan_id=clan_id,
-            player_id=player.id,
-            status='pending'
-        ).all()
-        
-        for app in pending_applications:
-            app.status = 'rejected'
+            player_id=player.id
+        ).delete()
         
         db.session.delete(member)
         db.session.commit()
@@ -470,16 +466,12 @@ def kick_member(clan_id, member_id):
         # Обнулить current_clan_id у игрока
         member.player.current_clan_id = None
         
-        # Отклонить все pending заявки исключенного игрока в этот клан
+        # Удалить ВСЕ заявки исключенного игрока в этот клан (любого статуса)
         # Это предотвращает конфликт UNIQUE constraint при повторной подаче заявки
-        pending_applications = ClanApplication.query.filter_by(
+        ClanApplication.query.filter_by(
             clan_id=clan_id,
-            player_id=member.player_id,
-            status='pending'
-        ).all()
-        
-        for app in pending_applications:
-            app.status = 'rejected'
+            player_id=member.player_id
+        ).delete()
         
         db.session.delete(member)
         db.session.commit()
@@ -512,10 +504,10 @@ def change_member_role(clan_id, member_id):
             }), 400
         
         new_role = data['role']
-        if new_role not in ['owner', 'member']:
+        if new_role not in ['owner', 'officer', 'member', 'recruit']:
             return jsonify({
                 'success': False,
-                'error': 'Недопустимая роль. Разрешены: owner, member'
+                'error': 'Недопустимая роль. Разрешены: owner, officer, member, recruit'
             }), 400
         
         # Проверка прав - только владелец может менять роли

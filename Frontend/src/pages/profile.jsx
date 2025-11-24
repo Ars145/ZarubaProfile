@@ -449,14 +449,17 @@ export default function ProfilePage() {
     return {
       id: member.id, // ID записи в clan_members (используется для kick/change role)
       playerId: member.playerId, // ID игрока
-      roleBackend: member.role, // Сырое значение роли из API ('owner' или 'member')
+      roleBackend: member.role, // Сырое значение роли из API
       name: member.player?.username || 'Unknown',
-      role: member.role === 'owner' ? 'Лидер' : member.role === 'member' ? 'Боец' : 'Рекрут',
+      role: member.role === 'owner' ? 'Лидер' : 
+            member.role === 'officer' ? 'Офицер' : 
+            member.role === 'member' ? 'Боец' : 'Рекрут',
       status: onlineStatus,
       statusColor: statusColor,
       roleColor: member.role === 'owner' ? 'text-primary border-primary/20 bg-primary/10' : 
-                 member.role === 'officer' ? 'text-orange-400 border-orange-400/20 bg-orange-400/10' : 
-                 'text-muted-foreground border-white/10 bg-white/5',
+                 member.role === 'officer' ? 'text-orange-400 border-orange-400/20 bg-orange-400/10' :
+                 member.role === 'member' ? 'text-zinc-400 border-zinc-700 bg-zinc-800/50' :
+                 'text-zinc-500 border-zinc-700/50 bg-zinc-800/30',
       avatar: member.player?.username?.substring(0, 2).toUpperCase() || 'UN',
       stats: { 
         games: 0, 
@@ -671,7 +674,9 @@ export default function ProfilePage() {
   });
 
   const handleRoleChange = (membershipId, newRole, memberName) => {
-    const roleText = newRole === 'owner' ? 'владельца' : 'участника';
+    const roleText = newRole === 'owner' ? 'владельца' : 
+                     newRole === 'officer' ? 'офицера' :
+                     newRole === 'member' ? 'бойца' : 'рекрута';
     if (confirm(`Вы уверены, что хотите изменить роль ${memberName} на ${roleText}?`)) {
       changeRoleMutation.mutate({ memberId: membershipId, newRole });
     }
@@ -2243,8 +2248,9 @@ export default function ProfilePage() {
                                                           value={member.roleBackend} 
                                                           onValueChange={(val) => handleRoleChange(member.id, val, member.name)}
                                                         >
-                                                          <DropdownMenuRadioItem value="owner" className="cursor-pointer text-orange-400 focus:text-orange-400">Владелец</DropdownMenuRadioItem>
-                                                          <DropdownMenuRadioItem value="member" className="cursor-pointer text-white focus:text-white">Участник</DropdownMenuRadioItem>
+                                                          <DropdownMenuRadioItem value="officer" className="cursor-pointer text-orange-400 focus:text-orange-400">Офицер</DropdownMenuRadioItem>
+                                                          <DropdownMenuRadioItem value="member" className="cursor-pointer text-white focus:text-white">Боец</DropdownMenuRadioItem>
+                                                          <DropdownMenuRadioItem value="recruit" className="cursor-pointer text-zinc-400 focus:text-zinc-400">Рекрут</DropdownMenuRadioItem>
                                                         </DropdownMenuRadioGroup>
                                                       </DropdownMenuSubContent>
                                                     </DropdownMenuSub>

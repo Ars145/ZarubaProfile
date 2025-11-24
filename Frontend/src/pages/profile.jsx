@@ -711,15 +711,18 @@ export default function ProfilePage() {
     }
   };
   
-  // Generate requirements badge summary from state  
+  // Generate requirements badge summary from selectedClanData for guest view
   const getRequirementsBadge = () => {
+    const reqs = selectedClanData?.requirements || {};
     const parts = [];
-    if (clanRequirements.microphone) parts.push("Микрофон");
-    if (clanRequirements.ageRestriction) parts.push("Возраст 18+");
-    // Show full custom requirement without truncation
-    if (clanRequirements.customRequirement) {
-      parts.push(clanRequirements.customRequirement);
+    
+    if (reqs.microphone) parts.push("Микрофон");
+    if (reqs.age) parts.push(`Возраст ${reqs.age}+`);
+    if (reqs.experience) parts.push(reqs.experience);
+    if (reqs.custom && Array.isArray(reqs.custom)) {
+      parts.push(...reqs.custom);
     }
+    
     return parts.length > 0 ? parts.join(", ") : "Открыто для всех";
   };
 
@@ -1395,24 +1398,30 @@ export default function ProfilePage() {
                                    Требования
                                 </h4>
                                 <ul className="space-y-4">
-                                   {clanRequirements.microphone && (
+                                   {selectedClanData?.requirements?.microphone && (
                                      <li className="flex items-start gap-3 text-sm text-white/90">
                                         <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
                                         <span className="leading-relaxed">Наличие микрофона и Discord</span>
                                      </li>
                                    )}
-                                   {clanRequirements.ageRestriction && (
+                                   {selectedClanData?.requirements?.age && (
                                      <li className="flex items-start gap-3 text-sm text-white/90">
                                         <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
-                                        <span className="leading-relaxed">Возраст 18+</span>
+                                        <span className="leading-relaxed">Возраст {selectedClanData.requirements.age}+</span>
                                      </li>
                                    )}
-                                   {clanRequirements.customRequirement && (
+                                   {selectedClanData?.requirements?.experience && (
                                      <li className="flex items-start gap-3 text-sm text-white/90">
                                         <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
-                                        <span className="leading-relaxed">{clanRequirements.customRequirement}</span>
+                                        <span className="leading-relaxed">{selectedClanData.requirements.experience}</span>
                                      </li>
                                    )}
+                                   {selectedClanData?.requirements?.custom?.map((req, index) => (
+                                     <li key={index} className="flex items-start gap-3 text-sm text-white/90">
+                                        <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
+                                        <span className="leading-relaxed">{req}</span>
+                                     </li>
+                                   ))}
                                 </ul>
                              </div>
                              

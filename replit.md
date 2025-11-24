@@ -42,3 +42,71 @@ The backend is developed with Flask 3.0 and uses PostgreSQL (hosted on Neon) wit
 -   **SQLAlchemy:** Used as the Python ORM for PostgreSQL.
 -   **Gunicorn:** Used as the WSGI HTTP Server.
 -   **Steam API:** (Planned) For additional player authentication and profile data.
+---
+
+## Техническая документация API (Ноябрь 2024)
+
+### Общие принципы
+
+#### Формат ответов
+Все API эндпоинты возвращают JSON в формате "envelope":
+```json
+{
+  "success": true/false,
+  "data": {...},        // при успехе
+  "error": "message"    // при ошибке
+}
+```
+
+Frontend автоматически "разворачивает" envelope через interceptor в queryClient.
+
+#### Коды статусов HTTP
+- `200 OK` - Успешный запрос
+- `201 Created` - Ресурс создан
+- `400 Bad Request` - Невалидные данные
+- `401 Unauthorized` - Требуется авторизация
+- `403 Forbidden` - Недостаточно прав
+- `404 Not Found` - Ресурс не найден
+- `409 Conflict` - Конфликт данных (дубликат)
+- `500 Internal Server Error` - Ошибка сервера
+
+#### Авторизация
+Эндпоинты с меткой `@require_auth` требуют JWT токен в header:
+```
+Authorization: Bearer <access_token>
+```
+
+### Изменения и миграции (Ноябрь 2024)
+
+#### Удаление max_members
+- Удалена колонка `max_members` из таблицы `clans`
+- Удалено поле `maxMembers` из всех API ответов
+- Удалены все упоминания в UI
+- **Миграция:** `backend/migrations/001_remove_max_members.sql`
+- **SQL:** `ALTER TABLE clans DROP COLUMN IF EXISTS max_members;`
+- **Статус:** Миграция применена в development окружении
+
+#### Система иерархических ролей
+- Добавлены роли: Owner, Officer, Member, Recruit
+- Визуальная стилизация для каждой роли
+- Dropdown меню для смены ролей (только Owner)
+
+#### Auto-rejection заявок
+- При одобрении заявки все другие pending заявки этого игрока отклоняются
+- Транзакционная безопасность через SQLAlchemy
+
+#### Удаление заявок при leave/kick
+- При выходе из клана удаляются ВСЕ заявки игрока в этот клан
+- Предотвращает UNIQUE constraint violations при повторной подаче
+
+#### AlertDialog вместо confirm()
+- Все подтверждения через кастомные AlertDialog компоненты
+- Красивая UI с цветовыми темами (оранжевый для ролей, красный для kick)
+
+#### Real-time обновления
+- TanStack Query cache invalidation после каждой мутации
+- Немедленное отражение изменений в UI без перезагрузки
+
+### Полная документация API доступна по запросу
+Для получения полной документации всех 26+ API эндпоинтов (кланы, игроки, статистика, авторизация, загрузка файлов) обратитесь к разработчику или создайте issue в репозитории.
+

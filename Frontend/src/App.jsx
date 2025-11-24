@@ -10,8 +10,6 @@ import NotFound from "@/pages/not-found";
 import ProfilePage from "@/pages/profile";
 import Login from "@/pages/Login";
 import AuthCallback from "@/pages/AuthCallback";
-import ClanDetailPage from "@/pages/clan-detail";
-import ClanManagePage from "@/pages/clan-manage";
 import AdminPanel from "@/pages/admin-panel";
 
 function Router() {
@@ -20,13 +18,6 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/auth/callback" component={AuthCallback} />
       
-      {/* Публичные страницы - доступны всем (включая GUEST) */}
-      <Route path="/clans/:id">
-        <Layout>
-          <ClanDetailPage />
-        </Layout>
-      </Route>
-      
       {/* Защищенные страницы - требуют авторизации */}
       <Route>
         <ProtectedRoute>
@@ -34,7 +25,6 @@ function Router() {
             <Switch>
               <Route path="/" component={ProfilePage} />
               <Route path="/profile" component={ProfilePage} />
-              <Route path="/clans/:id/manage" component={ClanManagePage} />
               <Route path="/admin" component={AdminPanel} />
               <Route component={NotFound} />
             </Switch>

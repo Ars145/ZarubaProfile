@@ -527,23 +527,69 @@ export default function ProfilePage() {
     }
   }, [clanData]);
 
-  // Загружаем заявки на вступление (пока нет endpoint - пустой массив)
-  // TODO: Добавить API endpoint для заявок
-  const applications = [];
+  // Загружаем заявки на вступление (только для владельцев клана)
+  const isOwner = clanData?.owner_id === user?.id;
+  const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
+    queryKey: ['/api/clans', currentClanId, 'applications'],
+    enabled: !!currentClanId && isOwner,
+  });
+  
+  const applications = applicationsResponse?.applications || [];
 
   const handleRoleChange = (memberId, newRole) => {
     // TODO: Implement API call to change member role
     console.log('Change role for member', memberId, 'to', newRole);
   };
 
+  // Мутация для отклонения заявки
+  const rejectApplicationMutation = useMutation({
+    mutationFn: async (applicationId) => {
+      return await apiRequest('POST', `/api/clans/${currentClanId}/applications/${applicationId}/reject`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId, 'applications'] });
+      toast({
+        title: "Заявка отклонена",
+        description: "Заявка успешно отклонена",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось отклонить заявку",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleRejectApp = (id) => {
-    // TODO: Implement API call to reject application (endpoint не существует пока)
-    console.log('Reject application', id);
+    rejectApplicationMutation.mutate(id);
   };
 
+  // Мутация для принятия заявки
+  const acceptApplicationMutation = useMutation({
+    mutationFn: async (applicationId) => {
+      return await apiRequest('POST', `/api/clans/${currentClanId}/applications/${applicationId}/approve`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId, 'applications'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId, 'members'] });
+      toast({
+        title: "Заявка принята",
+        description: "Игрок добавлен в клан",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось принять заявку",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleAcceptApp = (id) => {
-    // TODO: Implement API call to accept application (endpoint не существует пока)
-    console.log('Accept application', id);
+    acceptApplicationMutation.mutate(id);
   };
   
   // Мутация для сохранения настроек клана

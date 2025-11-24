@@ -237,6 +237,40 @@ export default function ClanDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {clan.requirements && Object.keys(clan.requirements).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Требования</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {clan.requirements.microphone && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span className="text-sm">Наличие микрофона и Discord</span>
+                  </div>
+                )}
+                {clan.requirements.age && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span className="text-sm">Возраст {clan.requirements.age}+</span>
+                  </div>
+                )}
+                {clan.requirements.experience && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span className="text-sm">{clan.requirements.experience}</span>
+                  </div>
+                )}
+                {clan.requirements.custom && clan.requirements.custom.map((req, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span className="text-sm">{req}</span>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

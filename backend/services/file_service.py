@@ -72,26 +72,46 @@ class FileService:
         
         try:
             img = Image.open(file)
+            original_format = img.format
+            has_transparency = img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info)
             
-            if img.mode in ('RGBA', 'LA', 'P'):
-                background = Image.new('RGB', img.size, (255, 255, 255))
-                if img.mode == 'P':
+            # Сохраняем PNG с прозрачностью как PNG, остальное как JPEG
+            if has_transparency:
+                # Конвертируем в RGBA для сохранения прозрачности
+                if img.mode != 'RGBA':
                     img = img.convert('RGBA')
-                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
-                img = background
-            elif img.mode != 'RGB':
-                img = img.convert('RGB')
-            
-            img.thumbnail(config['max_size'], Image.Resampling.LANCZOS)
-            
-            filename = f'{uuid.uuid4()}.jpg'
-            upload_folder = current_app.config.get('UPLOAD_FOLDER')
-            filepath = os.path.join(upload_folder, config['path'])
-            
-            os.makedirs(filepath, exist_ok=True)
-            
-            full_path = os.path.join(filepath, filename)
-            img.save(full_path, 'JPEG', quality=config['quality'], optimize=True)
+                
+                img.thumbnail(config['max_size'], Image.Resampling.LANCZOS)
+                
+                filename = f'{uuid.uuid4()}.png'
+                upload_folder = current_app.config.get('UPLOAD_FOLDER')
+                filepath = os.path.join(upload_folder, config['path'])
+                
+                os.makedirs(filepath, exist_ok=True)
+                
+                full_path = os.path.join(filepath, filename)
+                img.save(full_path, 'PNG', optimize=True)
+            else:
+                # Для изображений без прозрачности сохраняем как JPEG
+                if img.mode in ('RGBA', 'LA', 'P'):
+                    background = Image.new('RGB', img.size, (255, 255, 255))
+                    if img.mode == 'P':
+                        img = img.convert('RGBA')
+                    background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                    img = background
+                elif img.mode != 'RGB':
+                    img = img.convert('RGB')
+                
+                img.thumbnail(config['max_size'], Image.Resampling.LANCZOS)
+                
+                filename = f'{uuid.uuid4()}.jpg'
+                upload_folder = current_app.config.get('UPLOAD_FOLDER')
+                filepath = os.path.join(upload_folder, config['path'])
+                
+                os.makedirs(filepath, exist_ok=True)
+                
+                full_path = os.path.join(filepath, filename)
+                img.save(full_path, 'JPEG', quality=config['quality'], optimize=True)
             
             # Генерируем относительный URL для Flask route /api/static/uploads/<path:filename>
             # Используем относительный URL чтобы работать и в dev (через Vite proxy) и в production

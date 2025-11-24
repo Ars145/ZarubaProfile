@@ -1955,25 +1955,14 @@ export default function ProfilePage() {
                                />
                                <p className="text-xs text-muted-foreground">Название клана можно изменить только через администратора</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                               <div className="grid gap-2">
-                                  <Label>Тег Клана</Label>
-                                  <Input 
-                                    value={clanData?.tag || ''} 
-                                    readOnly
-                                    className="bg-black/20 border-white/10 opacity-70 cursor-not-allowed"
-                                    data-testid="input-clan-tag"
-                                  />
-                               </div>
-                               <div className="grid gap-2">
-                                  <Label>Максимум участников</Label>
-                                  <Input 
-                                    value={clanData?.maxMembers || 0}
-                                    readOnly 
-                                    className="bg-black/20 border-white/10 opacity-70 cursor-not-allowed"
-                                    data-testid="input-clan-max-members"
-                                  />
-                               </div>
+                            <div className="grid gap-2">
+                               <Label>Тег Клана</Label>
+                               <Input 
+                                 value={clanData?.tag || ''} 
+                                 readOnly
+                                 className="bg-black/20 border-white/10 opacity-70 cursor-not-allowed"
+                                 data-testid="input-clan-tag"
+                               />
                             </div>
                             <div className="grid gap-2">
                                <Label>Описание</Label>
@@ -2136,7 +2125,7 @@ export default function ProfilePage() {
                               <div className="space-y-2 relative z-10">
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><Users className="w-4 h-4 text-zinc-500"/> Всего бойцов</span>
-                                      <span className="font-mono font-bold text-white">{squadMembers.length} / {clanData?.maxMembers || 50}</span>
+                                      <span className="font-mono font-bold text-white">{squadMembers.length}</span>
                                   </div>
                                   <div className="flex justify-between items-center text-sm p-3 bg-black/40 rounded-lg border border-white/5 hover:border-white/10 transition-colors">
                                       <span className="text-muted-foreground flex items-center gap-2 font-medium"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"/> В строю</span>
@@ -2199,7 +2188,7 @@ export default function ProfilePage() {
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                                 <span className="text-xs font-mono bg-zinc-800 px-3 py-1.5 rounded border border-white/5 text-muted-foreground font-bold">
-                                  {squadMembers.length} / {clanData?.clan?.maxMembers || 50}
+                                  {squadMembers.length}
                                 </span>
                               </div>
                           </div>

@@ -43,7 +43,6 @@ export default function AdminPanel() {
     logoUrl: '',
     level: 0,
     winrate: 0,
-    maxMembers: 50,
     requirements: {}
   });
   
@@ -156,7 +155,6 @@ export default function AdminPanel() {
       logoUrl: clan.logoUrl || '',
       level: clan.level || 0,
       winrate: clan.winrate || 0,
-      maxMembers: clan.maxMembers || 50,
       requirements: clan.requirements || {}
     });
   };
@@ -176,7 +174,6 @@ export default function AdminPanel() {
         logoUrl: editForm.logoUrl,
         level: parseInt(editForm.level),
         winrate: parseFloat(editForm.winrate),
-        maxMembers: parseInt(editForm.maxMembers),
         requirements: editForm.requirements
       };
       
@@ -421,7 +418,7 @@ export default function AdminPanel() {
                         [{clan.tag}] {clan.name}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        ID: {clan.id} | Участников: {clan.memberCount || 0} / {clan.maxMembers || 50}
+                        ID: {clan.id} | Участников: {clan.memberCount || 0}
                       </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
@@ -529,33 +526,18 @@ export default function AdminPanel() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-winrate">Процент побед</Label>
-                <Input
-                  id="edit-winrate"
-                  data-testid="input-edit-winrate"
-                  type="number"
-                  step="0.1"
-                  value={editForm.winrate}
-                  onChange={(e) => setEditForm({ ...editForm, winrate: e.target.value })}
-                  min="0"
-                  max="100"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-maxmembers">Макс. участников</Label>
-                <Input
-                  id="edit-maxmembers"
-                  data-testid="input-edit-maxmembers"
-                  type="number"
-                  value={editForm.maxMembers}
-                  onChange={(e) => setEditForm({ ...editForm, maxMembers: e.target.value })}
-                  min="1"
-                  max="100"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-winrate">Процент побед</Label>
+              <Input
+                id="edit-winrate"
+                data-testid="input-edit-winrate"
+                type="number"
+                step="0.1"
+                value={editForm.winrate}
+                onChange={(e) => setEditForm({ ...editForm, winrate: e.target.value })}
+                min="0"
+                max="100"
+              />
             </div>
             
             <div className="grid grid-cols-2 gap-4">

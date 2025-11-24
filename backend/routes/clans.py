@@ -1398,8 +1398,6 @@ def admin_update_clan(clan_id):
             clan.level = int(data['level'])
         if 'winrate' in data:
             clan.winrate = float(data['winrate'])
-        if 'maxMembers' in data:
-            clan.max_members = int(data['maxMembers'])
         if 'requirements' in data:
             clan.requirements = data['requirements']
         

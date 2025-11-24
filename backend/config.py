@@ -37,7 +37,8 @@ class Config:
     
     # Uploads
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
-    UPLOAD_FOLDER = 'static/uploads'
+    # Абсолютный путь к uploads относительно backend/
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
     
     # Admin Steam IDs (захардкожены)

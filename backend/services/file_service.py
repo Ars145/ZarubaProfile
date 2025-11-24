@@ -2,7 +2,7 @@ import os
 import uuid
 from PIL import Image
 from werkzeug.utils import secure_filename
-from flask import current_app
+from flask import current_app, url_for
 
 
 class FileService:
@@ -85,7 +85,7 @@ class FileService:
             img.thumbnail(config['max_size'], Image.Resampling.LANCZOS)
             
             filename = f'{uuid.uuid4()}.jpg'
-            upload_folder = current_app.config.get('UPLOAD_FOLDER', 'static/uploads')
+            upload_folder = current_app.config.get('UPLOAD_FOLDER')
             filepath = os.path.join(upload_folder, config['path'])
             
             os.makedirs(filepath, exist_ok=True)
@@ -93,8 +93,8 @@ class FileService:
             full_path = os.path.join(filepath, filename)
             img.save(full_path, 'JPEG', quality=config['quality'], optimize=True)
             
-            relative_path = os.path.join('static', 'uploads', config['path'], filename)
-            url = f'/{relative_path}'
+            # Генерируем абсолютный URL для Flask route /static/uploads/<path:filename>
+            url = url_for('uploaded_file', filename=f"{config['path']}/{filename}", _external=True)
             
             return url, None
             

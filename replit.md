@@ -1,213 +1,42 @@
 # ZARUBA Gaming Community Platform
 
 ## Overview
-ZARUBA is a tactical gaming community platform for Squad server players, offering player profiles, clan management, and detailed game statistics. It integrates a React frontend with existing Squad server infrastructure (MongoDB statistics) and a Discord bot ecosystem. The platform aims to enhance player engagement by providing statistics, clan functionality, and a ranking system based on in-game performance.
-
-## Recent Changes (Nov 23, 2025)
-
-### File Upload & Settings Fix ✅
-
-**1. Fixed File Upload Endpoints**
-- **Problem**: Frontend called `/api/uploads/clan-banners` and `/api/uploads/clan-logos` (plural)
-- **Solution**: Backend provides `/api/uploads/clan-banner` and `/api/uploads/clan-logo` (singular)
-- **Fixed in**: Frontend/src/pages/profile.jsx (lines 602, 630)
-- **Improved response handling**: Now checks `data.bannerUrl || data.url || data.path` for flexibility
-
-**2. Fixed Settings Save Mutation**
-- **Problem**: updateClanMutation used snake_case field names (`banner_url`, `logo_url`)
-- **Backend expects**: camelCase field names (`bannerUrl`, `logoUrl`)
-- **Fixed in**: Frontend/src/pages/profile.jsx updateClanMutation (lines 535-536)
-- **Result**: Clan settings (theme, banner, logo, Discord link, requirements) now save correctly
-
-**3. Security Verification**
-- All upload endpoints protected with `@require_auth` decorator
-- Ownership verification: Only clan owners can upload banner/logo
-- `uploadFileWithAuth` correctly passes `clanId` via FormData for backend validation
-
----
-
-### Admin Panel Improvements - Steam ID Support ✅
-
-**1. Steam ID Integration in Admin Panel**
-- **Frontend Changes** (Frontend/src/pages/admin-panel.jsx):
-  - Changed "ID Владельца" → "Steam ID Владельца" in clan creation form
-  - Changed "ID Игрока" → "Steam ID Игрока" in owner assignment form
-  - Added "Я" buttons to auto-fill current user's Steam ID
-  - Forms now use `ownerSteamId` and `steamId` fields instead of UUIDs
-  
-- **Backend Changes** (backend/routes/clans.py):
-  - POST /api/clans now accepts `ownerSteamId` parameter (optional)
-  - POST /api/admin/clans/:id/assign-owner now accepts `steamId` parameter
-  - Both endpoints search players by `steam_id` using `Player.query.filter_by(steam_id=...)`
-  - Clear error messages: "Игрок с таким Steam ID не найден"
-
-**2. Benefits**:
-- **User-friendly**: Steam IDs are visible in Steam profile, easy to share
-- **No UUID lookup needed**: Admins don't need to query database for player UUIDs
-- **Self-assignment**: "Я" button auto-fills admin's Steam ID for quick ownership
-
----
-
-### Complete Clan System Frontend-Backend Integration ✅
-
-**1. Centralized API Response Envelope Unwrapping** in Frontend/src/lib/queryClient.js
-- **Architecture**: Backend returns `{success: true, clan/clans/members/...}`, frontend automatically unwraps to clean data
-- **Implementation**:
-  - `getQueryFn()` automatically strips `{success, ...}` wrapper and returns clean payload
-  - `apiRequest()` also unwraps responses for mutations
-  - All pages now receive clean data without manual fallback logic (`clan?.clan || clan` → just `clan`)
-- **Benefits**: Consistent data handling, no duplicate unwrapping code, prevents `{success, data}` access bugs
-
-**2. Complete Clan Management Page** (/clans/:id/manage)
-- **Three-tab interface**: Applications (заявки) / Members (участники) / Invitations (приглашения)
-- **Applications Tab**: View all pending applications with approve/reject actions
-- **Members Tab**: View all clan members, kick members, display owner badge
-- **Invitations Tab**: Create/send invitations to players, view all sent invitations, cancel invitations
-- **Owner-only access**: Redirects non-owners to clan detail page
-- **Real-time updates**: All mutations invalidate queries to refresh data immediately
-
-**3. Fixed Critical Admin Panel Bugs**
-- **Problem**: Double JSON parsing in mutations (`await res.json()` on already-parsed response)
-- **Solution**: Removed `.json()` calls, `apiRequest` already returns parsed data
-- **Problem**: Clans created without owners (admin didn't specify UUID)
-- **Solution**: Added "Я" buttons to auto-fill Steam ID, fixed all existing clans to have owners
-
-**4. Enhanced Clan Detail Page** (/clans/:id)
-- **Dynamic Actions**: Join/Apply/Manage buttons based on user role and clan state
-- **Member List**: Display all clan members with roles (owner badge)
-- **Recruiting Status**: Visual indicator for open/closed recruitment
-- **Owner View**: "Управление кланом" button for clan owners
-- **Applicant View**: "Подать заявку" or "Вступить" based on clan settings
-
-**5. Authentication & Authorization**
-- **Fixed missing Authorization header**: All requests now include `Bearer <token>` from localStorage
-- **CORS credentials**: Backend supports `credentials: include` for cross-origin requests
-- **Token flow**: Steam login → URL params → localStorage → Authorization headers → backend validation
-
----
-
-## Previous Changes (Nov 23, 2025)
-
-### ADMIN Role Implementation
-- **Admin Role System**: Захардкожены три Steam ID администраторов в backend/config.py (ADMIN_STEAM_IDS)
-  - `76561199104736343` (Админ 1)
-  - `76561198046223350` (Админ 2)
-  - `76561198890001608` (Владелец проекта)
-- **Backend Admin Checks**: 
-  - /api/auth/me теперь возвращает поле isAdmin (проверяется на бэкенде по Steam ID)
-  - /api/clans POST требует авторизацию и проверяет права админа
-  - Новый endpoint /api/admin/clans/<clan_id>/assign-owner для назначения владельцев кланов админами
-  - Поддержка назначения owner при создании клана (параметр ownerId)
-- **Frontend Admin Panel**:
-  - Создана страница Admin Panel (/admin) с двумя основными функциями
-  - Форма создания клана с опциональным назначением owner
-  - Форма назначения владельца существующему клану
-  - Список всех кланов в системе
-  - Redirect на главную для не-админов при попытке доступа к /admin
-- **UI/UX Improvements**:
-  - Удален хедер (навигационная панель вверху страницы)
-  - Кнопка "Админ" перенесена на главную информационную карточку профиля
-  - Кнопка "Админ" отображается рядом с кнопками "Настройки" и "Выйти" только для администраторов
-  - Навигация между страницами осуществляется через главную карточку профиля
-
----
-
-## Previous Changes
-- **Frontend-API Integration**: Connected frontend to real backend APIs, removed all mock data
-  - useSquadStats hook refactored to use TanStack Query with /api/stats/:steamId endpoint with credentials
-  - Profile page updated with proper auth checks and loading/error states for statistics
-  - Created clan pages (list, detail) with real API integration
-- **Navigation**: Added header with navigation menu (Profile, Clans) and user dropdown
-- **Backend Improvements**: 
-  - Added PostgreSQL connection pool settings (pool_pre_ping, pool_recycle) to handle SSL connection stability
-  - **FIXED: 503 errors** - Stats API now returns HTTP 200 with empty stats when MongoDB unavailable (graceful degradation)
-- **Critical Bug Fixes**:
-  - **FIXED: Frontend crash** - useSquadStats now safely handles empty stats responses without nested fields
-  - Added early return with minimal stats object when MongoDB data unavailable
-  - All nested field access now uses optional chaining (?.) and fallback values
-  - Fixed field name mismatches (playerData._id vs steamId, death vs deaths, etc.)
-  - **FIXED: All components** - squad-stats-compact.jsx and profile.jsx now safely handle missing nested stats
-  - All rank.progress, topWeapon, topRole accesses protected with optional chaining and fallbacks
-- **Mock Data Cleanup**: 
-  - Removed mockSquadStats.js and all mock data dependencies
-  - Removed hardcoded fake clans array from profile.jsx
-  - Removed unused banner/logo imports (alphaBanner, wolfLogo)
-  - Added proper loading/error states for "Боевая Статистика" card
-  - Replaced undefined variables with safe defaults (null for clan assets, empty array for clans list)
+ZARUBA is a tactical gaming community platform for Squad server players. It offers player profiles, comprehensive clan management, and detailed game statistics. The platform integrates a React frontend with existing Squad server infrastructure (MongoDB statistics) and a Discord bot ecosystem, aiming to enhance player engagement through statistics, clan functionality, and an in-game performance-based ranking system.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-The frontend uses React 19 with a Vite-based build system, pure JavaScript/JSX, shadcn/ui components (built on Radix UI primitives), and TailwindCSS with a custom gaming theme. Data fetching and state management are handled by TanStack Query. Key decisions include a component-based architecture, custom hooks for logic, and a gaming-focused dark theme with custom fonts. All TypeScript has been removed in favor of pure JavaScript.
+### UI/UX Decisions
+The frontend uses React with a Vite-based build system, pure JavaScript/JSX, shadcn/ui components (built on Radix UI primitives), and TailwindCSS. A custom gaming-focused dark theme with custom fonts is applied.
 
-### Backend Architecture
-The backend is built with Flask 3.0, using PostgreSQL (Neon-hosted) via SQLAlchemy ORM. It provides REST API endpoints for managing clans and retrieving player statistics. Key features include UUID primary keys, JSONB fields for complex data, CASCADE deletes for data integrity, and JSON validation. Flask-CORS is used for cross-origin requests, and Gunicorn is used for production.
+### Technical Implementations
+The backend is built with Flask 3.0, utilizing PostgreSQL (Neon-hosted) via SQLAlchemy ORM. It provides REST API endpoints for clan management and player statistics. Data fetching and state management on the frontend are handled by TanStack Query. All TypeScript has been removed in favor of pure JavaScript.
 
-### Data Storage Solutions
-**PostgreSQL Database (Replit-hosted Neon):** Stores player, clan, clan member, and clan application data using SQLAlchemy ORM.
-**MongoDB Statistics Integration (SquadJS):** Consumes read-only player statistics from the Squad game server's MongoDB. This integration includes calculating vehicle time, kills, and a ranking system. The system supports graceful degradation if MongoDB is unavailable.
+### Feature Specifications
+-   **Player Profiles:** Displays detailed player statistics.
+-   **Clan Management System:** A complete system with 15+ REST API endpoints covering Clan CRUD, member management (join, leave, kick, role changes), an application system (submit, view, approve/reject, withdraw), and an invitation system (create, view, accept/reject, cancel). It ensures transactional safety for ownership transfers and prevents duplicate memberships.
+-   **Statistics System:** A robust calculation engine, ported from a Discord bot, processes complex statistics including vehicle time, kills, and a comprehensive ranking system. It supports 35+ vehicle types and 60+ weapon patterns, with calculations primarily client-side.
+-   **Admin Panel:** Provides functionality for creating clans, assigning owners using Steam IDs, and listing all clans. Access is restricted to predefined administrators.
 
-### Authentication & Authorization
-**Discord OAuth** is fully implemented for user authentication, including account linking and unlinking. User sessions are managed with JWT tokens stored in cookies. The `@require_auth` decorator secures all protected endpoints and provides `request.current_player` for accessing authenticated player data. Role-based access control (Guest, Member, Owner) is enforced across clan management endpoints.
-
-**Steam Authentication** is planned for future implementation to provide additional player verification and profile data.
-
-### Statistics System
-A robust calculation engine, ported from the Discord bot's JavaScript logic to Python, processes complex statistics. It supports 35+ vehicle types, 60+ weapon patterns, and a comprehensive ranking system. Data categories include player performance (K/D, revives), match statistics, time tracking (playtime, commander time), role analysis, weapon proficiency, and vehicle statistics. Calculations are primarily client-side to reduce backend load and maintain consistency with the existing Discord bot.
-
-### Clan Management System
-**Complete Implementation** with 15+ REST API endpoints covering:
-
-**Data Models:**
-- **Clan:** Basic clan info with name, tag, description, logo, and owner relationship
-- **ClanMember:** Membership records with role (owner/member), join dates, and stats snapshots
-- **ClanApplication:** Player applications with status tracking (pending/accepted/rejected/cancelled)
-- **ClanInvitation:** Owner-sent invitations with status tracking and invited_by relationship
-
-**Core Features:**
-- **Clan CRUD:** Create, read, update, delete clans (owner-only operations)
-- **Member Management (4 endpoints):**
-  - Join open clans
-  - Leave clan (owners must transfer ownership first)
-  - Kick members (owner-only)
-  - Change member roles with transactional ownership transfer (ensures exactly one owner at all times)
-  
-- **Application System (5 endpoints):**
-  - Submit applications with current stats snapshot
-  - View clan applications (owner-only)
-  - View personal applications
-  - Approve/reject applications with duplicate membership prevention
-  - Withdraw pending applications
-  
-- **Invitation System (6 endpoints):**
-  - Create invitations (owner-only)
-  - View personal invitations
-  - View clan invitations (owner-only)
-  - Accept invitations with membership checks
-  - Reject invitations
-  - Cancel invitations (owner-only)
-
-**Key Design Decisions:**
-- RESTful resource identification using `ClanMember.id` (not `player_id`) in URL paths
-- Transactional safety: ownership transfers promote target first, then demote others to prevent ownerless clans
-- Defensive checks prevent duplicate memberships (reject applications/invitations if player joined another clan)
-- Single source of truth: `Player.current_clan_id` synced with `ClanMember` records
-- Unique constraints prevent duplicate applications per player per clan
-- CASCADE deletes maintain data integrity when clans or players are removed
+### System Design Choices
+-   **Authentication & Authorization:** Discord OAuth is fully implemented for user authentication, managing sessions with JWT tokens. The `@require_auth` decorator secures endpoints, and role-based access control (Guest, Member, Owner) is enforced. Steam authentication is planned.
+-   **Data Storage:** PostgreSQL stores player, clan, member, and application data with UUID primary keys, JSONB fields, and CASCADE deletes. MongoDB is used for read-only Squad game server statistics, with graceful degradation if unavailable.
+-   **API Design:** Backend APIs return an envelope (`{success: true, data: ...}`), which the frontend automatically unwraps for consistent data handling.
+-   **File Uploads:** Absolute paths and URLs are generated for uploaded clan logos and banners, ensuring proper display on the frontend regardless of the environment. Upload endpoints are secured with authentication and ownership verification.
+-   **Error Handling:** The stats API returns HTTP 200 with empty stats if MongoDB is unavailable to prevent 503 errors and frontend crashes. Optional chaining and fallback values are used for safe access to potentially missing nested data.
 
 ## External Dependencies
 
-*   **SquadJS MongoDB Database:** Used for real-time player statistics from the Squad game server (`mainstats`, `config` collections).
-*   **Steam API:** (Planned) For player authentication and profile data.
-*   **Discord OAuth:** (Implemented) For user authentication via Discord, including linking and unlinking accounts.
-*   **shadcn/ui & Radix UI primitives:** Frontend UI component libraries.
+*   **SquadJS MongoDB Database:** For real-time player statistics.
+*   **Discord OAuth:** For user authentication.
+*   **shadcn/ui & Radix UI primitives:** Frontend UI components.
 *   **Vite:** Frontend build tool.
 *   **TailwindCSS:** CSS framework.
 *   **TanStack Query:** Data fetching and state management.
 *   **Flask:** Backend web framework.
 *   **PostgreSQL (Neon):** Primary database.
-*   **SQLAlchemy:** Python ORM for PostgreSQL.
-*   **Gunicorn:** WSGI HTTP Server for Python applications.
+*   **SQLAlchemy:** Python ORM.
+*   **Gunicorn:** WSGI HTTP Server.
+*   **Steam API:** (Planned) For player authentication and profile data.

@@ -1997,17 +1997,18 @@ export default function ProfilePage() {
                             <div key={app.id} onClick={() => setSelectedMemberStats(app)} className="cursor-pointer group relative bg-zinc-900/60 border border-white/10 rounded-xl p-6 overflow-hidden hover:bg-zinc-800/80 hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-[0_8px_30px_rgba(255,102,0,0.15)]">
                               <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-primary/50 opacity-70 group-hover:opacity-100 group-hover:w-1.5 transition-all" />
                               
-                              <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between relative z-10">
+                              <div className="flex flex-col gap-4 relative z-10">
+                                {/* Верхняя часть: Аватар и инфо */}
                                 <div className="flex items-start gap-4">
                                   <Avatar className="w-16 h-16 border-2 border-white/10 shadow-lg group-hover:scale-105 transition-transform">
                                     <AvatarFallback className="bg-zinc-800 font-bold text-xl">{app.avatar}</AvatarFallback>
                                   </Avatar>
-                                  <div>
-                                    <div className="flex items-center gap-2">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
                                       <h4 className="text-xl font-bold text-white group-hover:text-primary transition-colors">{app.name}</h4>
                                       <span className="text-xs text-muted-foreground bg-zinc-900 px-2 py-0.5 rounded border border-white/5">{app.time}</span>
                                     </div>
-                                    <div className="flex items-center gap-4 mt-2 text-sm">
+                                    <div className="flex items-center gap-4 mt-2 text-sm flex-wrap">
                                       <div className="flex items-center gap-1.5 text-zinc-400">
                                         <Clock className="w-4 h-4 text-primary" />
                                         <span className="font-mono text-white">{app.stats.hours}</span>
@@ -2020,14 +2021,16 @@ export default function ProfilePage() {
                                   </div>
                                 </div>
                                 
-                                <div className="flex-1 lg:mx-8 p-4 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm">
+                                {/* Сообщение */}
+                                <div className="p-4 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm">
                                   <p className="text-sm text-zinc-300 italic leading-relaxed">"{app.message}"</p>
                                 </div>
 
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 self-center" onClick={(e) => e.stopPropagation()}>
+                                {/* Кнопки действий */}
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                   <Button 
                                     onClick={() => handleAcceptApp(app.id)} 
-                                    className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 hover:text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300 font-semibold gap-2 shadow-lg hover:shadow-emerald-500/20 min-w-[120px]"
+                                    className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 hover:text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-300 font-semibold gap-2 shadow-lg hover:shadow-emerald-500/20"
                                   >
                                     <Check className="w-4 h-4" />
                                     Принять
@@ -2035,7 +2038,7 @@ export default function ProfilePage() {
                                   <Button 
                                     onClick={() => handleRejectApp(app.id)} 
                                     variant="outline" 
-                                    className="border-red-500/30 text-red-500 hover:bg-red-500/20 hover:text-red-400 bg-red-500/5 hover:border-red-500/60 transition-all duration-300 font-semibold gap-2 shadow-lg hover:shadow-red-500/20 min-w-[120px]"
+                                    className="border-red-500/30 text-red-500 hover:bg-red-500/20 hover:text-red-400 bg-red-500/5 hover:border-red-500/60 transition-all duration-300 font-semibold gap-2 shadow-lg hover:shadow-red-500/20"
                                   >
                                     <X className="w-4 h-4" />
                                     Отклонить

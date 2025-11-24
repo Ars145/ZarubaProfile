@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -896,6 +897,10 @@ export default function ProfilePage() {
       {/* Player Stats Modal (Shared) */}
       <Dialog open={!!selectedMemberStats} onOpenChange={(open) => !open && setSelectedMemberStats(null)}>
         <DialogContent className="max-w-4xl bg-transparent border-none p-0 shadow-none overflow-hidden">
+          <VisuallyHidden>
+            <DialogTitle>Статистика игрока</DialogTitle>
+            <DialogDescription>Подробная статистика игрока {selectedMemberStats?.name}</DialogDescription>
+          </VisuallyHidden>
           {selectedMemberStats && (
             <div className="relative w-full max-w-4xl mx-auto bg-gradient-to-br from-zinc-900 to-zinc-950 rounded-3xl border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in zoom-in-95 duration-300">
                 {/* Decorative Glow */}
@@ -1059,9 +1064,9 @@ export default function ProfilePage() {
                     </div>
                 </div>
                 
-                {/* Right Side Image (Mocked with Soldier) */}
+                {/* Right Side Decorative Panel */}
                 <div className="w-80 relative hidden md:block">
-                    <div className="absolute inset-0 bg-[url('https://w.forfun.com/fetch/9c/9c028de189727234587a8d47d6d8e606.jpeg')] bg-cover bg-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900">
                         <div className="absolute inset-0 bg-gradient-to-l from-zinc-950 via-zinc-950/50 to-transparent" />
                     </div>
                     <div className="absolute bottom-8 right-8">

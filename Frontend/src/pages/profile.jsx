@@ -1988,8 +1988,8 @@ export default function ProfilePage() {
                       ) : (
                         <div className="grid grid-cols-1 gap-4">
                           {applications.map((app) => (
-                            <div key={app.id} onClick={() => setSelectedMemberStats(app)} className="cursor-pointer group relative bg-zinc-900/40 border border-white/5 rounded-2xl p-6 overflow-hidden hover:bg-zinc-900/60 transition-all duration-300">
-                              <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-50 group-hover:opacity-100 transition-opacity" />
+                            <div key={app.id} onClick={() => setSelectedMemberStats(app)} className="cursor-pointer group relative bg-zinc-900/60 border border-white/10 rounded-xl p-6 overflow-hidden hover:bg-zinc-800/80 hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-[0_8px_30px_rgba(255,102,0,0.15)]">
+                              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-primary/50 opacity-70 group-hover:opacity-100 group-hover:w-1.5 transition-all" />
                               
                               <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between relative z-10">
                                 <div className="flex items-start gap-4">
@@ -2014,7 +2014,7 @@ export default function ProfilePage() {
                                   </div>
                                 </div>
                                 
-                                <div className="flex-1 lg:mx-8 p-4 bg-black/20 rounded-xl border border-white/5">
+                                <div className="flex-1 lg:mx-8 p-4 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm">
                                   <p className="text-sm text-zinc-300 italic">"{app.message}"</p>
                                 </div>
 

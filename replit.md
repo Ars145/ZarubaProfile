@@ -32,6 +32,7 @@ The backend is built with Flask 3.0, utilizing PostgreSQL (Neon-hosted) via SQLA
 -   **Error Handling:** The stats API returns HTTP 200 with empty stats if MongoDB is unavailable to prevent 503 errors and frontend crashes. Optional chaining and fallback values are used for safe access to potentially missing nested data.
 -   **Clan Applications:** When an owner approves an application, the backend automatically rejects all other pending applications from that same player in a single transaction, preventing players from being in multiple clans (Nov 2024).
 -   **Application Cleanup:** When a player leaves or is kicked from a clan, ALL their applications to that clan (any status: pending, accepted, rejected) are permanently deleted. This prevents UNIQUE constraint violations when the player reapplies (Nov 2024).
+-   **Real-time Updates:** Role changes are reflected immediately in the UI through TanStack Query cache invalidation, providing instant feedback without page refresh (Nov 2024).
 
 ## External Dependencies
 

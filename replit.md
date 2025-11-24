@@ -30,6 +30,7 @@ The backend is built with Flask 3.0, utilizing PostgreSQL (Neon-hosted) via SQLA
 -   **File Uploads:** PNG transparency is fully supported - FileService detects RGBA/LA/P image modes and preserves transparency by saving as PNG instead of JPEG. Relative URLs (`/api/static/uploads/...`) are generated for uploaded clan logos and banners, working seamlessly in development (via Vite proxy) and production. Upload endpoints are secured with authentication and ownership verification. Static file route `/api/static/uploads/<path>` properly serves nested subdirectories using absolute upload paths.
 -   **Error Handling:** The stats API returns HTTP 200 with empty stats if MongoDB is unavailable to prevent 503 errors and frontend crashes. Optional chaining and fallback values are used for safe access to potentially missing nested data.
 -   **Clan Applications:** When an owner approves an application, the backend automatically rejects all other pending applications from that same player in a single transaction, preventing players from being in multiple clans (Nov 2024).
+-   **Application Cleanup:** When a player leaves or is kicked from a clan, all their pending applications to that clan are automatically rejected. This prevents UNIQUE constraint violations when the player reapplies (Nov 2024).
 
 ## External Dependencies
 

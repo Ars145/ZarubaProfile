@@ -403,6 +403,18 @@ def leave_clan(clan_id):
             }), 403
         
         player.current_clan_id = None
+        
+        # Отклонить все pending заявки игрока в этот клан
+        # Это предотвращает конфликт UNIQUE constraint при повторной подаче заявки
+        pending_applications = ClanApplication.query.filter_by(
+            clan_id=clan_id,
+            player_id=player.id,
+            status='pending'
+        ).all()
+        
+        for app in pending_applications:
+            app.status = 'rejected'
+        
         db.session.delete(member)
         db.session.commit()
         
@@ -457,6 +469,17 @@ def kick_member(clan_id, member_id):
         
         # Обнулить current_clan_id у игрока
         member.player.current_clan_id = None
+        
+        # Отклонить все pending заявки исключенного игрока в этот клан
+        # Это предотвращает конфликт UNIQUE constraint при повторной подаче заявки
+        pending_applications = ClanApplication.query.filter_by(
+            clan_id=clan_id,
+            player_id=member.player_id,
+            status='pending'
+        ).all()
+        
+        for app in pending_applications:
+            app.status = 'rejected'
         
         db.session.delete(member)
         db.session.commit()

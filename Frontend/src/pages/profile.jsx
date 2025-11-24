@@ -717,7 +717,13 @@ export default function ProfilePage() {
     const parts = [];
     
     if (reqs.microphone) parts.push("Микрофон");
-    if (reqs.age) parts.push(`Возраст ${reqs.age}+`);
+    // Support both old (ageRestriction) and new (age) formats
+    if (reqs.ageRestriction || reqs.age) {
+      const ageValue = reqs.age || 18;
+      parts.push(`Возраст ${ageValue}+`);
+    }
+    // Support both old (customRequirement) and new (experience) formats
+    if (reqs.customRequirement) parts.push(reqs.customRequirement);
     if (reqs.experience) parts.push(reqs.experience);
     if (reqs.custom && Array.isArray(reqs.custom)) {
       parts.push(...reqs.custom);
@@ -1404,10 +1410,18 @@ export default function ProfilePage() {
                                         <span className="leading-relaxed">Наличие микрофона и Discord</span>
                                      </li>
                                    )}
-                                   {selectedClanData?.requirements?.age && (
+                                   {/* Support both old (ageRestriction) and new (age) formats */}
+                                   {(selectedClanData?.requirements?.ageRestriction || selectedClanData?.requirements?.age) && (
                                      <li className="flex items-start gap-3 text-sm text-white/90">
                                         <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
-                                        <span className="leading-relaxed">Возраст {selectedClanData.requirements.age}+</span>
+                                        <span className="leading-relaxed">Возраст {selectedClanData.requirements.age || '18'}+</span>
+                                     </li>
+                                   )}
+                                   {/* Support both old (customRequirement) and new (experience) formats */}
+                                   {selectedClanData?.requirements?.customRequirement && (
+                                     <li className="flex items-start gap-3 text-sm text-white/90">
+                                        <div className={`w-1.5 h-1.5 rounded-full mt-2 shrink-0 opacity-80 bg-current ${getThemeColors().color}`} />
+                                        <span className="leading-relaxed">{selectedClanData.requirements.customRequirement}</span>
                                      </li>
                                    )}
                                    {selectedClanData?.requirements?.experience && (

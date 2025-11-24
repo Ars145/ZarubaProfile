@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import discordLogo from "@assets/image_1763634265865.png";
 import profileBg from "@assets/generated_images/dark_tactical_abstract_gaming_background.png";
@@ -410,6 +411,15 @@ export default function ProfilePage() {
   const [selectedMemberStats, setSelectedMemberStats] = useState(null);
   const [sortBy, setSortBy] = useState("default");
   
+  // State для подтверждения смены роли
+  const [roleChangeConfirm, setRoleChangeConfirm] = useState({
+    open: false,
+    memberId: null,
+    memberName: "",
+    newRole: "",
+    roleText: ""
+  });
+  
   // Clan Assets State (Owner Settings) - будут инициализированы из clanData
   const [clanBanner, setClanBanner] = useState(null);
   const [clanLogo, setClanLogo] = useState(null);
@@ -674,12 +684,26 @@ export default function ProfilePage() {
   });
 
   const handleRoleChange = (membershipId, newRole, memberName) => {
-    const roleText = newRole === 'owner' ? 'владельца' : 
-                     newRole === 'officer' ? 'офицера' :
-                     newRole === 'member' ? 'бойца' : 'рекрута';
-    if (confirm(`Вы уверены, что хотите изменить роль ${memberName} на ${roleText}?`)) {
-      changeRoleMutation.mutate({ memberId: membershipId, newRole });
-    }
+    const roleText = newRole === 'owner' ? 'Лидер' : 
+                     newRole === 'officer' ? 'Офицер' :
+                     newRole === 'member' ? 'Боец' : 'Рекрут';
+    
+    // Открываем диалог подтверждения
+    setRoleChangeConfirm({
+      open: true,
+      memberId: membershipId,
+      memberName: memberName,
+      newRole: newRole,
+      roleText: roleText
+    });
+  };
+  
+  const confirmRoleChange = () => {
+    changeRoleMutation.mutate({ 
+      memberId: roleChangeConfirm.memberId, 
+      newRole: roleChangeConfirm.newRole 
+    });
+    setRoleChangeConfirm({ open: false, memberId: null, memberName: "", newRole: "", roleText: "" });
   };
   
   // Мутация для сохранения настроек клана
@@ -2305,6 +2329,35 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </div>
+      
+      {/* AlertDialog для подтверждения смены роли */}
+      <AlertDialog open={roleChangeConfirm.open} onOpenChange={(open) => !open && setRoleChangeConfirm({ open: false, memberId: null, memberName: "", newRole: "", roleText: "" })}>
+        <AlertDialogContent className="bg-zinc-900 border border-white/10 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-display font-bold text-white flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" />
+              Подтвердите действие
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-300 text-base leading-relaxed">
+              Вы уверены, что хотите изменить роль <span className="font-bold text-white">{roleChangeConfirm.memberName}</span> на <span className="font-bold text-primary">{roleChangeConfirm.roleText}</span>?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel 
+              className="bg-zinc-800 text-white border-white/10 hover:bg-zinc-700 hover:border-white/20"
+              onClick={() => setRoleChangeConfirm({ open: false, memberId: null, memberName: "", newRole: "", roleText: "" })}
+            >
+              Отмена
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-primary text-black hover:bg-primary/90 font-bold"
+              onClick={confirmRoleChange}
+            >
+              Подтвердить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from config import config
 from models import db
@@ -55,6 +55,17 @@ def create_app(config_name=None):
     @app.route('/health')
     def health():
         return jsonify({'status': 'healthy'}), 200
+    
+    # Раздача статических файлов (загруженные изображения)
+    @app.route('/static/uploads/<path:filename>')
+    def uploaded_file(filename):
+        # FileService сохраняет файлы относительно текущей рабочей директории
+        # Используем тот же путь что и при сохранении файлов
+        upload_dir = app.config['UPLOAD_FOLDER']
+        if not os.path.isabs(upload_dir):
+            # Если путь относительный, resolve относительно текущей рабочей директории
+            upload_dir = os.path.abspath(upload_dir)
+        return send_from_directory(upload_dir, filename)
     
     return app
 

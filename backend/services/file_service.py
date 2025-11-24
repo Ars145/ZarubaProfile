@@ -9,7 +9,7 @@ class FileService:
     """Сервис для загрузки и обработки файлов"""
     
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+    MAX_FILE_SIZE = 16 * 1024 * 1024  # 16MB
     
     IMAGE_CONFIGS = {
         'avatar': {

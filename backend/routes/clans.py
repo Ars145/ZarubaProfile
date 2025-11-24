@@ -817,8 +817,22 @@ def approve_application(clan_id, application_id):
         # Обновить current_clan_id у игрока
         application.player.current_clan_id = clan_id
         
+        # Принять эту заявку
         application.status = 'accepted'
         db.session.add(member)
+        
+        # ВАЖНО: Автоматически отклонить все остальные pending заявки этого игрока
+        # Игрок может подавать заявки в несколько кланов, но после принятия в один -
+        # все остальные заявки должны быть отклонены
+        other_applications = ClanApplication.query.filter(
+            ClanApplication.player_id == application.player_id,
+            ClanApplication.id != application.id,
+            ClanApplication.status == 'pending'
+        ).all()
+        
+        for other_app in other_applications:
+            other_app.status = 'rejected'
+        
         db.session.commit()
         
         return jsonify({

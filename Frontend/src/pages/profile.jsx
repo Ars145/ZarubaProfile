@@ -446,9 +446,11 @@ export default function ProfilePage() {
                        'text-zinc-500';
     
     return {
-      id: member.id,
+      id: member.id, // ID записи в clan_members (используется для kick/change role)
+      playerId: member.playerId, // ID игрока
+      roleBackend: member.role, // Сырое значение роли из API ('owner' или 'member')
       name: member.player?.username || 'Unknown',
-      role: member.role === 'owner' ? 'Лидер' : member.role === 'officer' ? 'Офицер' : member.role === 'member' ? 'Боец' : 'Рекрут',
+      role: member.role === 'owner' ? 'Лидер' : member.role === 'member' ? 'Боец' : 'Рекрут',
       status: onlineStatus,
       statusColor: statusColor,
       roleColor: member.role === 'owner' ? 'text-primary border-primary/20 bg-primary/10' : 
@@ -475,19 +477,6 @@ export default function ProfilePage() {
       } // TODO: Получить реальную статистику
     };
   }) || [];
-  
-  // DEBUG: Логирование данных
-  useEffect(() => {
-    console.log('[CLAN DEBUG] ================');
-    console.log('[CLAN DEBUG] User:', user);
-    console.log('[CLAN DEBUG] currentClanId:', currentClanId);
-    console.log('[CLAN DEBUG] Queries enabled:', !!currentClanId);
-    console.log('[CLAN DEBUG] clanData:', clanData);
-    console.log('[CLAN DEBUG] clanMembersResponse:', clanMembersResponse);
-    console.log('[CLAN DEBUG] clanLoading:', clanLoading, 'membersLoading:', membersLoading);
-    console.log('[CLAN DEBUG] squadMembers length:', squadMembers.length);
-    console.log('[CLAN DEBUG] ================');
-  }, [user, currentClanId, clanData, clanMembersResponse, clanLoading, membersLoading, squadMembers]);
   
   // Определяем роль пользователя в клане
   useEffect(() => {
@@ -532,22 +521,10 @@ export default function ProfilePage() {
   // Поэтому user это сам объект player с полем id
   const isOwner = clanData?.ownerId === user?.id;
   
-  // Debug - проверим данные
-  console.log('DEBUG Applications:', {
-    currentClanId,
-    clanOwnerId: clanData?.ownerId,
-    userId: user?.id,
-    isOwner,
-    userFull: user,
-    clanDataFull: clanData
-  });
-  
   const { data: applicationsResponse, isLoading: applicationsLoading } = useQuery({
     queryKey: ['/api/clans', currentClanId, 'applications'],
     enabled: !!currentClanId && isOwner,
   });
-  
-  console.log('Applications Response:', applicationsResponse);
   
   // queryClient автоматически распаковывает {success: true, applications: [...]} -> [...]
   // Поэтому applicationsResponse это УЖЕ массив заявок!
@@ -562,11 +539,6 @@ export default function ProfilePage() {
       kd: 0.0       // TODO: загружать из statsSnapshot
     }
   }));
-
-  const handleRoleChange = (memberId, newRole) => {
-    // TODO: Implement API call to change member role
-    console.log('Change role for member', memberId, 'to', newRole);
-  };
 
   // Мутация для отклонения заявки
   const rejectApplicationMutation = useMutation({
@@ -617,6 +589,91 @@ export default function ProfilePage() {
 
   const handleAcceptApp = (id) => {
     acceptApplicationMutation.mutate(id);
+  };
+  
+  // Мутация для выхода из клана
+  const leaveClanMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest('POST', `/api/clans/${currentClanId}/leave`);
+    },
+    onSuccess: () => {
+      // ВАЖНО: Сначала инвалидируем auth state чтобы обновить currentClanId
+      // Только после этого другие queries увидят что у пользователя нет клана
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
+      toast({
+        title: "Вы покинули клан",
+        description: "Вы успешно вышли из клана",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось покинуть клан",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleLeaveClan = () => {
+    if (confirm('Вы уверены, что хотите покинуть клан?')) {
+      leaveClanMutation.mutate();
+    }
+  };
+  
+  // Мутация для исключения участника (кик)
+  const kickMemberMutation = useMutation({
+    mutationFn: async (memberId) => {
+      return await apiRequest('DELETE', `/api/clans/${currentClanId}/members/${memberId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId, 'members'] });
+      toast({
+        title: "Участник исключен",
+        description: "Участник успешно исключен из клана",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось исключить участника",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleKickMember = (memberId, memberName) => {
+    if (confirm(`Вы уверены, что хотите исключить ${memberName}?`)) {
+      kickMemberMutation.mutate(memberId);
+    }
+  };
+  
+  // Мутация для изменения роли участника
+  const changeRoleMutation = useMutation({
+    mutationFn: async ({ memberId, newRole }) => {
+      return await apiRequest('PUT', `/api/clans/${currentClanId}/members/${memberId}/role`, { role: newRole });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId, 'members'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId] });
+      toast({
+        title: "Роль изменена",
+        description: "Роль участника успешно изменена",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка",
+        description: error.message || "Не удалось изменить роль",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleRoleChange = (membershipId, newRole, memberName) => {
+    const roleText = newRole === 'owner' ? 'владельца' : 'участника';
+    if (confirm(`Вы уверены, что хотите изменить роль ${memberName} на ${roleText}?`)) {
+      changeRoleMutation.mutate({ memberId: membershipId, newRole });
+    }
   };
   
   // Мутация для сохранения настроек клана
@@ -2033,9 +2090,15 @@ export default function ProfilePage() {
                           {userRole === "owner" ? (
                              <div /> 
                           ) : (
-                             <Button variant="destructive" className="w-full font-bold font-display tracking-wide h-12 shadow-lg border-none bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20">
+                             <Button 
+                                data-testid="button-leave-clan"
+                                variant="destructive" 
+                                className="w-full font-bold font-display tracking-wide h-12 shadow-lg border-none bg-red-500/10 hover:bg-red-500/20 text-red-500 border-red-500/20"
+                                onClick={handleLeaveClan}
+                                disabled={leaveClanMutation.isPending}
+                             >
                                  <LogOut className="w-4 h-4 mr-2" />
-                                 Покинуть Клан
+                                 {leaveClanMutation.isPending ? 'Выход...' : 'Покинуть Клан'}
                              </Button>
                           )}
                       </div>
@@ -2171,14 +2234,20 @@ export default function ProfilePage() {
                                                         <User className="w-4 h-4 mr-2" /> Изменить роль
                                                       </DropdownMenuSubTrigger>
                                                       <DropdownMenuSubContent className="bg-zinc-900 border-white/10">
-                                                        <DropdownMenuRadioGroup value={member.role} onValueChange={(val) => handleRoleChange(member.id, val)}>
-                                                          <DropdownMenuRadioItem value="Офицер" className="cursor-pointer text-orange-400 focus:text-orange-400">Офицер</DropdownMenuRadioItem>
-                                                          <DropdownMenuRadioItem value="Боец" className="cursor-pointer text-white focus:text-white">Боец</DropdownMenuRadioItem>
-                                                          <DropdownMenuRadioItem value="Рекрут" className="cursor-pointer text-emerald-500 focus:text-emerald-500">Рекрут</DropdownMenuRadioItem>
+                                                        <DropdownMenuRadioGroup 
+                                                          value={member.roleBackend} 
+                                                          onValueChange={(val) => handleRoleChange(member.id, val, member.name)}
+                                                        >
+                                                          <DropdownMenuRadioItem value="owner" className="cursor-pointer text-orange-400 focus:text-orange-400">Владелец</DropdownMenuRadioItem>
+                                                          <DropdownMenuRadioItem value="member" className="cursor-pointer text-white focus:text-white">Участник</DropdownMenuRadioItem>
                                                         </DropdownMenuRadioGroup>
                                                       </DropdownMenuSubContent>
                                                     </DropdownMenuSub>
-                                                    <DropdownMenuItem className="text-red-500 hover:bg-red-500/10 cursor-pointer focus:text-red-500 focus:bg-red-500/10">
+                                                    <DropdownMenuItem 
+                                                      data-testid={`button-kick-${member.id}`}
+                                                      className="text-red-500 hover:bg-red-500/10 cursor-pointer focus:text-red-500 focus:bg-red-500/10"
+                                                      onClick={() => handleKickMember(member.id, member.name)}
+                                                    >
                                                       <Trash2 className="w-4 h-4 mr-2" /> Исключить
                                                     </DropdownMenuItem>
                                                   </DropdownMenuContent>

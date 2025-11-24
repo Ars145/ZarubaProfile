@@ -22,9 +22,9 @@ The backend is built with Flask 3.0, utilizing PostgreSQL (Neon-hosted) via SQLA
 
 ### System Design Choices
 -   **Authentication & Authorization:** Discord OAuth is fully implemented for user authentication, managing sessions with JWT tokens. The `@require_auth` decorator secures endpoints, and role-based access control (Guest, Member, Owner) is enforced. Steam authentication is planned.
--   **Data Storage:** PostgreSQL stores player, clan, member, and application data with UUID primary keys, JSONB fields, and CASCADE deletes. MongoDB is used for read-only Squad game server statistics, with graceful degradation if unavailable.
+-   **Data Storage:** PostgreSQL stores player, clan, member, and application data with UUID primary keys, JSONB fields, and CASCADE deletes. The `clan_applications` table uses `player_id UUID` foreign key (legacy `player_name`/`player_steam_id` fields removed Nov 2025) with UNIQUE constraint on `(clan_id, player_id)`. MongoDB is used for read-only Squad game server statistics, with graceful degradation if unavailable.
 -   **API Design:** Backend APIs return an envelope (`{success: true, data: ...}`), which the frontend automatically unwraps for consistent data handling.
--   **File Uploads:** Relative URLs (`/api/static/uploads/...`) are generated for uploaded clan logos and banners, working seamlessly in development (via Vite proxy) and production. Upload endpoints are secured with authentication and ownership verification. Static file route `/api/static/uploads/<path>` properly serves nested subdirectories using absolute upload paths.
+-   **File Uploads:** PNG transparency is fully supported - FileService detects RGBA/LA/P image modes and preserves transparency by saving as PNG instead of JPEG. Relative URLs (`/api/static/uploads/...`) are generated for uploaded clan logos and banners, working seamlessly in development (via Vite proxy) and production. Upload endpoints are secured with authentication and ownership verification. Static file route `/api/static/uploads/<path>` properly serves nested subdirectories using absolute upload paths.
 -   **Error Handling:** The stats API returns HTTP 200 with empty stats if MongoDB is unavailable to prevent 503 errors and frontend crashes. Optional chaining and fallback values are used for safe access to potentially missing nested data.
 
 ## External Dependencies

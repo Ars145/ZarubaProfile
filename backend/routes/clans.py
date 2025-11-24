@@ -685,6 +685,20 @@ def create_clan_application(clan_id):
         player = request.current_player
         data = request.get_json()
         
+        # Валидация данных запроса
+        if not data or 'message' not in data:
+            return jsonify({'success': False, 'error': 'Сопроводительное письмо обязательно'}), 400
+        
+        message = data.get('message', '').strip()
+        
+        # Проверяем что сообщение не пустое
+        if not message:
+            return jsonify({'success': False, 'error': 'Сопроводительное письмо не может быть пустым'}), 400
+        
+        # Проверяем максимальную длину сообщения (500 символов)
+        if len(message) > 500:
+            return jsonify({'success': False, 'error': 'Сопроводительное письмо не может быть длиннее 500 символов'}), 400
+        
         # Проверяем существование клана
         clan = Clan.query.get(clan_id)
         if not clan:
@@ -708,7 +722,7 @@ def create_clan_application(clan_id):
         application = ClanApplication(
             clan_id=clan_id,
             player_id=player.id,
-            message=data.get('message', ''),
+            message=message,
             status='pending',
             stats_snapshot={}  # TODO: добавить snapshot статистики игрока
         )

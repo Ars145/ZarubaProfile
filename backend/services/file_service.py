@@ -93,8 +93,9 @@ class FileService:
             full_path = os.path.join(filepath, filename)
             img.save(full_path, 'JPEG', quality=config['quality'], optimize=True)
             
-            # Генерируем абсолютный URL для Flask route /static/uploads/<path:filename>
-            url = url_for('uploaded_file', filename=f"{config['path']}/{filename}", _external=True)
+            # Генерируем относительный URL для Flask route /api/static/uploads/<path:filename>
+            # Используем относительный URL чтобы работать и в dev (через Vite proxy) и в production
+            url = url_for('uploaded_file', filename=f"{config['path']}/{filename}")
             
             return url, None
             
@@ -104,11 +105,29 @@ class FileService:
     @staticmethod
     def delete_file(url):
         """Удалить файл"""
-        if not url or not url.startswith('/static/uploads/'):
+        if not url:
+            return False
+        
+        # Поддерживаем как абсолютные URLs, так и относительные пути
+        if url.startswith('http'):
+            # Извлекаем путь из абсолютного URL
+            # Например: https://...repl.co/api/static/uploads/clan-logos/file.jpg -> clan-logos/file.jpg
+            if '/api/static/uploads/' in url:
+                url = url.split('/api/static/uploads/', 1)[1]
+            elif '/static/uploads/' in url:
+                url = url.split('/static/uploads/', 1)[1]
+            else:
+                return False
+        elif url.startswith('/api/static/uploads/'):
+            url = url[len('/api/static/uploads/'):]
+        elif url.startswith('/static/uploads/'):
+            url = url[len('/static/uploads/'):]
+        else:
             return False
         
         try:
-            filepath = url.lstrip('/')
+            upload_folder = current_app.config.get('UPLOAD_FOLDER')
+            filepath = os.path.join(upload_folder, url)
             if os.path.exists(filepath):
                 os.remove(filepath)
                 return True

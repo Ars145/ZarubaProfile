@@ -534,7 +534,18 @@ export default function ProfilePage() {
     enabled: !!currentClanId && isOwner,
   });
   
-  const applications = applicationsResponse?.applications || [];
+  // Преобразуем заявки в нужный формат для UI
+  const applications = (applicationsResponse?.applications || []).map(app => ({
+    id: app.id,
+    name: app.player?.username || 'Unknown',
+    avatar: app.player?.username?.substring(0, 2).toUpperCase() || 'UN',
+    message: app.message || '',
+    time: new Date(app.createdAt).toLocaleDateString('ru-RU'),
+    stats: {
+      hours: '0ч',  // TODO: загружать из statsSnapshot
+      kd: 0.0       // TODO: загружать из statsSnapshot
+    }
+  }));
 
   const handleRoleChange = (memberId, newRole) => {
     // TODO: Implement API call to change member role

@@ -420,6 +420,13 @@ export default function ProfilePage() {
     roleText: ""
   });
   
+  // State для подтверждения исключения
+  const [kickConfirm, setKickConfirm] = useState({
+    open: false,
+    memberId: null,
+    memberName: ""
+  });
+  
   // Clan Assets State (Owner Settings) - будут инициализированы из clanData
   const [clanBanner, setClanBanner] = useState(null);
   const [clanLogo, setClanLogo] = useState(null);
@@ -641,6 +648,7 @@ export default function ProfilePage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId, 'members'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/clans', currentClanId] });
       toast({
         title: "Участник исключен",
         description: "Участник успешно исключен из клана",
@@ -656,9 +664,17 @@ export default function ProfilePage() {
   });
 
   const handleKickMember = (memberId, memberName) => {
-    if (confirm(`Вы уверены, что хотите исключить ${memberName}?`)) {
-      kickMemberMutation.mutate(memberId);
-    }
+    // Открываем диалог подтверждения
+    setKickConfirm({
+      open: true,
+      memberId: memberId,
+      memberName: memberName
+    });
+  };
+  
+  const confirmKick = () => {
+    kickMemberMutation.mutate(kickConfirm.memberId);
+    setKickConfirm({ open: false, memberId: null, memberName: "" });
   };
   
   // Мутация для изменения роли участника
@@ -2354,6 +2370,35 @@ export default function ProfilePage() {
               onClick={confirmRoleChange}
             >
               Подтвердить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* AlertDialog для подтверждения исключения */}
+      <AlertDialog open={kickConfirm.open} onOpenChange={(open) => !open && setKickConfirm({ open: false, memberId: null, memberName: "" })}>
+        <AlertDialogContent className="bg-zinc-900 border border-red-500/20 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-display font-bold text-white flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-500" />
+              Исключить участника
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-300 text-base leading-relaxed">
+              Вы уверены, что хотите исключить <span className="font-bold text-white">{kickConfirm.memberName}</span> из отряда? Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel 
+              className="bg-zinc-800 text-white border-white/10 hover:bg-zinc-700 hover:border-white/20"
+              onClick={() => setKickConfirm({ open: false, memberId: null, memberName: "" })}
+            >
+              Отмена
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-500 text-white hover:bg-red-600 font-bold"
+              onClick={confirmKick}
+            >
+              Исключить
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

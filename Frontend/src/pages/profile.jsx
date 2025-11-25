@@ -2156,16 +2156,16 @@ export default function ProfilePage() {
                               
                               {/* Clan Logo & Banner in Stats Card */}
                               <div className="flex items-start justify-between mb-8 relative z-10">
-                                  <div className="w-20 h-20 bg-gradient-to-br from-zinc-800 to-black rounded-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)] overflow-hidden group-hover:scale-105 transition-transform duration-300 p-2">
+                                  <div className="w-20 h-20 rounded-xl border border-white/10 overflow-hidden group-hover:scale-105 transition-transform duration-300">
                                       {clanData?.logoUrl ? (
                                         <img src={clanData.logoUrl} className="w-full h-full object-contain" alt="Clan Logo" />
                                       ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-primary text-2xl font-bold">
+                                        <div className="w-full h-full flex items-center justify-center text-primary text-2xl font-bold bg-gradient-to-br from-zinc-800 to-black">
                                           {clanData?.tag || '?'}
                                         </div>
                                       )}
                                   </div>
-                                  <div className="flex flex-col gap-2 items-end">
+                                  <div className="flex flex-col gap-1.5 items-end">
                                     <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">
                                       LVL {clanData?.level || 1}
                                     </Badge>
@@ -2177,9 +2177,10 @@ export default function ProfilePage() {
                                       if (reqs.customRequirement?.trim()) {
                                         parts.push(reqs.customRequirement.trim());
                                       }
-                                      const reqText = parts.length > 0 ? parts.join(" • ") : "Нет требований";
+                                      if (parts.length === 0) return null;
+                                      const reqText = parts.join(" • ");
                                       return (
-                                        <Badge variant="outline" className="text-[10px] h-6 px-2 border-white/10 bg-black/40 backdrop-blur-md text-white/70">
+                                        <Badge variant="outline" className="text-[10px] h-5 px-2 border-white/10 bg-black/40 backdrop-blur-md text-white/70 whitespace-nowrap">
                                           {reqText}
                                         </Badge>
                                       );

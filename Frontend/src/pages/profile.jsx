@@ -281,7 +281,7 @@ const DiscordCard = () => {
                       transition={{ type: "spring", stiffness: 300 }}
                     >
                       <Avatar className="w-9 h-9 border-2 border-white/20 shadow-md">
-                        <AvatarImage src={user.avatarUrl} alt={user.discordUsername} />
+                        <AvatarImage src={user.discordAvatarUrl} alt={user.discordUsername} />
                         <AvatarFallback className="bg-[#5865F2] text-white font-bold text-xs">
                           {user.discordUsername?.slice(0, 2).toUpperCase() || 'DC'}
                         </AvatarFallback>

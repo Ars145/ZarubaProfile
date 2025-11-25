@@ -112,8 +112,12 @@ Authorization: Bearer <access_token>
 - **Темная цветовая схема:** Изменен градиент с яркого (#5865F2) на темный (#3742a8/#2d3580) для лучшей читаемости
 - **Анимации:** Добавлены множественные анимации - вращение логотипа, масштабирование аватара, пульсация иконок
 - **AlertDialog подтверждение:** Отвязка Discord теперь использует красивый popup вместо браузерного confirm()
-- **Реальная аватарка Discord:** Автоматическая загрузка и отображение аватарки пользователя из Discord API
-- **Backend интеграция:** Discord OAuth callback теперь сохраняет avatar URL (`https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png`) в базу данных
+- **Раздельные аватарки:** Добавлено отдельное поле `discord_avatar_url` в модель Player
+  - Steam аватарка хранится в `avatar_url` (остается неизменной)
+  - Discord аватарка хранится в `discord_avatar_url` (загружается из Discord API)
+  - Discord карточка показывает реальную Discord аватарку, а не Steam
+- **Backend интеграция:** Discord OAuth callback сохраняет `discord_avatar_url` (`https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png`)
+- **Миграция:** `backend/migrations/002_add_discord_avatar_url.sql` - добавление колонки `discord_avatar_url`
 
 ### Полная документация API доступна по запросу
 Для получения полной документации всех 26+ API эндпоинтов (кланы, игроки, статистика, авторизация, загрузка файлов) обратитесь к разработчику или создайте issue в репозитории.

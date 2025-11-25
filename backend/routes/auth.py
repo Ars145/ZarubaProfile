@@ -236,9 +236,8 @@ def discord_callback():
         if player:
             player.discord_id = discord_id
             player.discord_username = discord_username
-            # Обновить аватарку только если есть Discord аватарка
-            if discord_avatar_url:
-                player.avatar_url = discord_avatar_url
+            # Сохранить Discord аватарку отдельно (не перезаписываем Steam аватарку)
+            player.discord_avatar_url = discord_avatar_url
             db.session.commit()
         
         return redirect(f'{return_url}?discord_linked=true')
@@ -255,6 +254,7 @@ def discord_unlink():
     
     player.discord_id = None
     player.discord_username = None
+    player.discord_avatar_url = None
     db.session.commit()
     
     return jsonify({

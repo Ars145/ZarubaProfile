@@ -2108,9 +2108,26 @@ export default function ProfilePage() {
                                         </div>
                                       )}
                                   </div>
-                                  <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">
-                                    LVL {clanData?.level || 1}
-                                  </Badge>
+                                  <div className="flex flex-col gap-2 items-end">
+                                    <Badge className="bg-black/60 backdrop-blur-md text-primary border border-primary/30 font-mono text-sm px-3 py-1 shadow-[0_0_10px_rgba(255,102,0,0.2)]">
+                                      LVL {clanData?.level || 1}
+                                    </Badge>
+                                    {(() => {
+                                      const reqs = clanData?.requirements || {};
+                                      const parts = [];
+                                      if (reqs.microphone) parts.push("🎤");
+                                      if (reqs.ageRestriction) parts.push("18+");
+                                      if (reqs.customRequirement?.trim()) {
+                                        parts.push(reqs.customRequirement.trim());
+                                      }
+                                      const reqText = parts.length > 0 ? parts.join(" • ") : "Нет требований";
+                                      return (
+                                        <Badge variant="outline" className="text-[10px] h-6 px-2 border-white/10 bg-black/40 backdrop-blur-md text-white/70">
+                                          {reqText}
+                                        </Badge>
+                                      );
+                                    })()}
+                                  </div>
                               </div>
                               
                               <div className="relative z-10 mb-8">

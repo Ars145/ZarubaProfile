@@ -241,77 +241,111 @@ const DiscordCard = () => {
   };
   
   return (
-    <motion.div variants={item} initial="hidden" animate="show" transition={{ delay: 0.6 }}>
-      <Card className="bg-gradient-to-br from-[#5865F2] via-[#5865F2] to-[#4752C4] border-none overflow-hidden relative group hover:shadow-[0_0_30px_rgba(88,101,242,0.4)] transition-all duration-500 cursor-pointer transform hover:scale-[1.02]">
-        <div className="absolute inset-0 bg-[url('https://assets-global.website-files.com/6257adef93867e56f84d3109/636e0a6918e57475a843f59f_layer_1.svg')] opacity-10 bg-repeat" />
-        <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl group-hover:bg-white/15 transition-colors duration-500" />
+    <motion.div 
+      variants={item} 
+      initial="hidden" 
+      animate="show" 
+      transition={{ delay: 0.6 }}
+      whileHover={{ scale: 1.02 }}
+      className="relative"
+    >
+      <div className="bg-gradient-to-br from-[#5865F2]/90 to-[#4752C4]/90 backdrop-blur-md border border-[#5865F2]/30 rounded-xl overflow-hidden relative group hover:shadow-[0_8px_30px_rgba(88,101,242,0.3)] transition-all duration-300">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-500" />
         
-        <CardHeader className="relative z-10 pb-2">
-          <CardTitle className="flex items-center gap-3 text-white font-display text-xl">
-            <svg className="w-8 h-8 drop-shadow-lg" viewBox="0 0 127.14 96.36" fill="white">
+        <div className="relative z-10 p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <motion.svg 
+              className="w-5 h-5 drop-shadow-md" 
+              viewBox="0 0 127.14 96.36" 
+              fill="white"
+              whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+              transition={{ duration: 0.5 }}
+            >
               <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-            </svg>
-            Discord аккаунт
-          </CardTitle>
-        </CardHeader>
-        
-        <CardContent className="relative z-10 space-y-4">
+            </motion.svg>
+            <h3 className="text-sm font-bold text-white tracking-wide">Discord</h3>
+          </div>
+          
           {isLinked ? (
-            <>
-              <div className="flex items-center justify-between p-3 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 group-hover:bg-black/30 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Avatar className="w-12 h-12 border-2 border-white/20 shadow-lg">
-                      <AvatarFallback className="bg-[#5865F2] text-white font-bold">
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center justify-between p-2.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10 group-hover:bg-black/25 transition-all"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Avatar className="w-9 h-9 border-2 border-white/20 shadow-md">
+                      <AvatarFallback className="bg-[#5865F2] text-white font-bold text-xs">
                         {user.discordUsername?.slice(0, 2).toUpperCase() || 'DC'}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-[#5865F2] rounded-full p-1 border-2 border-white/10 shadow-md">
-                      <CheckCircle2 className="w-3 h-3 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold text-white">{user.discordUsername}</span>
-                    <span className="text-[10px] text-white/80 uppercase tracking-wider font-bold flex items-center gap-1">
-                      <Zap className="w-3 h-3 text-yellow-300 fill-yellow-300" />
-                      Подтверждено
-                    </span>
-                  </div>
+                  </motion.div>
+                  <motion.div 
+                    className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 rounded-full p-0.5 border border-white/20 shadow-sm"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring" }}
+                  >
+                    <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                  </motion.div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="text-white/50 hover:text-white hover:bg-white/10 rounded-full"
-                  onClick={handleUnlinkDiscord}
-                  data-testid="button-unlink-discord"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-white leading-tight">{user.discordUsername}</span>
+                  <span className="text-[9px] text-emerald-300 uppercase tracking-wide font-bold flex items-center gap-0.5">
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    >
+                      <Zap className="w-2.5 h-2.5 fill-emerald-300" />
+                    </motion.div>
+                    Verified
+                  </span>
+                </div>
               </div>
-            </>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                onClick={handleUnlinkDiscord}
+                data-testid="button-unlink-discord"
+              >
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </motion.div>
           ) : (
-            <div className="p-4 rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 text-center">
-              <p className="text-white/80 text-sm mb-4">Discord аккаунт не привязан</p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-2.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10 text-center"
+            >
+              <p className="text-white/70 text-xs">Не привязан</p>
+            </motion.div>
           )}
           
-          <Button 
-            className="w-full bg-white text-[#5865F2] hover:bg-white/90 font-bold font-display tracking-wide shadow-lg border-none h-11 group-hover:scale-[1.02] transition-transform gap-2"
-            onClick={handleLinkDiscord}
-            disabled={isLinking}
-            data-testid="button-link-discord"
-          >
-            {isLinking ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <svg className="w-5 h-5" viewBox="0 0 127.14 96.36" fill="currentColor">
-                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-              </svg>
-            )}
-            {isLinked ? 'Обновить привязку' : 'Привязать аккаунт'}
-          </Button>
-        </CardContent>
-      </Card>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button 
+              className="w-full bg-white text-[#5865F2] hover:bg-white/95 font-bold tracking-wide shadow-md border-none h-9 text-xs gap-1.5 transition-all"
+              onClick={handleLinkDiscord}
+              disabled={isLinking}
+              data-testid="button-link-discord"
+            >
+              {isLinking ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
+                  <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+                </svg>
+              )}
+              {isLinked ? 'Обновить' : 'Привязать'}
+            </Button>
+          </motion.div>
+        </div>
+      </div>
     </motion.div>
   );
 };

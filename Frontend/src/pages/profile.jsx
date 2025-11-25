@@ -166,6 +166,7 @@ const parseGameDuration = (durationStr) => {
 const DiscordCard = () => {
   const { user, linkDiscord, unlinkDiscord } = useAuth();
   const [isLinking, setIsLinking] = useState(false);
+  const [showUnlinkDialog, setShowUnlinkDialog] = useState(false);
   const { toast } = useToast();
   
   const isLinked = user?.discordId && user?.discordUsername;
@@ -214,139 +215,164 @@ const DiscordCard = () => {
   };
   
   const handleUnlinkDiscord = async () => {
-    if (confirm('Вы уверены, что хотите отвязать Discord аккаунт?')) {
-      try {
-        const success = await unlinkDiscord();
-        if (success) {
-          toast({
-            title: "Discord аккаунт отвязан",
-            description: "Ваш Discord аккаунт успешно отвязан от профиля",
-          });
-        } else {
-          toast({
-            title: "Ошибка",
-            description: "Не удалось отвязать Discord аккаунт",
-            variant: "destructive"
-          });
-        }
-      } catch (error) {
-        console.error('Failed to unlink Discord:', error);
+    try {
+      const success = await unlinkDiscord();
+      if (success) {
+        toast({
+          title: "Discord аккаунт отвязан",
+          description: "Ваш Discord аккаунт успешно отвязан от профиля",
+        });
+        setShowUnlinkDialog(false);
+      } else {
         toast({
           title: "Ошибка",
-          description: "Произошла ошибка при отвязке Discord",
+          description: "Не удалось отвязать Discord аккаунт",
           variant: "destructive"
         });
       }
+    } catch (error) {
+      console.error('Failed to unlink Discord:', error);
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при отвязке Discord",
+        variant: "destructive"
+      });
     }
   };
   
   return (
-    <motion.div 
-      variants={item} 
-      initial="hidden" 
-      animate="show" 
-      transition={{ delay: 0.6 }}
-      whileHover={{ scale: 1.02 }}
-      className="relative"
-    >
-      <div className="bg-gradient-to-br from-[#5865F2]/90 to-[#4752C4]/90 backdrop-blur-md border border-[#5865F2]/30 rounded-xl overflow-hidden relative group hover:shadow-[0_8px_30px_rgba(88,101,242,0.3)] transition-all duration-300">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-all duration-500" />
-        
-        <div className="relative z-10 p-4 space-y-3">
-          <div className="flex items-center gap-2 mb-1">
-            <motion.svg 
-              className="w-5 h-5 drop-shadow-md" 
-              viewBox="0 0 127.14 96.36" 
-              fill="white"
-              whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-              transition={{ duration: 0.5 }}
-            >
-              <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-            </motion.svg>
-            <h3 className="text-sm font-bold text-white tracking-wide">Discord</h3>
-          </div>
+    <>
+      <motion.div 
+        variants={item} 
+        initial="hidden" 
+        animate="show" 
+        transition={{ delay: 0.6 }}
+        whileHover={{ scale: 1.02 }}
+        className="relative"
+      >
+        <div className="bg-gradient-to-br from-[#3742a8]/80 to-[#2d3580]/80 backdrop-blur-md border border-[#3742a8]/20 rounded-xl overflow-hidden relative group hover:shadow-[0_8px_30px_rgba(55,66,168,0.25)] transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/3 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/3 rounded-full blur-2xl group-hover:bg-white/5 transition-all duration-500" />
           
-          {isLinked ? (
-            <motion.div 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center justify-between p-2.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10 group-hover:bg-black/25 transition-all"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="relative">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <Avatar className="w-9 h-9 border-2 border-white/20 shadow-md">
-                      <AvatarFallback className="bg-[#5865F2] text-white font-bold text-xs">
-                        {user.discordUsername?.slice(0, 2).toUpperCase() || 'DC'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </motion.div>
-                  <motion.div 
-                    className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 rounded-full p-0.5 border border-white/20 shadow-sm"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring" }}
-                  >
-                    <CheckCircle2 className="w-2.5 h-2.5 text-white" />
-                  </motion.div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-white leading-tight">{user.discordUsername}</span>
-                  <span className="text-[9px] text-emerald-300 uppercase tracking-wide font-bold flex items-center gap-0.5">
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ repeat: Infinity, duration: 2 }}
-                    >
-                      <Zap className="w-2.5 h-2.5 fill-emerald-300" />
-                    </motion.div>
-                    Verified
-                  </span>
-                </div>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-7 w-7 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"
-                onClick={handleUnlinkDiscord}
-                data-testid="button-unlink-discord"
+          <div className="relative z-10 p-4 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <motion.svg 
+                className="w-5 h-5 drop-shadow-md" 
+                viewBox="0 0 127.14 96.36" 
+                fill="white"
+                whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                transition={{ duration: 0.5 }}
               >
-                <X className="w-3.5 h-3.5" />
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+              </motion.svg>
+              <h3 className="text-sm font-bold text-white tracking-wide">Discord</h3>
+            </div>
+            
+            {isLinked ? (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center justify-between p-2.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10 group-hover:bg-black/25 transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="relative">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <Avatar className="w-9 h-9 border-2 border-white/20 shadow-md">
+                        <AvatarImage src={user.avatarUrl} alt={user.discordUsername} />
+                        <AvatarFallback className="bg-[#5865F2] text-white font-bold text-xs">
+                          {user.discordUsername?.slice(0, 2).toUpperCase() || 'DC'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </motion.div>
+                    <motion.div 
+                      className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 rounded-full p-0.5 border border-white/20 shadow-sm"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: "spring" }}
+                    >
+                      <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                    </motion.div>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-white leading-tight">{user.discordUsername}</span>
+                    <span className="text-[9px] text-emerald-300 uppercase tracking-wide font-bold flex items-center gap-0.5">
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                      >
+                        <Zap className="w-2.5 h-2.5 fill-emerald-300" />
+                      </motion.div>
+                      Verified
+                    </span>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-7 w-7 text-white/40 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                  onClick={() => setShowUnlinkDialog(true)}
+                  data-testid="button-unlink-discord"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </motion.div>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="p-2.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10 text-center"
+              >
+                <p className="text-white/70 text-xs">Не привязан</p>
+              </motion.div>
+            )}
+            
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button 
+                className="w-full bg-white text-[#3742a8] hover:bg-white/95 font-bold tracking-wide shadow-md border-none h-9 text-xs gap-1.5 transition-all"
+                onClick={handleLinkDiscord}
+                disabled={isLinking}
+                data-testid="button-link-discord"
+              >
+                {isLinking ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
+                    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
+                  </svg>
+                )}
+                {isLinking ? 'Обновить' : 'Привязать'}
               </Button>
             </motion.div>
-          ) : (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="p-2.5 rounded-lg bg-black/20 backdrop-blur-sm border border-white/10 text-center"
-            >
-              <p className="text-white/70 text-xs">Не привязан</p>
-            </motion.div>
-          )}
-          
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button 
-              className="w-full bg-white text-[#5865F2] hover:bg-white/95 font-bold tracking-wide shadow-md border-none h-9 text-xs gap-1.5 transition-all"
-              onClick={handleLinkDiscord}
-              disabled={isLinking}
-              data-testid="button-link-discord"
-            >
-              {isLinking ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
-                  <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/>
-                </svg>
-              )}
-              {isLinked ? 'Обновить' : 'Привязать'}
-            </Button>
-          </motion.div>
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      <AlertDialog open={showUnlinkDialog} onOpenChange={setShowUnlinkDialog}>
+        <AlertDialogContent className="border-destructive/50 bg-background/95 backdrop-blur-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="w-5 h-5" />
+              Отвязать Discord аккаунт?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Вы действительно хотите отвязать Discord аккаунт <span className="font-semibold text-foreground">{user?.discordUsername}</span> от вашего профиля?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnlinkDiscord}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Отвязать
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

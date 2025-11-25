@@ -222,14 +222,23 @@ def discord_callback():
         
         discord_id = user_response.get('id')
         discord_username = user_response.get('username')
+        discord_avatar = user_response.get('avatar')
         
         if not discord_id:
             return redirect(f'{return_url}?error=discord_user_failed')
+        
+        # Построить URL аватарки Discord
+        discord_avatar_url = None
+        if discord_avatar:
+            discord_avatar_url = f'https://cdn.discordapp.com/avatars/{discord_id}/{discord_avatar}.png'
         
         player = Player.query.filter_by(id=player_id).first()
         if player:
             player.discord_id = discord_id
             player.discord_username = discord_username
+            # Обновить аватарку только если есть Discord аватарка
+            if discord_avatar_url:
+                player.avatar_url = discord_avatar_url
             db.session.commit()
         
         return redirect(f'{return_url}?discord_linked=true')

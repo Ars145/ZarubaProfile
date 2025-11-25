@@ -4,7 +4,6 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Gamepad2, Shield, Users, Trophy } from 'lucide-react';
-import zarubaLogo from '@assets/zaruba_logo_1763633752495.png';
 
 export default function Login() {
   const { loginWithSteam, isAuthenticated, loading } = useAuth();
@@ -39,11 +38,16 @@ export default function Login() {
           <div className="mx-auto relative">
             <div className="absolute inset-0 bg-primary/40 blur-[80px] rounded-full scale-150 animate-pulse" style={{ animationDuration: '3s' }} />
             <div className="absolute inset-0 bg-gradient-radial from-primary/30 via-primary/10 to-transparent blur-2xl" />
-            <img 
-              src={zarubaLogo} 
-              alt="ZARUBA" 
-              className="w-52 h-52 object-contain mx-auto relative z-10 drop-shadow-2xl"
-            />
+            <div className="relative z-10">
+              <h1 className="text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary via-primary/90 to-primary/70 drop-shadow-2xl mb-4">
+                ZARUBA
+              </h1>
+              <div className="flex items-center justify-center gap-2 text-primary/60">
+                <Shield className="w-5 h-5" />
+                <span className="text-sm font-semibold tracking-wider uppercase">Squad Community</span>
+                <Trophy className="w-5 h-5" />
+              </div>
+            </div>
           </div>
           
           <div className="space-y-3">

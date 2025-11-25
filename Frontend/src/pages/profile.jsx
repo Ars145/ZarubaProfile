@@ -1590,11 +1590,6 @@ export default function ProfilePage() {
                                         <p className="text-xs text-muted-foreground text-center line-clamp-2 min-h-[32px] leading-relaxed px-1">
                                           {clan.description}
                                         </p>
-                                        <div className="flex justify-center pt-1">
-                                           <Badge variant="outline" className={`text-[10px] h-6 px-2 border-white/10 ${clanColors.color} bg-black/40 backdrop-blur-md`}>
-                                             {clan.id === "alpha" ? getRequirementsBadge() : clan.req}
-                                           </Badge>
-                                        </div>
                                       </div>
                                    </div>
                                 </motion.div>

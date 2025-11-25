@@ -1531,7 +1531,8 @@ export default function ProfilePage() {
                              <span className="text-xs text-muted-foreground bg-zinc-900 px-2 py-1 rounded border border-white/5">{clans.length} доступно</span>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                              {clans.map((clan) => {
                                 // Use theme colors for "alpha" clan (owner's clan), static colors for others
                                 const clanColors = clan.id === "alpha" ? getThemeColors() : {
@@ -1595,6 +1596,7 @@ export default function ProfilePage() {
                                 </motion.div>
                                 );
                              })}
+                            </div>
                           </div>
                        </div>
 
